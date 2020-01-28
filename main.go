@@ -16,6 +16,7 @@ func main() {
 	flag.StringVar(&cfg.path, "cfg", "", "The path of the `config file`")
 	flag.Parse()
 	LoadConfig()
+	defer CloseLog()
 	fmt.Println(`OK`)
 	//	RunServer()
 }

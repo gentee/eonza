@@ -14,16 +14,29 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type LogConfig struct {
+	Dir   string `yaml:"dir"`   // Directory for log files. If it is empty - dir of cfg file
+	Mode  string `yaml:"mode"`  // Log mode. It can be stdout, file, stdout file.
+	Level string `yaml:"level"` // Log level. It can be disable, error, warn, info.
+}
+
 // Config stores application's settings
 type Config struct {
-	DataDir string `yaml:"datadir"` // Directory for data file. If it is empty - dir of cfg file
-	LogDir  string `yaml:"logdir"`  // Directory for log files. If it is empty - dir of cfg file
+	Version string    `yaml:"version"` // Version of the application
+	DataDir string    `yaml:"datadir"` // Directory for data file. If it is empty - dir of cfg file
+	Log     LogConfig `yaml:"log"`     // Log settings
 
 	path string // Directory of cfg file
 }
 
 var (
-	cfg = Config{}
+	cfg = Config{
+		Version: Version,
+		Log: LogConfig{
+			Mode:  logModeFile,
+			Level: logLevelInfo,
+		},
+	}
 )
 
 func defDir(dir string) string {
@@ -73,9 +86,9 @@ func LoadConfig() {
 		golog.Fatal(err)
 	}
 	dataFile := defDir(cfg.DataDir)
-	logFile := defDir(cfg.LogDir)
 
-	fmt.Println(`DIR`, dir, basename, cfg, dataFile, logFile)
+	SetLogging(basename)
+	fmt.Println(`DIR`, dir, basename, cfg, dataFile)
 }
 
 // Install creates config and data file on the first execution
@@ -92,5 +105,5 @@ func SaveConfig() error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cfg.path, data, os.ModePerm)
+	return ioutil.WriteFile(cfg.path, data, 0777 /*os.ModePerm*/)
 }
