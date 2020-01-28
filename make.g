@@ -10,4 +10,5 @@ run {
     $ go install 
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
     $ /home/ak/app/eonza/eonza
+    $ /home/ak/app/eonza/eonza -cfg /home/ak/app/eonza/config
 }
