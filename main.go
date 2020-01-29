@@ -18,5 +18,5 @@ func main() {
 	LoadConfig()
 	defer CloseLog()
 	fmt.Println(`OK`)
-	//	RunServer()
+	RunServer()
 }

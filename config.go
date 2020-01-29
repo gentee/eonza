@@ -14,6 +14,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// HTTPConfig stores web-server settings
+type HTTPConfig struct {
+	Port int `yaml:"port"` // if empty, then 3234
+}
+
+// LogConfig stores config  settings
 type LogConfig struct {
 	Dir   string `yaml:"dir"`   // Directory for log files. If it is empty - dir of cfg file
 	Mode  string `yaml:"mode"`  // Log mode. It can be stdout, file, stdout file.
@@ -22,9 +28,10 @@ type LogConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version string    `yaml:"version"` // Version of the application
-	DataDir string    `yaml:"datadir"` // Directory for data file. If it is empty - dir of cfg file
-	Log     LogConfig `yaml:"log"`     // Log settings
+	Version string     `yaml:"version"` // Version of the application
+	DataDir string     `yaml:"datadir"` // Directory for data file. If it is empty - dir of cfg file
+	Log     LogConfig  `yaml:"log"`     // Log settings
+	HTTP    HTTPConfig `yaml:"http"`    // Web-server settings
 
 	path string // Directory of cfg file
 }
@@ -35,6 +42,9 @@ var (
 		Log: LogConfig{
 			Mode:  logModeFile,
 			Level: logLevelInfo,
+		},
+		HTTP: HTTPConfig{
+			Port: DefPort,
 		},
 	}
 )

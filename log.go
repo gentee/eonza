@@ -23,6 +23,10 @@ const (
 	logLevelInfo    = `info`
 )
 
+var (
+	logFile *os.File
+)
+
 // SetLogging sets the options of the logging
 func SetLogging(basename string) {
 	if len(cfg.Log.Level) == 0 {
@@ -32,12 +36,12 @@ func SetLogging(basename string) {
 		golog.SetOutput(ioutil.Discard)
 	}
 	if cfg.Log.Level != logLevelDisable && strings.Index(cfg.Log.Mode, logModeFile) >= 0 {
-		logFile := filepath.Join(defDir(cfg.Log.Dir), basename+`.log`)
-		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		logFile, err := os.OpenFile(filepath.Join(defDir(cfg.Log.Dir), basename+`.log`),
+			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			golog.Fatal(err)
 		}
-		golog.AddOutput(f)
+		golog.AddOutput(logFile)
 	}
 	golog.SetLevel(cfg.Log.Level)
 	golog.Info(`Start`)
@@ -46,4 +50,7 @@ func SetLogging(basename string) {
 
 // CloseLog close file handle
 func CloseLog() {
+	if logFile != nil {
+		logFile.Close()
+	}
 }

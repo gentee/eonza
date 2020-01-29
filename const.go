@@ -7,4 +7,6 @@ package main
 const (
 	// Version of the application
 	Version = "1.0.0+1"
+	// DefPort is the default web-server port
+	DefPort = 3234
 )
