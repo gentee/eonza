@@ -9,6 +9,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"eonza/api"
+	"eonza/lib"
+
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	md "github.com/labstack/echo/v4/middleware"
@@ -18,6 +21,14 @@ const (
 	XForwardedFor = "X-Forwarded-For"
 	XRealIP       = "X-Real-IP"
 )
+
+// WebSettings contains web-server parameters
+type WebSettings struct {
+	Domain   string // Domain, localhost if it sempty
+	Port     int
+	IsScript bool // true, if web-server for the script
+	Open     bool // if true then webpage is opened
+}
 
 var (
 	ErrNotFound = errors.New(`Not found`)
@@ -104,9 +115,10 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 
 func defHandle(c echo.Context) error {
 	var err error
-//	req := c.Request()
-//	data, err := RenderPage(req.URL.String())
-	data := `Hello, world!`
+	//	req := c.Request()
+	//	data, err := RenderPage(req.URL.String())
+	data := `Hello, world!<br>
+	<a href="/api/run">Run Hello</a>`
 	if err != nil {
 		if err == ErrNotFound {
 			err = echo.NewHTTPError(http.StatusNotFound)
@@ -116,14 +128,21 @@ func defHandle(c echo.Context) error {
 	return c.HTML(http.StatusOK, data)
 }
 
+func runHandle(c echo.Context) error {
+	if err := api.Run("World"); err != nil {
+		return err
+	}
+	return c.HTML(http.StatusOK, "OK")
+}
+
 func customHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 	}
-//	url := fmt.Sprintf("/%d.html", code)
+	//	url := fmt.Sprintf("/%d.html", code)
 	message := http.StatusText(code)
-/*	if _, ok := pages[url]; ok {
+	/*	if _, ok := pages[url]; ok {
 		if data, err := RenderPage(url); err == nil {
 			message = data
 		}
@@ -135,7 +154,10 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)*/
 }
 
-func RunServer() {
+func RunServer(options WebSettings) {
+	if len(options.Domain) == 0 {
+		options.Domain = `localhost`
+	}
 	e := echo.New()
 
 	e.HideBanner = true
@@ -144,8 +166,12 @@ func RunServer() {
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
-	e.GET("/*", defHandle)
+	e.GET("/", defHandle)
+	e.GET("/api/run", runHandle)
 
+	if options.Open {
+		lib.Open(fmt.Sprintf("http://%s:%d", options.Domain, options.Port))
+	}
 	if err := e.Start(fmt.Sprintf(":%d", cfg.HTTP.Port)); err != nil {
 		golog.Fatal(err)
 	}

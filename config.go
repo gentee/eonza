@@ -5,6 +5,7 @@
 package main
 
 import (
+	"eonza/lib"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -16,7 +17,8 @@ import (
 
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
-	Port int `yaml:"port"` // if empty, then 3234
+	Port int  `yaml:"port"` // if empty, then 3234
+	Open bool `yaml:"open"` // if true then host is opened
 }
 
 // LogConfig stores config  settings
@@ -45,20 +47,16 @@ var (
 		},
 		HTTP: HTTPConfig{
 			Port: DefPort,
+			Open: true,
 		},
 	}
 )
 
 func defDir(dir string) string {
-	var err error
 	if len(dir) == 0 {
-		dir = filepath.Dir(cfg.path)
-	} else if !filepath.IsAbs(dir) {
-		if dir, err = filepath.Abs(dir); err != nil {
-			golog.Fatal(err)
-		}
+		return filepath.Dir(cfg.path)
 	}
-	return dir
+	return lib.AppPath(dir)
 }
 
 // LoadConfig loads application's settings
@@ -68,15 +66,10 @@ func LoadConfig() {
 		cfgData []byte
 	)
 
-	appname := os.Args[0]
-	if !filepath.IsAbs(appname) {
-		if appname, err = filepath.Abs(appname); err != nil {
-			golog.Fatal(err)
-		}
-	}
-	basename := filepath.Base(appname)
-	dir := filepath.Dir(appname)
-	if ext := filepath.Ext(appname); len(ext) > 0 {
+	app := lib.AppPath()
+	basename := filepath.Base(app)
+	dir := filepath.Dir(app)
+	if ext := filepath.Ext(app); len(ext) > 0 {
 		basename = basename[:len(basename)-len(ext)]
 	}
 	if len(cfg.path) == 0 {
@@ -97,6 +90,9 @@ func LoadConfig() {
 	}
 	dataFile := defDir(cfg.DataDir)
 
+	if cfg.HTTP.Port == 0 {
+		cfg.HTTP.Port = DefPort
+	}
 	SetLogging(basename)
 	fmt.Println(`DIR`, dir, basename, cfg, dataFile)
 }
