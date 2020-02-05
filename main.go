@@ -24,12 +24,17 @@ func main() {
 		golog.Fatal(err)
 	}
 	if fi.Mode()&os.ModeNamedPipe != 0 {
-		script.Run()
+		scriptTask, err := script.Decode()
+		if err != nil {
+			golog.Fatal(err)
+		}
+		scriptTask.Run()
 		return
 	}
 
 	LoadConfig()
 	defer CloseLog()
+	SetAsset(cfg.AssetsDir, cfg.HTTP.Theme)
 	RunServer(WebSettings{
 		Port: cfg.HTTP.Port,
 		Open: cfg.HTTP.Open,

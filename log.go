@@ -36,7 +36,11 @@ func SetLogging(basename string) {
 		golog.SetOutput(ioutil.Discard)
 	}
 	if cfg.Log.Level != logLevelDisable && strings.Index(cfg.Log.Mode, logModeFile) >= 0 {
-		logFile, err := os.OpenFile(filepath.Join(defDir(cfg.Log.Dir), basename+`.log`),
+		err := os.MkdirAll(cfg.Log.Dir, 0777)
+		if err != nil {
+			golog.Fatal(err)
+		}
+		logFile, err = os.OpenFile(filepath.Join(cfg.Log.Dir, basename+`.log`),
 			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			golog.Fatal(err)
@@ -45,7 +49,6 @@ func SetLogging(basename string) {
 	}
 	golog.SetLevel(cfg.Log.Level)
 	golog.Info(`Start`)
-
 }
 
 // CloseLog close file handle

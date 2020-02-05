@@ -16,11 +16,12 @@ import (
 	"github.com/gentee/gentee"
 )
 
-type Package struct {
-	Exec *gentee.Exec // Bytecode
+type Header struct {
+	Name string
+	HTTP *lib.HTTPConfig
 }
 
-func Send() error {
+func Encode(header Header) error {
 	var (
 		data bytes.Buffer
 	)
@@ -33,10 +34,10 @@ func Send() error {
 		return err
 	}
 	enc := gob.NewEncoder(&data)
-	err = enc.Encode(Package{
-		Exec: bcode,
-	})
-	if err != nil {
+	if err = enc.Encode(header); err != nil {
+		return err
+	}
+	if err = enc.Encode(bcode); err != nil {
 		return err
 	}
 	command := exec.Command(lib.AppPath())
@@ -47,18 +48,18 @@ func Send() error {
 	return command.Start()
 }
 
-func Run() (err error) {
+func Decode() (script *Script, err error) {
 	var (
 		data bytes.Buffer
-		pkg  Package
 	)
+	script = &Script{}
 	if _, err = data.ReadFrom(os.Stdin); err != nil {
-		return nil
+		return
 	}
 	dec := gob.NewDecoder(&data)
 
-	if err = dec.Decode(&pkg); err == nil {
-		_, err = pkg.Exec.Run(gentee.Settings{})
+	if err = dec.Decode(&script.Header); err == nil {
+		err = dec.Decode(&script.Exec)
 	}
 	return
 }

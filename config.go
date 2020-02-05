@@ -6,7 +6,6 @@ package main
 
 import (
 	"eonza/lib"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -14,12 +13,6 @@ import (
 	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
 )
-
-// HTTPConfig stores web-server settings
-type HTTPConfig struct {
-	Port int  `yaml:"port"` // if empty, then 3234
-	Open bool `yaml:"open"` // if true then host is opened
-}
 
 // LogConfig stores config  settings
 type LogConfig struct {
@@ -30,10 +23,11 @@ type LogConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version string     `yaml:"version"` // Version of the application
-	DataDir string     `yaml:"datadir"` // Directory for data file. If it is empty - dir of cfg file
-	Log     LogConfig  `yaml:"log"`     // Log settings
-	HTTP    HTTPConfig `yaml:"http"`    // Web-server settings
+	Version   string         `yaml:"version"`   // Version of the application
+	DataDir   string         `yaml:"datadir"`   // Directory for data file. empty - dir of cfg file
+	AssetsDir string         `yaml:"assetsdir"` // Directory for assets file. empty - dir of cfg file
+	Log       LogConfig      `yaml:"log"`       // Log settings
+	HTTP      lib.HTTPConfig `yaml:"http"`      // Web-server settings
 
 	path string // Directory of cfg file
 }
@@ -45,16 +39,17 @@ var (
 			Mode:  logModeFile,
 			Level: logLevelInfo,
 		},
-		HTTP: HTTPConfig{
-			Port: DefPort,
-			Open: true,
+		HTTP: lib.HTTPConfig{
+			Port:  DefPort,
+			Open:  true,
+			Theme: `default`,
 		},
 	}
 )
 
-func defDir(dir string) string {
+func defDir(dir, def string) string {
 	if len(dir) == 0 {
-		return filepath.Dir(cfg.path)
+		return filepath.Join(filepath.Dir(cfg.path), def)
 	}
 	return lib.AppPath(dir)
 }
@@ -88,13 +83,22 @@ func LoadConfig() {
 	if err = yaml.Unmarshal(cfgData, &cfg); err != nil {
 		golog.Fatal(err)
 	}
-	dataFile := defDir(cfg.DataDir)
+	if len(cfg.AssetsDir) != 0 {
+		if _, err := os.Stat(dir); err != nil {
+			golog.Fatal(err)
+		}
+	}
+	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
+	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
+	//	dataFile := defDir(cfg.DataDir)
 
 	if cfg.HTTP.Port == 0 {
 		cfg.HTTP.Port = DefPort
 	}
+	if len(cfg.HTTP.Theme) == 0 {
+		cfg.HTTP.Theme = DefTheme
+	}
 	SetLogging(basename)
-	fmt.Println(`DIR`, dir, basename, cfg, dataFile)
 }
 
 // Install creates config and data file on the first execution

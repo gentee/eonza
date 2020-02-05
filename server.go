@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"eonza/api"
 	"eonza/lib"
 
 	"github.com/kataras/golog"
@@ -113,12 +112,10 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func defHandle(c echo.Context) error {
+func indexHandle(c echo.Context) error {
 	var err error
-	//	req := c.Request()
-	//	data, err := RenderPage(req.URL.String())
-	data := `Hello, world!<br>
-	<a href="/api/run">Run Hello</a>`
+	req := c.Request()
+	data, err := RenderPage(req.URL.String())
 	if err != nil {
 		if err == ErrNotFound {
 			err = echo.NewHTTPError(http.StatusNotFound)
@@ -126,13 +123,6 @@ func defHandle(c echo.Context) error {
 		return err
 	}
 	return c.HTML(http.StatusOK, data)
-}
-
-func runHandle(c echo.Context) error {
-	if err := api.Run("World"); err != nil {
-		return err
-	}
-	return c.HTML(http.StatusOK, "OK")
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -166,9 +156,12 @@ func RunServer(options WebSettings) {
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
-	e.GET("/", defHandle)
-	e.GET("/api/run", runHandle)
+	if options.IsScript {
 
+	} else {
+		e.GET("/", indexHandle)
+		e.GET("/api/run", runHandle)
+	}
 	if options.Open {
 		lib.Open(fmt.Sprintf("http://%s:%d", options.Domain, options.Port))
 	}

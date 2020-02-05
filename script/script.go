@@ -4,10 +4,19 @@
 
 package script
 
+import (
+	"github.com/gentee/gentee"
+)
+
 type Script struct {
-	Name string // The name of the script
+	Header Header       // script header
+	Exec   *gentee.Exec // Bytecode
 }
 
 var (
 //	scripts = make(map[string]*Script)
 )
+
+func (script *Script) Run() (interface{}, error) {
+	return script.Exec.Run(gentee.Settings{})
+}
