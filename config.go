@@ -84,7 +84,7 @@ func LoadConfig() {
 		golog.Fatal(err)
 	}
 	if len(cfg.AssetsDir) != 0 {
-		if _, err := os.Stat(dir); err != nil {
+		if _, err := os.Stat(cfg.AssetsDir); err != nil {
 			golog.Fatal(err)
 		}
 	}

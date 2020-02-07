@@ -15,4 +15,6 @@ const (
 	DefAssets = `assets`
 	// DefLogs is the default name of log directory
 	DefLog = `log`
+	// Success is the success api answer
+	Success = `ok`
 )

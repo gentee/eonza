@@ -5,9 +5,12 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"time"
 
 	"eonza/lib"
 
@@ -23,14 +26,14 @@ const (
 
 // WebSettings contains web-server parameters
 type WebSettings struct {
-	Domain   string // Domain, localhost if it sempty
-	Port     int
-	IsScript bool // true, if web-server for the script
-	Open     bool // if true then webpage is opened
+	Domain string // Domain, localhost if it sempty
+	Port   int
+	Open   bool // if true then webpage is opened
 }
 
 var (
 	ErrNotFound = errors.New(`Not found`)
+	IsScript    bool // true, if web-server for the script
 )
 
 func Logger(next echo.HandlerFunc) echo.HandlerFunc {
@@ -114,8 +117,16 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 
 func indexHandle(c echo.Context) error {
 	var err error
-	req := c.Request()
-	data, err := RenderPage(req.URL.String())
+	//	req := c.Request()
+	url := c.Request().URL.String()
+	if url == `/` {
+		if IsScript {
+			url = `script`
+		} else {
+			url = `index`
+		}
+	}
+	data, err := RenderPage(url)
 	if err != nil {
 		if err == ErrNotFound {
 			err = echo.NewHTTPError(http.StatusNotFound)
@@ -144,7 +155,15 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)*/
 }
 
+func fileHandle(c echo.Context) error {
+	fname := c.Request().URL.String()
+	data := bytes.NewReader(FileAsset(fname))
+	http.ServeContent(c.Response(), c.Request(), fname, time.Now(), data)
+	return nil //c.HTML(http.StatusOK, Success)
+}
+
 func RunServer(options WebSettings) {
+	chStart := make(chan bool)
 	if len(options.Domain) == 0 {
 		options.Domain = `localhost`
 	}
@@ -156,16 +175,40 @@ func RunServer(options WebSettings) {
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
-	if options.IsScript {
-
-	} else {
-		e.GET("/", indexHandle)
+	e.GET("/", indexHandle)
+	e.GET("/api/ping", pingHandle)
+	e.GET("/js/*", fileHandle)
+	e.GET("/css/*", fileHandle)
+	if !IsScript {
 		e.GET("/api/run", runHandle)
 	}
+	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
 	if options.Open {
-		lib.Open(fmt.Sprintf("http://%s:%d", options.Domain, options.Port))
+		go func() {
+			<-chStart
+			lib.Open(url)
+		}()
 	}
-	if err := e.Start(fmt.Sprintf(":%d", cfg.HTTP.Port)); err != nil {
-		golog.Fatal(err)
+	go func() {
+		var body []byte
+		for string(body) != Success {
+			resp, err := http.Get(url + `/api/ping`)
+			if err == nil {
+				body, _ = ioutil.ReadAll(resp.Body)
+				resp.Body.Close()
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+		chStart <- true
+	}()
+	start := func() {
+		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
+			golog.Fatal(err)
+		}
+	}
+	if IsScript {
+		go start()
+	} else {
+		start()
 	}
 }

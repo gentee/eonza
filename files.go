@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -21,12 +22,13 @@ var (
 
 // SetAsset sets assets folder
 func SetAsset(dir, theme string) error {
-	assetsBox = `\eonza-assets\` + theme
+	assetsBox = filepath.Join(string(filepath.Separator)+`eonza-assets`, theme)
 	dir = filepath.Join(dir, theme)
-	if _, err := os.Stat(dir); os.IsExist(err) {
+	if _, err := os.Stat(dir); err == nil {
 		isAssets = true
 	}
 	assetsDir = dir
+	fmt.Println(`Asset`, isAssets, dir)
 	return nil
 }
 
@@ -37,8 +39,9 @@ func FileAsset(fname string) (data []byte) {
 	)
 	if data, ok = assets[fname]; !ok {
 		if isAssets {
-			filePath := filepath.Join(assetsDir, fname)
-			if _, err := os.Stat(filePath); os.IsExist(err) {
+			filePath := filepath.Join(assetsDir, filepath.FromSlash(fname))
+			fmt.Println(`Path`, filePath)
+			if _, err := os.Stat(filePath); err == nil {
 				data, _ = ioutil.ReadFile(filePath)
 				assets[fname] = data
 				return
@@ -51,4 +54,9 @@ func FileAsset(fname string) (data []byte) {
 	}
 	data, _ = FSByte(false, path.Join(assetsBox, fname))
 	return
+}
+
+// TemplateAsset returns the template of the web-page
+func TemplateAsset(fname string) []byte {
+	return FileAsset(filepath.Join(`templates`, fname+`.tpl`))
 }

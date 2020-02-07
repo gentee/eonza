@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	"eonza/script"
 
@@ -24,11 +25,18 @@ func main() {
 		golog.Fatal(err)
 	}
 	if fi.Mode()&os.ModeNamedPipe != 0 {
+		IsScript = true
 		scriptTask, err := script.Decode()
 		if err != nil {
 			golog.Fatal(err)
 		}
+		SetAsset(scriptTask.Header.AssetsDir, scriptTask.Header.HTTP.Theme)
+		RunServer(WebSettings{
+			Port: scriptTask.Header.HTTP.Port,
+			Open: true,
+		})
 		scriptTask.Run()
+		time.Sleep(2000 * time.Second)
 		return
 	}
 

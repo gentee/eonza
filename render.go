@@ -5,24 +5,53 @@
 package main
 
 import (
+	"bytes"
 	"html/template"
 )
 
 type Render struct {
-	Content template.HTML
-	/*	Title    string
-		Params   map[string]string
+	Title string
+	/*	Params   map[string]string
 		Url      string
 		Index    bool
 	*/
 }
 
+var (
+	tmpls = make(map[string]*template.Template)
+)
+
+func RenderTemplate(name string) (*template.Template, error) {
+	var (
+		ok   bool
+		err  error
+		tmpl *template.Template
+	)
+
+	if tmpl, ok = tmpls[name]; !ok {
+		tmpl = template.New(name).Delims(`[[`, `]]`)
+		data := TemplateAsset(name)
+		if len(data) == 0 {
+			return nil, ErrNotFound
+		}
+		if tmpl, err = tmpl.Parse(string(data)); err != nil {
+			return nil, err
+		}
+		tmpls[name] = tmpl
+	}
+	return tmpl, nil
+}
+
 func RenderPage(url string) (string, error) {
 	var (
-		err error
-		//		ok     bool
-		//		render Render
+		err    error
+		render Render
+		tmpl   *template.Template
 	)
+	if tmpl, err = RenderTemplate(url); err != nil {
+		return ``, err
+	}
+
 	/*	file := filepath.Join(cfg.WebDir, filepath.FromSlash(page.url))
 		var exist bool
 		if cfg.mode != ModeDynamic {
@@ -53,16 +82,16 @@ func RenderPage(url string) (string, error) {
 			return page.body, err
 		}
 		render.Content = template.HTML(``)*/
-	/*	render.Title = page.Title
-		render.Params = page.parent.Params
+	render.Title = `My Script`
+	/*	render.Params = page.parent.Params
 		render.Langs = LangList(page)
 		render.Index = path.Base(page.url) == `index.html`
 		render.Url = page.url
 		render.Domain = cfg.Domain*/
 	//	render.Original = path.Join(path.Dir(page.url), path.Base(page.file))
-	/*	if err = templates.templates.ExecuteTemplate(buf, tpl+`.html`, render); err != nil {
+	buf := bytes.NewBuffer([]byte{})
+	if err = tmpl.Execute(buf, render); err != nil {
 		return ``, err
-	}*/
-	//buf := bytes.NewBuffer([]byte{})
-	return `Hello` /*buf.String()*/, err
+	}
+	return buf.String(), err
 }

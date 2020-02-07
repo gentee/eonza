@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"eonza/lib"
@@ -15,7 +16,8 @@ import (
 
 func runHandle(c echo.Context) error {
 	if err := script.Encode(script.Header{
-		Name: "World",
+		Name:      "World",
+		AssetsDir: cfg.AssetsDir,
 		HTTP: &lib.HTTPConfig{
 			Port:  3235,
 			Open:  true,
@@ -25,4 +27,9 @@ func runHandle(c echo.Context) error {
 		return err
 	}
 	return c.HTML(http.StatusOK, "OK")
+}
+
+func pingHandle(c echo.Context) error {
+	fmt.Println(`PING`)
+	return c.HTML(http.StatusOK, Success)
 }
