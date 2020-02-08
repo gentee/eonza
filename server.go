@@ -157,6 +157,9 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 
 func fileHandle(c echo.Context) error {
 	fname := c.Request().URL.String()
+	/*	if off := strings.IndexByte(fname, '?'); off > 0 {
+		fname = fname[:off]
+	}*/
 	data := bytes.NewReader(FileAsset(fname))
 	http.ServeContent(c.Response(), c.Request(), fname, time.Now(), data)
 	return nil //c.HTML(http.StatusOK, Success)
