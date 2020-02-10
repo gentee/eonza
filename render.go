@@ -82,7 +82,7 @@ func RenderPage(url string) (string, error) {
 			return page.body, err
 		}
 		render.Content = template.HTML(``)*/
-	render.Title = `My Script`
+	render.Title = AppTitle
 	/*	render.Params = page.parent.Params
 		render.Langs = LangList(page)
 		render.Index = path.Base(page.url) == `index.html`
