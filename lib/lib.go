@@ -40,6 +40,11 @@ func AppPath(path ...string) (ret string) {
 	return
 }
 
+// ChangeExt changes the extension of the file
+func ChangeExt(path string, ext string) string {
+	return path[:len(path)-len(filepath.Ext(path))] + `.` + ext
+}
+
 // Open opens the corresponding app for filename
 func Open(filename string) error {
 	var err error

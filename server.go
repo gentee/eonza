@@ -182,6 +182,7 @@ func RunServer(options WebSettings) {
 	e.GET("/api/ping", pingHandle)
 	e.GET("/js/*", fileHandle)
 	e.GET("/css/*", fileHandle)
+	e.GET("/images/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if !IsScript {
 		e.GET("/api/run", runHandle)

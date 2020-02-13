@@ -41,6 +41,7 @@ func main() {
 	}
 
 	LoadConfig()
+	LoadStorage()
 	defer CloseLog()
 	SetAsset(cfg.AssetsDir, cfg.HTTP.Theme)
 	RunServer(WebSettings{

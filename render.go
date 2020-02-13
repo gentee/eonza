@@ -10,7 +10,7 @@ import (
 )
 
 type Render struct {
-	Title string
+	App AppInfo
 	/*	Params   map[string]string
 		Url      string
 		Index    bool
@@ -82,7 +82,7 @@ func RenderPage(url string) (string, error) {
 			return page.body, err
 		}
 		render.Content = template.HTML(``)*/
-	render.Title = AppTitle
+	render.App = appInfo
 	/*	render.Params = page.parent.Params
 		render.Langs = LangList(page)
 		render.Index = path.Base(page.url) == `index.html`

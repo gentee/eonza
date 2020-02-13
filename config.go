@@ -24,12 +24,11 @@ type LogConfig struct {
 // Config stores application's settings
 type Config struct {
 	Version   string         `yaml:"version"`   // Version of the application
-	DataDir   string         `yaml:"datadir"`   // Directory for data file. empty - dir of cfg file
 	AssetsDir string         `yaml:"assetsdir"` // Directory for assets file. empty - dir of cfg file
 	Log       LogConfig      `yaml:"log"`       // Log settings
 	HTTP      lib.HTTPConfig `yaml:"http"`      // Web-server settings
 
-	path string // Directory of cfg file
+	path string // path to cfg file
 }
 
 var (
@@ -104,6 +103,9 @@ func LoadConfig() {
 // Install creates config and data file on the first execution
 func Install() {
 	if err := SaveConfig(); err != nil {
+		golog.Fatal(err)
+	}
+	if err := SaveStorage(); err != nil {
 		golog.Fatal(err)
 	}
 }

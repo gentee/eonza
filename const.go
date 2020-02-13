@@ -18,3 +18,11 @@ const (
 	// Success is the success api answer
 	Success = `ok`
 )
+
+// AppInfo contains information about the application
+type AppInfo struct {
+	Title     string
+	Copyright string
+	Homepage  string
+	Lang      string
+}
