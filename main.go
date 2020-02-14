@@ -34,6 +34,7 @@ func main() {
 		RunServer(WebSettings{
 			Port: scriptTask.Header.HTTP.Port,
 			Open: true,
+			Lang: scriptTask.Header.Lang,
 		})
 		scriptTask.Run()
 		time.Sleep(2000 * time.Second)
@@ -47,5 +48,6 @@ func main() {
 	RunServer(WebSettings{
 		Port: cfg.HTTP.Port,
 		Open: cfg.HTTP.Open,
+		Lang: storage.Settings.Lang,
 	})
 }

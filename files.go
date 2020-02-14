@@ -40,7 +40,6 @@ func FileAsset(fname string) (data []byte) {
 	if data, ok = assets[fname]; !ok {
 		if isAssets {
 			filePath := filepath.Join(assetsDir, filepath.FromSlash(fname))
-			fmt.Println(`Path`, filePath)
 			if _, err := os.Stat(filePath); err == nil {
 				data, _ = ioutil.ReadFile(filePath)
 				assets[fname] = data
@@ -59,4 +58,9 @@ func FileAsset(fname string) (data []byte) {
 // TemplateAsset returns the template of the web-page
 func TemplateAsset(fname string) []byte {
 	return FileAsset(filepath.Join(`templates`, fname+`.tpl`))
+}
+
+// LanguageAsset returns the language resources
+func LanguageAsset(lng string) []byte {
+	return FileAsset(filepath.Join(`languages`, lng+`.yaml`))
 }

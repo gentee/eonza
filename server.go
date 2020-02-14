@@ -29,6 +29,7 @@ type WebSettings struct {
 	Domain string // Domain, localhost if it sempty
 	Port   int
 	Open   bool // if true then webpage is opened
+	Lang   string
 }
 
 var (
@@ -166,6 +167,7 @@ func fileHandle(c echo.Context) error {
 }
 
 func RunServer(options WebSettings) {
+	InitLang(options.Lang)
 	chStart := make(chan bool)
 	if len(options.Domain) == 0 {
 		options.Domain = `localhost`

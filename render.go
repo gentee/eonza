@@ -10,7 +10,8 @@ import (
 )
 
 type Render struct {
-	App AppInfo
+	App     AppInfo
+	Version string
 	/*	Params   map[string]string
 		Url      string
 		Index    bool
@@ -29,7 +30,9 @@ func RenderTemplate(name string) (*template.Template, error) {
 	)
 
 	if tmpl, ok = tmpls[name]; !ok {
-		tmpl = template.New(name).Delims(`[[`, `]]`)
+		tmpl = template.New(name).Delims(`[[`, `]]`).Funcs(template.FuncMap{
+			"lang": Lang,
+		})
 		data := TemplateAsset(name)
 		if len(data) == 0 {
 			return nil, ErrNotFound
@@ -83,6 +86,7 @@ func RenderPage(url string) (string, error) {
 		}
 		render.Content = template.HTML(``)*/
 	render.App = appInfo
+	render.Version = Version
 	/*	render.Params = page.parent.Params
 		render.Langs = LangList(page)
 		render.Index = path.Base(page.url) == `index.html`
