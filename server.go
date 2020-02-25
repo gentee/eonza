@@ -168,6 +168,7 @@ func fileHandle(c echo.Context) error {
 
 func RunServer(options WebSettings) {
 	InitLang(options.Lang)
+	InitTemplates()
 	chStart := make(chan bool)
 	if len(options.Domain) == 0 {
 		options.Domain = `localhost`

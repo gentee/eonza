@@ -7,6 +7,8 @@ package main
 import (
 	"bytes"
 	"html/template"
+
+	"github.com/kataras/golog"
 )
 
 type Render struct {
@@ -20,40 +22,36 @@ type Render struct {
 
 var (
 	tmpls = make(map[string]*template.Template)
+	tmpl  *template.Template
 )
 
-func RenderTemplate(name string) (*template.Template, error) {
-	var (
-		ok   bool
-		err  error
-		tmpl *template.Template
-	)
-
-	if tmpl, ok = tmpls[name]; !ok {
-		tmpl = template.New(name).Delims(`[[`, `]]`).Funcs(template.FuncMap{
-			"lang": Lang,
-		})
-		data := TemplateAsset(name)
+func InitTemplates() {
+	var err error
+	tmpl = template.New(`assets`).Delims(`[[`, `]]`).Funcs(template.FuncMap{
+		"lang": Lang,
+	})
+	for _, tpl := range _escDirs["../eonza-assets/default/templates"] {
+		fname := tpl.Name()
+		fname = fname[:len(fname)-4]
+		data := TemplateAsset(fname)
 		if len(data) == 0 {
-			return nil, ErrNotFound
+			golog.Fatal(ErrNotFound)
 		}
+		tmpl = tmpl.New(fname) /*.Delims(`[[`, `]]`).Funcs(template.FuncMap{
+			"lang": Lang,
+		})*/
+
 		if tmpl, err = tmpl.Parse(string(data)); err != nil {
-			return nil, err
+			golog.Fatal(err)
 		}
-		tmpls[name] = tmpl
 	}
-	return tmpl, nil
 }
 
 func RenderPage(url string) (string, error) {
 	var (
 		err    error
 		render Render
-		tmpl   *template.Template
 	)
-	if tmpl, err = RenderTemplate(url); err != nil {
-		return ``, err
-	}
 
 	/*	file := filepath.Join(cfg.WebDir, filepath.FromSlash(page.url))
 		var exist bool
@@ -94,7 +92,7 @@ func RenderPage(url string) (string, error) {
 		render.Domain = cfg.Domain*/
 	//	render.Original = path.Join(path.Dir(page.url), path.Base(page.file))
 	buf := bytes.NewBuffer([]byte{})
-	if err = tmpl.Execute(buf, render); err != nil {
+	if err = tmpl.ExecuteTemplate(buf, url, render); err != nil {
 		return ``, err
 	}
 	return buf.String(), err
