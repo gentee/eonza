@@ -21,14 +21,18 @@ type Render struct {
 }
 
 var (
-	tmpls = make(map[string]*template.Template)
-	tmpl  *template.Template
+	tmpl *template.Template
 )
+
+func Html(par string) template.HTML {
+	return template.HTML(par)
+}
 
 func InitTemplates() {
 	var err error
 	tmpl = template.New(`assets`).Delims(`[[`, `]]`).Funcs(template.FuncMap{
 		"lang": Lang,
+		"html": Html,
 	})
 	for _, tpl := range _escDirs["../eonza-assets/default/templates"] {
 		fname := tpl.Name()
@@ -37,9 +41,7 @@ func InitTemplates() {
 		if len(data) == 0 {
 			golog.Fatal(ErrNotFound)
 		}
-		tmpl = tmpl.New(fname) /*.Delims(`[[`, `]]`).Funcs(template.FuncMap{
-			"lang": Lang,
-		})*/
+		tmpl = tmpl.New(fname)
 
 		if tmpl, err = tmpl.Parse(string(data)); err != nil {
 			golog.Fatal(err)

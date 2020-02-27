@@ -24,5 +24,7 @@ type AppInfo struct {
 	Title     string
 	Copyright string
 	Homepage  string
+	Email     string
 	Lang      string
+	License   string
 }
