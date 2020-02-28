@@ -14,6 +14,7 @@ import (
 type Render struct {
 	App     AppInfo
 	Version string
+	Develop bool
 	/*	Params   map[string]string
 		Url      string
 		Index    bool
@@ -87,6 +88,7 @@ func RenderPage(url string) (string, error) {
 		render.Content = template.HTML(``)*/
 	render.App = appInfo
 	render.Version = Version
+	render.Develop = cfg.Develop
 	/*	render.Params = page.parent.Params
 		render.Langs = LangList(page)
 		render.Index = path.Base(page.url) == `index.html`

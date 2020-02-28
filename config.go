@@ -24,6 +24,7 @@ type LogConfig struct {
 // Config stores application's settings
 type Config struct {
 	Version   string         `yaml:"version"`   // Version of the application
+	Develop   bool           `yaml:"develop"`   // Developer's mode
 	AssetsDir string         `yaml:"assetsdir"` // Directory for assets file. empty - dir of cfg file
 	Log       LogConfig      `yaml:"log"`       // Log settings
 	HTTP      lib.HTTPConfig `yaml:"http"`      // Web-server settings

@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -20,6 +19,11 @@ var (
 	assets      = make(map[string][]byte)
 )
 
+// ClearAsset clears the asset's cache
+func ClearAsset() {
+	assets = make(map[string][]byte)
+}
+
 // SetAsset sets assets folder
 func SetAsset(dir, theme string) error {
 	assetsBox = filepath.Join(string(filepath.Separator)+`eonza-assets`, theme)
@@ -28,7 +32,6 @@ func SetAsset(dir, theme string) error {
 		isAssets = true
 	}
 	assetsDir = dir
-	fmt.Println(`Asset`, isAssets, dir)
 	return nil
 }
 

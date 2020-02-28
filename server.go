@@ -166,6 +166,12 @@ func fileHandle(c echo.Context) error {
 	return nil //c.HTML(http.StatusOK, Success)
 }
 
+func reloadHandle(c echo.Context) error {
+	ClearAsset()
+	InitTemplates()
+	return c.HTML(http.StatusOK, `OK`)
+}
+
 func RunServer(options WebSettings) {
 	InitLang(options.Lang)
 	InitTemplates()
@@ -183,11 +189,13 @@ func RunServer(options WebSettings) {
 
 	e.GET("/", indexHandle)
 	e.GET("/api/ping", pingHandle)
+
 	e.GET("/js/*", fileHandle)
 	e.GET("/css/*", fileHandle)
 	e.GET("/images/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if !IsScript {
+		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
 	}
 	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
