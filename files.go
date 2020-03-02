@@ -12,46 +12,43 @@ import (
 )
 
 var (
-	assetsTheme string
-	assetsDir   string
-	isAssets    bool
-	assetsBox   string
-	assets      = make(map[string][]byte)
+	assetsPath string
+	assetsBox  string
+	assets     map[string][]byte
 )
 
 // ClearAsset clears the asset's cache
-func ClearAsset() {
-	assets = make(map[string][]byte)
+func ClearAsset() (err error) {
+	if _, err = os.Stat(assetsPath); err == nil {
+		assets = make(map[string][]byte)
+		err = filepath.Walk(assetsPath, func(path string, info os.FileInfo, err error) error {
+			var data []byte
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			data, err = ioutil.ReadFile(path)
+			assets[path[len(assetsPath)+1:]] = data
+			return err
+		})
+	}
+	return
 }
 
-// SetAsset sets assets folder
-func SetAsset(dir, theme string) error {
+// LoadCustomAsset sets assets folder and load resources
+func LoadCustomAsset(dir, theme string) error {
 	assetsBox = filepath.Join(string(filepath.Separator)+`eonza-assets`, theme)
-	dir = filepath.Join(dir, theme)
-	if _, err := os.Stat(dir); err == nil {
-		isAssets = true
-	}
-	assetsDir = dir
-	return nil
+	assetsPath = filepath.Join(dir, theme)
+	return ClearAsset()
 }
 
 // FileAsset return the file data
 func FileAsset(fname string) (data []byte) {
-	var (
-		ok bool
-	)
-	if data, ok = assets[fname]; !ok {
-		if isAssets {
-			filePath := filepath.Join(assetsDir, filepath.FromSlash(fname))
-			if _, err := os.Stat(filePath); err == nil {
-				data, _ = ioutil.ReadFile(filePath)
-				assets[fname] = data
-				return
-			}
-		}
-		assets[fname] = []byte{}
-	}
-	if len(data) > 0 {
+	var ok bool
+
+	if data, ok = assets[fname]; ok {
 		return
 	}
 	data, _ = FSByte(false, path.Join(assetsBox, fname))

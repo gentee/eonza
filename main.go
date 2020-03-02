@@ -30,7 +30,9 @@ func main() {
 		if err != nil {
 			golog.Fatal(err)
 		}
-		SetAsset(scriptTask.Header.AssetsDir, scriptTask.Header.HTTP.Theme)
+		if err = LoadCustomAsset(scriptTask.Header.AssetsDir, scriptTask.Header.HTTP.Theme); err != nil {
+			golog.Fatal(err)
+		}
 		RunServer(WebSettings{
 			Port: scriptTask.Header.HTTP.Port,
 			Open: true,
@@ -44,7 +46,9 @@ func main() {
 	LoadConfig()
 	LoadStorage()
 	defer CloseLog()
-	SetAsset(cfg.AssetsDir, cfg.HTTP.Theme)
+	if err = LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
+		golog.Fatal(err)
+	}
 	RunServer(WebSettings{
 		Port: cfg.HTTP.Port,
 		Open: cfg.HTTP.Open,

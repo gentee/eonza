@@ -7,7 +7,7 @@ run {
     str env = $ go env
     $GOPATH = RegExp(env, `GOPATH="?([^"|\n|\r]*)`)
 
-//    $ /home/ak/go/bin/esc -o assets.go ../eonza-assets/default
+    $ /home/ak/go/bin/esc -o assets.go ../eonza-assets/default
     $ go install -tags "pa standard"
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
     $ /home/ak/app/eonza/eonza
