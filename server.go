@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	"eonza/lib"
@@ -156,6 +157,12 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)*/
 }
 
+func exitHandle(c echo.Context) error {
+	golog.Info(`Finish`)
+	stopchan <- os.Interrupt
+	return c.HTML(http.StatusOK, `OK`)
+}
+
 func fileHandle(c echo.Context) error {
 	fname := c.Request().URL.String()
 	/*	if off := strings.IndexByte(fname, '?'); off > 0 {
@@ -172,10 +179,9 @@ func reloadHandle(c echo.Context) error {
 	return c.HTML(http.StatusOK, `OK`)
 }
 
-func RunServer(options WebSettings) {
+func RunServer(options WebSettings) *echo.Echo {
 	InitLang(options.Lang)
 	InitTemplates()
-	chStart := make(chan bool)
 	if len(options.Domain) == 0 {
 		options.Domain = `localhost`
 	}
@@ -195,36 +201,29 @@ func RunServer(options WebSettings) {
 	e.GET("/images/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if !IsScript {
+		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
 	}
 	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
 	if options.Open {
 		go func() {
-			<-chStart
+			var body []byte
+			for string(body) != Success {
+				time.Sleep(100 * time.Millisecond)
+				resp, err := http.Get(url + `/api/ping`)
+				if err == nil {
+					body, _ = ioutil.ReadAll(resp.Body)
+					resp.Body.Close()
+				}
+			}
 			lib.Open(url)
 		}()
 	}
 	go func() {
-		var body []byte
-		for string(body) != Success {
-			resp, err := http.Get(url + `/api/ping`)
-			if err == nil {
-				body, _ = ioutil.ReadAll(resp.Body)
-				resp.Body.Close()
-			}
-			time.Sleep(100 * time.Millisecond)
-		}
-		chStart <- true
-	}()
-	start := func() {
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
 			golog.Fatal(err)
 		}
-	}
-	if IsScript {
-		go start()
-	} else {
-		start()
-	}
+	}()
+	return e
 }
