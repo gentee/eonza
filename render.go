@@ -35,7 +35,7 @@ func InitTemplates() {
 		"lang": Lang,
 		"html": Html,
 	})
-	for _, tpl := range _escDirs["../eonza-assets/default/templates"] {
+	for _, tpl := range _escDirs["../eonza-assets/themes/default/templates"] {
 		fname := tpl.Name()
 		fname = fname[:len(fname)-4]
 		data := TemplateAsset(fname)

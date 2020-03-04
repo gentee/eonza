@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	assetsPath string
-	assetsBox  string
-	assets     map[string][]byte
+	assetsPath  string
+	assetsTheme string
+	assets      map[string][]byte
 )
 
 // ClearAsset clears the asset's cache
@@ -30,7 +30,7 @@ func ClearAsset() (err error) {
 				return nil
 			}
 			data, err = ioutil.ReadFile(path)
-			assets[path[len(assetsPath)+1:]] = data
+			assets[filepath.ToSlash(path[len(assetsPath)+1:])] = data
 			return err
 		})
 	}
@@ -39,8 +39,8 @@ func ClearAsset() (err error) {
 
 // LoadCustomAsset sets assets folder and load resources
 func LoadCustomAsset(dir, theme string) error {
-	assetsBox = filepath.Join(string(filepath.Separator)+`eonza-assets`, theme)
-	assetsPath = filepath.Join(dir, theme)
+	assetsTheme = theme
+	assetsPath = dir
 	return ClearAsset()
 }
 
@@ -51,16 +51,21 @@ func FileAsset(fname string) (data []byte) {
 	if data, ok = assets[fname]; ok {
 		return
 	}
-	data, _ = FSByte(false, path.Join(assetsBox, fname))
+	data, _ = FSByte(false, path.Join(`/eonza-assets`, fname))
 	return
+}
+
+// WebAsset return the file data
+func WebAsset(fname string) (data []byte) {
+	return FileAsset(path.Join(`themes`, assetsTheme, fname))
 }
 
 // TemplateAsset returns the template of the web-page
 func TemplateAsset(fname string) []byte {
-	return FileAsset(filepath.Join(`templates`, fname+`.tpl`))
+	return WebAsset(path.Join(`templates`, fname+`.tpl`))
 }
 
 // LanguageAsset returns the language resources
 func LanguageAsset(lng string) []byte {
-	return FileAsset(filepath.Join(`languages`, lng+`.yaml`))
+	return FileAsset(path.Join(`languages`, lng+`.yaml`))
 }

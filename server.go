@@ -168,7 +168,7 @@ func fileHandle(c echo.Context) error {
 	/*	if off := strings.IndexByte(fname, '?'); off > 0 {
 		fname = fname[:off]
 	}*/
-	data := bytes.NewReader(FileAsset(fname))
+	data := bytes.NewReader(WebAsset(fname))
 	http.ServeContent(c.Response(), c.Request(), fname, time.Now(), data)
 	return nil //c.HTML(http.StatusOK, Success)
 }
@@ -177,6 +177,23 @@ func reloadHandle(c echo.Context) error {
 	ClearAsset()
 	InitTemplates()
 	return c.HTML(http.StatusOK, `OK`)
+}
+
+type ScriptResponse struct {
+	*Script
+	Error string `json:"error"`
+}
+
+func getScriptHandle(c echo.Context) error {
+	var response ScriptResponse
+
+	script := GetScript(c.QueryParam(`name`))
+	if script == nil {
+		response.Error = `Cannot find project`
+	} else {
+		response.Script = script
+	}
+	return c.JSON(http.StatusOK, &response)
 }
 
 func RunServer(options WebSettings) *echo.Echo {
@@ -204,6 +221,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
+		e.GET("/api/script", getScriptHandle)
 	}
 	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
 	if options.Open {
