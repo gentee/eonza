@@ -26,8 +26,10 @@ type Settings struct {
 
 // Storage contains all application data
 type Storage struct {
-	Settings Settings
-	Scripts  []Script
+	Settings   Settings
+	Scripts    []Script
+	History    [HistoryLimit]string
+	HistoryOff int
 }
 
 var (
@@ -35,13 +37,7 @@ var (
 		Settings: Settings{
 			Lang: appInfo.Lang,
 		},
-		Scripts: []Script{
-			Script{
-				scriptSettings{
-					Name: `new`,
-				},
-			},
-		},
+		Scripts: []Script{},
 	}
 )
 
@@ -88,5 +84,4 @@ func LoadStorage() {
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
 	}
-	LoadScripts()
 }

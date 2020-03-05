@@ -6,10 +6,12 @@ package lib
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/kataras/golog"
 )
@@ -60,4 +62,15 @@ func Open(filename string) error {
 		err = fmt.Errorf(`unsupported platform`)
 	}
 	return err
+}
+
+// UniqueName returns a random string
+func UniqueName(count int) string {
+	b := make([]rune, count)
+	var alphabet = []rune("0123456789abcdefghijklmnopqrstuvwxyz")
+	rand.Seed(time.Now().Unix())
+	for i := range b {
+		b[i] = alphabet[rand.Intn(len(alphabet))]
+	}
+	return string(b)
 }

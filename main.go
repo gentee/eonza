@@ -53,6 +53,7 @@ func main() {
 		if err = LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
+		InitScripts()
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,
 			Open: cfg.HTTP.Open,

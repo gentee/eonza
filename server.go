@@ -176,22 +176,39 @@ func fileHandle(c echo.Context) error {
 func reloadHandle(c echo.Context) error {
 	ClearAsset()
 	InitTemplates()
+	InitLang(curLang)
+	InitScripts()
 	return c.HTML(http.StatusOK, `OK`)
 }
 
 type ScriptResponse struct {
 	*Script
+	IsNew bool   `json:"isnew"`
 	Error string `json:"error"`
 }
 
 func getScriptHandle(c echo.Context) error {
 	var response ScriptResponse
 
-	script := GetScript(c.QueryParam(`name`))
+	name := c.QueryParam(`name`)
+	if len(name) == 0 {
+		name = LatestScript()
+		if len(name) == 0 {
+			name = `new`
+		}
+	}
+	script := GetScript(name)
 	if script == nil {
-		response.Error = `Cannot find project`
+		response.Error = Lang(`erropen`, name)
 	} else {
 		response.Script = script
+		if script.Settings.Name == `new` {
+			script.Settings.Name = lib.UniqueName(7)
+			script.Settings.Title = Lang(`newscript`)
+			response.IsNew = true
+		} else {
+			AddHistory(script.Settings.Name)
+		}
 	}
 	return c.JSON(http.StatusOK, &response)
 }

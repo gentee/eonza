@@ -17,6 +17,8 @@ const (
 	DefLog = `log`
 	// Success is the success api answer
 	Success = `ok`
+	// HistoryLimit is the limit of history count
+	HistoryLimit = 8
 )
 
 // AppInfo contains information about the application
