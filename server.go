@@ -33,6 +33,11 @@ type WebSettings struct {
 	Lang   string
 }
 
+type Response struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+}
+
 var (
 	ErrNotFound = errors.New(`Not found`)
 	IsScript    bool // true, if web-server for the script
@@ -160,7 +165,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 func exitHandle(c echo.Context) error {
 	golog.Info(`Finish`)
 	stopchan <- os.Interrupt
-	return c.HTML(http.StatusOK, `OK`)
+	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
 func fileHandle(c echo.Context) error {
@@ -178,39 +183,7 @@ func reloadHandle(c echo.Context) error {
 	InitTemplates()
 	InitLang(curLang)
 	InitScripts()
-	return c.HTML(http.StatusOK, `OK`)
-}
-
-type ScriptResponse struct {
-	*Script
-	IsNew bool   `json:"isnew"`
-	Error string `json:"error"`
-}
-
-func getScriptHandle(c echo.Context) error {
-	var response ScriptResponse
-
-	name := c.QueryParam(`name`)
-	if len(name) == 0 {
-		name = LatestScript()
-		if len(name) == 0 {
-			name = `new`
-		}
-	}
-	script := GetScript(name)
-	if script == nil {
-		response.Error = Lang(`erropen`, name)
-	} else {
-		response.Script = script
-		if script.Settings.Name == `new` {
-			script.Settings.Name = lib.UniqueName(7)
-			script.Settings.Title = Lang(`newscript`)
-			response.IsNew = true
-		} else {
-			AddHistory(script.Settings.Name)
-		}
-	}
-	return c.JSON(http.StatusOK, &response)
+	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
 func RunServer(options WebSettings) *echo.Echo {
@@ -239,6 +212,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
+		e.POST("/api/script", saveScriptHandle)
 	}
 	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
 	if options.Open {

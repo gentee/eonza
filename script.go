@@ -5,7 +5,9 @@
 package main
 
 import (
+	"fmt"
 	"path"
+	"regexp"
 
 	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
@@ -93,4 +95,15 @@ func LatestScript() (ret string) {
 		ret = history[0]
 	}
 	return
+}
+
+func (script *Script) Validate() error {
+	re, _ := regexp.Compile(`^[a-z\d\._-]+$`)
+	if !re.MatchString(script.Settings.Name) {
+		return fmt.Errorf(Lang(`invalidfield`), Lang(`uniquename`))
+	}
+	if len(script.Settings.Title) == 0 {
+		return fmt.Errorf(Lang(`invalidfield`), Lang(`title`))
+	}
+	return nil
 }
