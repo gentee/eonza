@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"time"
 
@@ -73,4 +74,10 @@ func UniqueName(count int) string {
 		b[i] = alphabet[rand.Intn(len(alphabet))]
 	}
 	return string(b)
+}
+
+// ValidateSysName checks the system name
+func ValidateSysName(value string) bool {
+	re, _ := regexp.Compile(`^[a-z\d\._-]+$`)
+	return re.MatchString(value)
 }

@@ -15,10 +15,14 @@ const (
 	DefAssets = `assets`
 	// DefLogs is the default name of log directory
 	DefLog = `log`
+	// DefUsers is the default name of users directory
+	DefUsers = `users`
+	// UserExt contains the user's settings
+	UserExt = `.usr`
 	// Success is the success api answer
 	Success = `ok`
 	// HistoryLimit is the limit of history count
-	HistoryLimit = 8
+	HistoryLimit = 7
 )
 
 // AppInfo contains information about the application

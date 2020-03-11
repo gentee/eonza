@@ -5,9 +5,9 @@
 package main
 
 import (
+	"eonza/lib"
 	"fmt"
 	"path"
-	"regexp"
 
 	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
@@ -47,59 +47,19 @@ func InitScripts() {
 }
 
 func GetScript(name string) *Script {
+	storageMutex.RLock()
 	if ind, ok := mapScripts[name]; ok {
 		if ind < len(sysScripts) {
 			return &sysScripts[ind]
 		}
 		return &storage.Scripts[ind-len(sysScripts)]
 	}
+	storageMutex.RUnlock()
 	return nil
 }
 
-// AddHistory save the script in the history
-func AddHistory(name string) {
-	var i int
-	for ; i < HistoryLimit; i++ {
-		if storage.History[i] == name {
-			storage.History[i] = storage.History[storage.HistoryOff]
-			break
-		}
-	}
-	storage.History[storage.HistoryOff] = name
-	storage.HistoryOff++
-	if storage.HistoryOff == HistoryLimit {
-		storage.HistoryOff = 0
-	}
-}
-
-// GetHistory returns the history list
-func GetHistory() []string {
-	ret := make([]string, 0)
-	for i := storage.HistoryOff - 1; i >= 0; i-- {
-		if len(storage.History[i]) > 0 {
-			ret = append(ret, storage.History[i])
-		}
-	}
-	for i := HistoryLimit - 1; i >= storage.HistoryOff; i-- {
-		if len(storage.History[i]) > 0 {
-			ret = append(ret, storage.History[i])
-		}
-	}
-	return ret
-}
-
-// LatestScript returns the latest open project
-func LatestScript() (ret string) {
-	history := GetHistory()
-	if len(history) > 0 {
-		ret = history[0]
-	}
-	return
-}
-
 func (script *Script) Validate() error {
-	re, _ := regexp.Compile(`^[a-z\d\._-]+$`)
-	if !re.MatchString(script.Settings.Name) {
+	if !lib.ValidateSysName(script.Settings.Name) {
 		return fmt.Errorf(Lang(`invalidfield`), Lang(`uniquename`))
 	}
 	if len(script.Settings.Title) == 0 {

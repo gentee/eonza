@@ -21,12 +21,18 @@ type LogConfig struct {
 	Level string `yaml:"level"` // Log level. It can be disable, error, warn, info.
 }
 
+// UsersConfig stores the config of users
+type UsersConfig struct {
+	Dir string `yaml:"dir"` // Directory for users files. If it is empty - dir of cfg file
+}
+
 // Config stores application's settings
 type Config struct {
 	Version   string         `yaml:"version"`   // Version of the application
 	Develop   bool           `yaml:"develop"`   // Developer's mode
 	AssetsDir string         `yaml:"assetsdir"` // Directory for assets file. empty - dir of cfg file
 	Log       LogConfig      `yaml:"log"`       // Log settings
+	Users     UsersConfig    `yaml:"users"`     // Users settings
 	HTTP      lib.HTTPConfig `yaml:"http"`      // Web-server settings
 
 	path string // path to cfg file
@@ -90,6 +96,7 @@ func LoadConfig() {
 	}
 	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
+	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	//	dataFile := defDir(cfg.DataDir)
 
 	if cfg.HTTP.Port == 0 {
@@ -103,10 +110,18 @@ func LoadConfig() {
 
 // Install creates config and data file on the first execution
 func Install() {
-	if err := SaveConfig(); err != nil {
+	var err error
+	if err = SaveConfig(); err != nil {
 		golog.Fatal(err)
 	}
-	if err := SaveStorage(); err != nil {
+	err = os.MkdirAll(cfg.Users.Dir, 0777)
+	if err != nil {
+		golog.Fatal(err)
+	}
+	if err = NewUser(`root`); err != nil {
+		golog.Fatal(err)
+	}
+	if err = SaveStorage(); err != nil {
 		golog.Fatal(err)
 	}
 }

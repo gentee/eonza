@@ -76,7 +76,7 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 				if len(cfg.Devices) > 0 {
 					for _, device := range cfg.Devices {
 						hash := md5.Sum([]byte(forHash + device + key))
-						if sign == strings.ToLower(hex.EncodeToString(hash[:])) {
+						if sign == strings.ToLower(.EncodeToString(hash[:])) {
 							valid = true
 							break
 						}

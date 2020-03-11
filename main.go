@@ -49,6 +49,7 @@ func main() {
 	} else {
 		LoadConfig()
 		LoadStorage()
+		LoadUsers()
 		defer CloseLog()
 		if err = LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
@@ -57,7 +58,7 @@ func main() {
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,
 			Open: cfg.HTTP.Open,
-			Lang: storage.Settings.Lang,
+			Lang: appInfo.Lang,
 		})
 	}
 	signal.Notify(stopchan, os.Kill, os.Interrupt)

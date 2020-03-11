@@ -10,6 +10,7 @@ import (
 	"encoding/gob"
 	"eonza/lib"
 	"io/ioutil"
+	"sync"
 	"time"
 
 	"github.com/kataras/golog"
@@ -20,25 +21,28 @@ const (
 )
 
 // Setting contains settings of the application
-type Settings struct {
+/*type Settings struct {
 	Lang string // the language of the interface
-}
+}*/
 
 // Storage contains all application data
 type Storage struct {
-	Settings   Settings
-	Scripts    []Script
-	History    [HistoryLimit]string
-	HistoryOff int
+	//	Settings   Settings
+	Users   []User
+	Scripts []Script
+	//	History    [HistoryLimit]string
+	//	HistoryOff int
 }
 
 var (
 	storage = Storage{
-		Settings: Settings{
-			Lang: appInfo.Lang,
-		},
+		/*		Settings: Settings{
+				Lang: appInfo.Lang,
+			},*/
+		Users:   []User{},
 		Scripts: []Script{},
 	}
+	storageMutex = &sync.RWMutex{}
 )
 
 // SaveStorage saves application data
