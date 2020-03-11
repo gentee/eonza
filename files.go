@@ -19,7 +19,10 @@ var (
 
 // ClearAsset clears the asset's cache
 func ClearAsset() (err error) {
-	if _, err = os.Stat(assetsPath); err == nil {
+	if _, err = os.Stat(assetsPath); os.IsNotExist(err) {
+		return nil
+	}
+	if err == nil {
 		assets = make(map[string][]byte)
 		err = filepath.Walk(assetsPath, func(path string, info os.FileInfo, err error) error {
 			var data []byte

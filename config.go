@@ -114,6 +114,7 @@ func Install() {
 	if err = SaveConfig(); err != nil {
 		golog.Fatal(err)
 	}
+	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	err = os.MkdirAll(cfg.Users.Dir, 0777)
 	if err != nil {
 		golog.Fatal(err)

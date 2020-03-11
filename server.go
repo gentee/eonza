@@ -38,10 +38,28 @@ type Response struct {
 	Error   string `json:"error,omitempty"`
 }
 
+type Auth struct {
+	echo.Context
+	User User
+}
+
 var (
 	ErrNotFound = errors.New(`Not found`)
 	IsScript    bool // true, if web-server for the script
 )
+
+func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		mutex.RLock()
+		user := storage.Users[0]
+		mutex.RUnlock()
+		auth := &Auth{
+			Context: c,
+			User:    user,
+		}
+		return next(auth)
+	}
+}
 
 func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -195,13 +213,14 @@ func RunServer(options WebSettings) *echo.Echo {
 	e := echo.New()
 
 	e.HideBanner = true
+	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
 	e.GET("/", indexHandle)
-	e.GET("/api/ping", pingHandle)
+	e.GET("/ping", pingHandle)
 
 	e.GET("/js/*", fileHandle)
 	e.GET("/css/*", fileHandle)
@@ -220,7 +239,7 @@ func RunServer(options WebSettings) *echo.Echo {
 			var body []byte
 			for string(body) != Success {
 				time.Sleep(100 * time.Millisecond)
-				resp, err := http.Get(url + `/api/ping`)
+				resp, err := http.Get(url + `/ping`)
 				if err == nil {
 					body, _ = ioutil.ReadAll(resp.Body)
 					resp.Body.Close()

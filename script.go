@@ -47,14 +47,14 @@ func InitScripts() {
 }
 
 func GetScript(name string) *Script {
-	storageMutex.RLock()
+	mutex.RLock()
+	defer mutex.RUnlock()
 	if ind, ok := mapScripts[name]; ok {
 		if ind < len(sysScripts) {
 			return &sysScripts[ind]
 		}
 		return &storage.Scripts[ind-len(sysScripts)]
 	}
-	storageMutex.RUnlock()
 	return nil
 }
 

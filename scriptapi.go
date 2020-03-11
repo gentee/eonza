@@ -29,7 +29,7 @@ func getScriptHandle(c echo.Context) error {
 
 	name := c.QueryParam(`name`)
 	if len(name) == 0 {
-		name = LatestScript()
+		name = LatestHistory(c.(*Auth).User.ID, HistEditor)
 		if len(name) == 0 {
 			name = `new`
 		}
@@ -44,7 +44,7 @@ func getScriptHandle(c echo.Context) error {
 			response.Script.Settings.Title = Lang(`newscript`)
 			response.IsNew = true
 		} else {
-			AddHistory(script.Settings.Name)
+			AddHistory(c.(*Auth).User.ID, HistEditor, script.Settings.Name)
 		}
 	}
 	return c.JSON(http.StatusOK, &response)
@@ -63,6 +63,11 @@ func saveScriptHandle(c echo.Context) error {
 	}
 	if err = script.Validate(); err != nil {
 		return errResult()
+	}
+	if script.IsNew {
+		if err = AddHistory(c.(*Auth).User.ID, HistEditor, script.Settings.Name); err != nil {
+			return errResult()
+		}
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
 }

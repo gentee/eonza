@@ -12,21 +12,23 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"gopkg.in/yaml.v2"
 )
 
 const (
 	HistEditor = iota
-	HistCount
 )
+
+type History struct {
+	Editor []string `yaml:"editor"`
+}
 
 // UserSettings stores the user's settings
 type UserSettings struct {
-	ID      uint32              `yaml:"id"`
-	Lang    string              `yaml:"lang"`
-	History [HistCount][]string `yaml:"history"`
+	ID      uint32  `yaml:"id"`
+	Lang    string  `yaml:"lang"`
+	History History `yaml:"history"`
 
 	index int // index in cfg.Users
 }
@@ -40,13 +42,13 @@ type User struct {
 
 var (
 	userSettings = make(map[uint32]UserSettings)
-	userMutex    = &sync.RWMutex{}
 )
 
 func LoadUsers() error {
 	var err error
 	for i, item := range storage.Users {
 		userSettings[item.ID] = UserSettings{
+			ID:    item.ID,
 			Lang:  appInfo.Lang,
 			index: i,
 		}
@@ -81,8 +83,8 @@ func NewUser(nickname string) error {
 	if !lib.ValidateSysName(nickname) {
 		return fmt.Errorf(Lang(`invalidfield`), Lang(`nickname`))
 	}
-	storageMutex.Lock()
-	defer storageMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	for _, item := range storage.Users {
 		if item.Nickname == nickname {
 			return fmt.Errorf(Lang(`errnickname`), nickname)
@@ -105,10 +107,19 @@ func NewUser(nickname string) error {
 
 // AddHistory adds the history item to the user's settings
 func AddHistory(id uint32, history int, name string) error {
-	userMutex.Lock()
+	fmt.Println(`ADD History Start`, id, name, userSettings[id])
+	mutex.Lock()
+	var (
+		cur UserSettings
+		in  []string
+	)
+	cur = userSettings[id]
+	if history == HistEditor {
+		in = cur.History.Editor
+	}
 	ret := make([]string, 1, HistoryLimit+1)
 	ret[0] = name
-	for _, item := range userSettings[id].History[history] {
+	for _, item := range in {
 		if item != name {
 			ret = append(ret, item)
 			if len(ret) == HistoryLimit {
@@ -116,16 +127,23 @@ func AddHistory(id uint32, history int, name string) error {
 			}
 		}
 	}
-	copy(userSettings[id].History[history], ret)
-	userMutex.Unlock()
+	if history == HistEditor {
+		cur.History.Editor = ret
+		userSettings[id] = cur
+	}
+	mutex.Unlock()
+	fmt.Println(`ADD History`, id, userSettings)
 	return SaveUser(id)
 }
 
 // GetHistory returns the history list
 func GetHistory(id uint32, history int) []string {
-	userMutex.RLock()
-	defer userMutex.RUnlock()
-	return userSettings[id].History[history]
+	mutex.RLock()
+	defer mutex.RUnlock()
+	if history == HistEditor {
+		return userSettings[id].History.Editor
+	}
+	return userSettings[id].History.Editor
 }
 
 // LatestHistory returns the latest open project
@@ -138,15 +156,13 @@ func LatestHistory(id uint32, history int) (ret string) {
 }
 
 func SaveUser(id uint32) error {
-	userMutex.RLock()
-	defer userMutex.RUnlock()
+	mutex.RLock()
+	defer mutex.RUnlock()
 
 	data, err := yaml.Marshal(userSettings[id])
 	if err != nil {
 		return err
 	}
-	storageMutex.RLock()
-	defer storageMutex.RUnlock()
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
 		storage.Users[userSettings[id].index].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
 }

@@ -42,7 +42,7 @@ var (
 		Users:   []User{},
 		Scripts: []Script{},
 	}
-	storageMutex = &sync.RWMutex{}
+	mutex = &sync.RWMutex{}
 )
 
 // SaveStorage saves application data
