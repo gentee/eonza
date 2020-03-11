@@ -9,6 +9,7 @@ import (
 	"compress/gzip"
 	"encoding/gob"
 	"eonza/lib"
+	"fmt"
 	"io/ioutil"
 	"sync"
 	"time"
@@ -88,4 +89,5 @@ func LoadStorage() {
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
 	}
+	fmt.Println(`STORAGE`, storage)
 }

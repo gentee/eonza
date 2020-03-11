@@ -67,3 +67,20 @@ func (script *Script) Validate() error {
 	}
 	return nil
 }
+
+func SaveScript(script Script) error {
+	mutex.Lock()
+	defer mutex.Unlock()
+	off := len(sysScripts)
+	if index, ok := mapScripts[script.Settings.Name]; ok {
+		if index >= off {
+			storage.Scripts[index-off] = script
+		} else {
+			// TODO: returns error
+		}
+	} else {
+		mapScripts[script.Settings.Name] = off + len(storage.Scripts)
+		storage.Scripts = append(storage.Scripts, script)
+	}
+	return SaveStorage()
+}

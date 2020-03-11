@@ -107,7 +107,6 @@ func NewUser(nickname string) error {
 
 // AddHistory adds the history item to the user's settings
 func AddHistory(id uint32, history int, name string) error {
-	fmt.Println(`ADD History Start`, id, name, userSettings[id])
 	mutex.Lock()
 	var (
 		cur UserSettings
@@ -132,7 +131,6 @@ func AddHistory(id uint32, history int, name string) error {
 		userSettings[id] = cur
 	}
 	mutex.Unlock()
-	fmt.Println(`ADD History`, id, userSettings)
 	return SaveUser(id)
 }
 

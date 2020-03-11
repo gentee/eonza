@@ -69,5 +69,8 @@ func saveScriptHandle(c echo.Context) error {
 			return errResult()
 		}
 	}
+	if err = SaveScript(script.Script); err != nil {
+		return errResult()
+	}
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
