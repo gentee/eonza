@@ -14,8 +14,7 @@ import (
 )
 
 var (
-	sysScripts []Script
-	mapScripts map[string]int
+	scripts map[string]*Script
 )
 
 type scriptSettings struct {
@@ -25,11 +24,12 @@ type scriptSettings struct {
 
 type Script struct {
 	Settings scriptSettings `json:"settings"`
+
+	embedded bool // Embedded script
 }
 
 func InitScripts() {
-	sysScripts = make([]Script, 0, 64)
-	mapScripts = make(map[string]int)
+	scripts = make(map[string]*Script)
 	for _, tpl := range _escDirs["../eonza-assets/scripts"] {
 		var script Script
 		fname := tpl.Name()
@@ -37,25 +37,12 @@ func InitScripts() {
 		if err := yaml.Unmarshal(data, &script); err != nil {
 			golog.Fatal(err)
 		}
-		mapScripts[script.Settings.Name] = len(sysScripts)
-		sysScripts = append(sysScripts, script)
+		script.embedded = true
+		scripts[script.Settings.Name] = &script
 	}
-	off := len(sysScripts)
-	for i, item := range storage.Scripts {
-		mapScripts[item.Settings.Name] = off + i
+	for name, item := range storage.Scripts {
+		scripts[name] = item
 	}
-}
-
-func GetScript(name string) *Script {
-	mutex.RLock()
-	defer mutex.RUnlock()
-	if ind, ok := mapScripts[name]; ok {
-		if ind < len(sysScripts) {
-			return &sysScripts[ind]
-		}
-		return &storage.Scripts[ind-len(sysScripts)]
-	}
-	return nil
 }
 
 func (script *Script) Validate() error {
@@ -68,19 +55,28 @@ func (script *Script) Validate() error {
 	return nil
 }
 
-func SaveScript(script Script) error {
-	mutex.Lock()
-	defer mutex.Unlock()
-	off := len(sysScripts)
-	if index, ok := mapScripts[script.Settings.Name]; ok {
-		if index >= off {
-			storage.Scripts[index-off] = script
-		} else {
-			// TODO: returns error
-		}
-	} else {
-		mapScripts[script.Settings.Name] = off + len(storage.Scripts)
-		storage.Scripts = append(storage.Scripts, script)
+func ScriptDependences(name string) []ScriptItem {
+	var ret []ScriptItem
+
+	// TODO: enumerate all commands
+	return ret
+}
+
+func (script *Script) SaveScript(original string) error {
+	if script.embedded {
+		// TODO: error
 	}
+	if len(original) > 0 && original != script.Settings.Name {
+		if _, ok := scripts[script.Settings.Name]; ok {
+			// TODO: error exists
+		}
+		if deps := ScriptDependences(original); len(deps) > 0 {
+			// TODO: error dependences
+		}
+		delete(scripts, original)
+		delete(storage.Scripts, original)
+	}
+	scripts[script.Settings.Name] = script
+	storage.Scripts[script.Settings.Name] = script
 	return SaveStorage()
 }

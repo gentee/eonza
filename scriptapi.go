@@ -14,27 +14,22 @@ import (
 
 type ScriptResponse struct {
 	Script
-	IsNew bool   `json:"isnew"`
-	Error string `json:"error,omitempty"`
+	original string       `json:"original"`
+	History  []ScriptItem `json:"history,omitempty"`
+	Error    string       `json:"error,omitempty"`
 }
-
-/*
-type ScriptRequest struct {
-	Script Script `json:"script"`
-	IsNew  bool   `json:"isnew"`
-}*/
 
 func getScriptHandle(c echo.Context) error {
 	var response ScriptResponse
 
 	name := c.QueryParam(`name`)
 	if len(name) == 0 {
-		name = LatestHistory(c.(*Auth).User.ID, HistEditor)
+		name = LatestHistoryEditor(c.(*Auth).User.ID)
 		if len(name) == 0 {
 			name = `new`
 		}
 	}
-	script := GetScript(name)
+	script := scripts[name]
 	if script == nil {
 		response.Error = Lang(`erropen`, name)
 	} else {
@@ -42,10 +37,11 @@ func getScriptHandle(c echo.Context) error {
 		if response.Script.Settings.Name == `new` {
 			response.Script.Settings.Name = lib.UniqueName(7)
 			response.Script.Settings.Title = Lang(`newscript`)
-			response.IsNew = true
 		} else {
-			AddHistory(c.(*Auth).User.ID, HistEditor, script.Settings.Name)
+			AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name)
+			response.original = name
 		}
+		response.History = GetHistoryEditor(c.(*Auth).User.ID)
 	}
 	return c.JSON(http.StatusOK, &response)
 }
@@ -64,12 +60,12 @@ func saveScriptHandle(c echo.Context) error {
 	if err = script.Validate(); err != nil {
 		return errResult()
 	}
-	if script.IsNew {
-		if err = AddHistory(c.(*Auth).User.ID, HistEditor, script.Settings.Name); err != nil {
+	if len(script.original) == 0 {
+		if err = AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name); err != nil {
 			return errResult()
 		}
 	}
-	if err = SaveScript(script.Script); err != nil {
+	if err = (&script.Script).SaveScript(script.original); err != nil {
 		return errResult()
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})

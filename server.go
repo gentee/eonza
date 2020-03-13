@@ -40,7 +40,7 @@ type Response struct {
 
 type Auth struct {
 	echo.Context
-	User User
+	User *User
 }
 
 var (
@@ -49,15 +49,20 @@ var (
 )
 
 func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		mutex.RLock()
-		user := storage.Users[0]
-		mutex.RUnlock()
+	return func(c echo.Context) (err error) {
+		mutex.Lock()
+		// TODO: JWT user
+		var user *User
+		for _, user = range storage.Users {
+			break
+		}
 		auth := &Auth{
 			Context: c,
 			User:    user,
 		}
-		return next(auth)
+		err = next(auth)
+		mutex.Unlock()
+		return
 	}
 }
 
@@ -225,6 +230,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/js/*", fileHandle)
 	e.GET("/css/*", fileHandle)
 	e.GET("/images/*", fileHandle)
+	e.GET("/fonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if !IsScript {
 		e.GET("/api/exit", exitHandle)

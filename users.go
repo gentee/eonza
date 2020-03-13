@@ -16,9 +16,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	HistEditor = iota
-)
+type ScriptItem struct {
+	Name  string `json:"name"`
+	Title string `json:"title"`
+}
 
 type History struct {
 	Editor []string `yaml:"editor"`
@@ -29,8 +30,6 @@ type UserSettings struct {
 	ID      uint32  `yaml:"id"`
 	Lang    string  `yaml:"lang"`
 	History History `yaml:"history"`
-
-	index int // index in cfg.Users
 }
 
 // User stores user's parameters
@@ -46,11 +45,10 @@ var (
 
 func LoadUsers() error {
 	var err error
-	for i, item := range storage.Users {
+	for _, item := range storage.Users {
 		userSettings[item.ID] = UserSettings{
-			ID:    item.ID,
-			Lang:  appInfo.Lang,
-			index: i,
+			ID:   item.ID,
+			Lang: appInfo.Lang,
 		}
 	}
 
@@ -67,8 +65,7 @@ func LoadUsers() error {
 		if err = yaml.Unmarshal(data, &user); err != nil {
 			return err
 		}
-		if curUser, ok := userSettings[user.ID]; ok {
-			user.index = curUser.index
+		if _, ok := storage.Users[user.ID]; ok {
 			userSettings[user.ID] = user
 		}
 		return err
@@ -83,8 +80,6 @@ func NewUser(nickname string) error {
 	if !lib.ValidateSysName(nickname) {
 		return fmt.Errorf(Lang(`invalidfield`), Lang(`nickname`))
 	}
-	mutex.Lock()
-	defer mutex.Unlock()
 	for _, item := range storage.Users {
 		if item.Nickname == nickname {
 			return fmt.Errorf(Lang(`errnickname`), nickname)
@@ -101,24 +96,19 @@ func NewUser(nickname string) error {
 		[]byte(hex.EncodeToString(private)), 0777 /*os.ModePerm*/); err != nil {
 		return err
 	}
-	storage.Users = append(storage.Users, user)
+	storage.Users[user.ID] = &user
 	return nil
 }
 
-// AddHistory adds the history item to the user's settings
-func AddHistory(id uint32, history int, name string) error {
-	mutex.Lock()
+// AddHistoryEditor adds the history item to the user's settings
+func AddHistoryEditor(id uint32, name string) error {
 	var (
 		cur UserSettings
-		in  []string
 	)
 	cur = userSettings[id]
-	if history == HistEditor {
-		in = cur.History.Editor
-	}
 	ret := make([]string, 1, HistoryLimit+1)
 	ret[0] = name
-	for _, item := range in {
+	for _, item := range cur.History.Editor {
 		if item != name {
 			ret = append(ret, item)
 			if len(ret) == HistoryLimit {
@@ -126,41 +116,40 @@ func AddHistory(id uint32, history int, name string) error {
 			}
 		}
 	}
-	if history == HistEditor {
-		cur.History.Editor = ret
-		userSettings[id] = cur
-	}
-	mutex.Unlock()
+	cur.History.Editor = ret
+	userSettings[id] = cur
 	return SaveUser(id)
 }
 
-// GetHistory returns the history list
-func GetHistory(id uint32, history int) []string {
-	mutex.RLock()
-	defer mutex.RUnlock()
-	if history == HistEditor {
-		return userSettings[id].History.Editor
+// GetHistoryEditor returns the history list
+func GetHistoryEditor(id uint32) []ScriptItem {
+	ret := make([]ScriptItem, 0, len(userSettings[id].History.Editor))
+	for _, item := range userSettings[id].History.Editor {
+		script := scripts[item]
+		if script == nil {
+			continue
+		}
+		ret = append(ret, ScriptItem{
+			Name:  item,
+			Title: script.Settings.Title,
+		})
 	}
-	return userSettings[id].History.Editor
+	return ret
 }
 
 // LatestHistory returns the latest open project
-func LatestHistory(id uint32, history int) (ret string) {
-	list := GetHistory(id, history)
-	if len(list) > 0 {
-		ret = list[0]
+func LatestHistoryEditor(id uint32) (ret string) {
+	if len(userSettings[id].History.Editor) > 0 {
+		return userSettings[id].History.Editor[0]
 	}
 	return
 }
 
 func SaveUser(id uint32) error {
-	mutex.RLock()
-	defer mutex.RUnlock()
-
 	data, err := yaml.Marshal(userSettings[id])
 	if err != nil {
 		return err
 	}
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
-		storage.Users[userSettings[id].index].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
+		storage.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
 }

@@ -9,7 +9,6 @@ import (
 	"compress/gzip"
 	"encoding/gob"
 	"eonza/lib"
-	"fmt"
 	"io/ioutil"
 	"sync"
 	"time"
@@ -29,10 +28,8 @@ const (
 // Storage contains all application data
 type Storage struct {
 	//	Settings   Settings
-	Users   []User
-	Scripts []Script
-	//	History    [HistoryLimit]string
-	//	HistoryOff int
+	Users   map[uint32]*User
+	Scripts map[string]*Script
 }
 
 var (
@@ -40,10 +37,10 @@ var (
 		/*		Settings: Settings{
 				Lang: appInfo.Lang,
 			},*/
-		Users:   []User{},
-		Scripts: []Script{},
+		Users:   make(map[uint32]*User),
+		Scripts: make(map[string]*Script),
 	}
-	mutex = &sync.RWMutex{}
+	mutex = &sync.Mutex{}
 )
 
 // SaveStorage saves application data
@@ -89,5 +86,4 @@ func LoadStorage() {
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
 	}
-	fmt.Println(`STORAGE`, storage)
 }
