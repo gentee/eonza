@@ -14,9 +14,18 @@ import (
 
 type ScriptResponse struct {
 	Script
-	original string       `json:"original"`
+	Original string       `json:"original"`
 	History  []ScriptItem `json:"history,omitempty"`
 	Error    string       `json:"error,omitempty"`
+}
+
+func deleteScriptHandle(c echo.Context) error {
+	var response ScriptResponse
+
+	if err := DeleteScript(c.QueryParam(`name`)); err != nil {
+		response.Error = fmt.Sprint(err)
+	}
+	return c.JSON(http.StatusOK, &response)
 }
 
 func getScriptHandle(c echo.Context) error {
@@ -39,7 +48,7 @@ func getScriptHandle(c echo.Context) error {
 			response.Script.Settings.Title = Lang(`newscript`)
 		} else {
 			AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name)
-			response.original = name
+			response.Original = name
 		}
 		response.History = GetHistoryEditor(c.(*Auth).User.ID)
 	}
@@ -60,12 +69,12 @@ func saveScriptHandle(c echo.Context) error {
 	if err = script.Validate(); err != nil {
 		return errResult()
 	}
-	if len(script.original) == 0 {
+	if len(script.Original) == 0 {
 		if err = AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name); err != nil {
 			return errResult()
 		}
 	}
-	if err = (&script.Script).SaveScript(script.original); err != nil {
+	if err = (&script.Script).SaveScript(script.Original); err != nil {
 		return errResult()
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})

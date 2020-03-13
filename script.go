@@ -80,3 +80,19 @@ func (script *Script) SaveScript(original string) error {
 	storage.Scripts[script.Settings.Name] = script
 	return SaveStorage()
 }
+
+func DeleteScript(name string) error {
+	script := scripts[name]
+	if script == nil {
+		return fmt.Errorf(Lang(`erropen`, name))
+	}
+	if script.embedded {
+		// TODO: error
+	}
+	if deps := ScriptDependences(name); len(deps) > 0 {
+		// TODO: error dependences
+	}
+	delete(scripts, name)
+	delete(storage.Scripts, name)
+	return SaveStorage()
+}

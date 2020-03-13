@@ -139,8 +139,9 @@ func GetHistoryEditor(id uint32) []ScriptItem {
 
 // LatestHistory returns the latest open project
 func LatestHistoryEditor(id uint32) (ret string) {
-	if len(userSettings[id].History.Editor) > 0 {
-		return userSettings[id].History.Editor[0]
+	list := GetHistoryEditor(id)
+	if len(list) > 0 {
+		return list[0].Name
 	}
 	return
 }

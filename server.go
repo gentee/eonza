@@ -238,6 +238,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
 		e.POST("/api/script", saveScriptHandle)
+		e.POST("/api/delete", deleteScriptHandle)
 	}
 	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
 	if options.Open {
