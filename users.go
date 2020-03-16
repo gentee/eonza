@@ -16,11 +16,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type ScriptItem struct {
-	Name  string `json:"name"`
-	Title string `json:"title"`
-}
-
 type History struct {
 	Editor []string `yaml:"editor"`
 }

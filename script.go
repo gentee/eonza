@@ -20,6 +20,7 @@ var (
 type scriptSettings struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
+	Desc  string `json:"desc,omitempty"`
 }
 
 type Script struct {

@@ -9,6 +9,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"eonza/script"
@@ -61,7 +62,7 @@ func main() {
 			Lang: appInfo.Lang,
 		})
 	}
-	signal.Notify(stopchan, os.Kill, os.Interrupt)
+	signal.Notify(stopchan, os.Kill, os.Interrupt, syscall.SIGTERM)
 	<-stopchan
 
 	ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)

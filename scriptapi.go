@@ -12,11 +12,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type ScriptItem struct {
+	Name     string `json:"name"`
+	Title    string `json:"title"`
+	Desc     string `json:"desc,omitempty"`
+	Embedded bool   `json:"embedded,omitempty"`
+}
+
 type ScriptResponse struct {
 	Script
 	Original string       `json:"original"`
 	History  []ScriptItem `json:"history,omitempty"`
 	Error    string       `json:"error,omitempty"`
+}
+
+type ListResponse struct {
+	List  map[string]ScriptItem `json:"list"`
+	Error string                `json:"error,omitempty"`
 }
 
 func deleteScriptHandle(c echo.Context) error {
@@ -78,4 +90,19 @@ func saveScriptHandle(c echo.Context) error {
 		return errResult()
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
+}
+
+func listScriptHandle(c echo.Context) error {
+	list := make(map[string]ScriptItem)
+
+	for key, item := range scripts {
+		list[key] = ScriptItem{
+			Name:     key,
+			Title:    item.Settings.Title,
+			Desc:     item.Settings.Desc,
+			Embedded: item.embedded,
+		}
+	}
+	return c.JSON(http.StatusOK, &ListResponse{
+		List: list})
 }

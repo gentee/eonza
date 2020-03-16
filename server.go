@@ -237,6 +237,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
+		e.GET("/api/list", listScriptHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 	}
