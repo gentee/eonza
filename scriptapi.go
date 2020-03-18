@@ -16,6 +16,7 @@ type ScriptItem struct {
 	Name     string `json:"name"`
 	Title    string `json:"title"`
 	Desc     string `json:"desc,omitempty"`
+	Unrun    bool   `json:"unrun,omitempty"`
 	Embedded bool   `json:"embedded,omitempty"`
 }
 
@@ -100,6 +101,7 @@ func listScriptHandle(c echo.Context) error {
 			Name:     key,
 			Title:    item.Settings.Title,
 			Desc:     item.Settings.Desc,
+			Unrun:    item.Settings.Unrun,
 			Embedded: item.embedded,
 		}
 	}

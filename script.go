@@ -17,14 +17,32 @@ var (
 	scripts map[string]*Script
 )
 
+type ParamType int
+
+const (
+	PCheckbox ParamType = iota
+	PTextarea
+)
+
 type scriptSettings struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
 	Desc  string `json:"desc,omitempty"`
+	Unrun bool   `json:"unrun,omitempty"`
+}
+
+type scriptParam struct {
+	Name    string    `json:"name"`
+	Title   string    `json:"title"`
+	Type    ParamType `json:"type"`
+	Default string    `json:"default,omitempty"`
+	More    string    `json:"more,omitempty"`
 }
 
 type Script struct {
 	Settings scriptSettings `json:"settings"`
+	Params   []scriptParam  `json:"params,omitempty"`
+	Code     string         `json:"code,omitempty"`
 
 	embedded bool // Embedded script
 }
