@@ -230,7 +230,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/js/*", fileHandle)
 	e.GET("/css/*", fileHandle)
 	e.GET("/images/*", fileHandle)
-	e.GET("/fonts/*", fileHandle)
+	e.GET("/webfonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if !IsScript {
 		e.GET("/api/exit", exitHandle)
