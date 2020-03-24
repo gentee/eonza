@@ -28,15 +28,22 @@ type ScriptResponse struct {
 }
 
 type ListResponse struct {
-	List  map[string]ScriptItem `json:"list"`
+	List  map[string]ScriptItem `json:"list,omitempty"`
+	Cache int32                 `json:"cache"`
 	Error string                `json:"error,omitempty"`
 }
+
+var (
+	hotVersion int32 = 1
+)
 
 func deleteScriptHandle(c echo.Context) error {
 	var response ScriptResponse
 
 	if err := DeleteScript(c.QueryParam(`name`)); err != nil {
 		response.Error = fmt.Sprint(err)
+	} else {
+		hotVersion++
 	}
 	return c.JSON(http.StatusOK, &response)
 }
@@ -90,21 +97,28 @@ func saveScriptHandle(c echo.Context) error {
 	if err = (&script.Script).SaveScript(script.Original); err != nil {
 		return errResult()
 	}
+	hotVersion++
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
 func listScriptHandle(c echo.Context) error {
-	list := make(map[string]ScriptItem)
-
-	for key, item := range scripts {
-		list[key] = ScriptItem{
-			Name:     key,
-			Title:    item.Settings.Title,
-			Desc:     item.Settings.Desc,
-			Unrun:    item.Settings.Unrun,
-			Embedded: item.embedded,
-		}
+	resp := &ListResponse{
+		Cache: hotVersion,
 	}
-	return c.JSON(http.StatusOK, &ListResponse{
-		List: list})
+
+	if c.QueryParam(`cache`) != fmt.Sprint(hotVersion) {
+		list := make(map[string]ScriptItem)
+
+		for key, item := range scripts {
+			list[key] = ScriptItem{
+				Name:     key,
+				Title:    item.Settings.Title,
+				Desc:     item.Settings.Desc,
+				Unrun:    item.Settings.Unrun,
+				Embedded: item.embedded,
+			}
+		}
+		resp.List = list
+	}
+	return c.JSON(http.StatusOK, resp)
 }
