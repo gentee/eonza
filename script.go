@@ -8,6 +8,7 @@ import (
 	"eonza/lib"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
@@ -41,6 +42,7 @@ type scriptParam struct {
 
 type scriptTree struct {
 	Name     string       `json:"name"`
+	Open     bool         `json:"open,omitempty"`
 	Children []scriptTree `json:"children,omitempty"`
 }
 
@@ -49,12 +51,16 @@ type Script struct {
 	Params   []scriptParam  `json:"params,omitempty"`
 	Tree     []scriptTree   `json:"tree,omitempty"`
 	Code     string         `json:"code,omitempty"`
-
-	embedded bool // Embedded script
+	folder   bool           // can have other commands inside
+	embedded bool           // Embedded script
 }
 
 func InitScripts() {
 	scripts = make(map[string]*Script)
+	isfolder := func(script *Script) bool {
+		return script.Settings.Name == `source-code` ||
+			strings.Contains(script.Code, `%body%`)
+	}
 	for _, tpl := range _escDirs["../eonza-assets/scripts"] {
 		var script Script
 		fname := tpl.Name()
@@ -63,9 +69,11 @@ func InitScripts() {
 			golog.Fatal(err)
 		}
 		script.embedded = true
+		script.folder = isfolder(&script)
 		scripts[script.Settings.Name] = &script
 	}
 	for name, item := range storage.Scripts {
+		item.folder = isfolder(item)
 		scripts[name] = item
 	}
 }
@@ -101,6 +109,8 @@ func (script *Script) SaveScript(original string) error {
 		delete(scripts, original)
 		delete(storage.Scripts, original)
 	}
+	script.folder = script.Settings.Name == `source-code` ||
+		strings.Contains(script.Code, `%body%`)
 	scripts[script.Settings.Name] = script
 	storage.Scripts[script.Settings.Name] = script
 	return SaveStorage()

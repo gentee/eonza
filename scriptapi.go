@@ -18,6 +18,7 @@ type ScriptItem struct {
 	Desc     string `json:"desc,omitempty"`
 	Unrun    bool   `json:"unrun,omitempty"`
 	Embedded bool   `json:"embedded,omitempty"`
+	Folder   bool   `json:"folder,omitempty"`
 }
 
 type ScriptResponse struct {
@@ -116,6 +117,7 @@ func listScriptHandle(c echo.Context) error {
 				Desc:     item.Settings.Desc,
 				Unrun:    item.Settings.Unrun,
 				Embedded: item.embedded,
+				Folder:   item.folder,
 			}
 		}
 		resp.List = list
