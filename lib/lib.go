@@ -78,6 +78,6 @@ func UniqueName(count int) string {
 
 // ValidateSysName checks the system name
 func ValidateSysName(value string) bool {
-	re, _ := regexp.Compile(`^[a-z\d\._-]+$`)
+	re, _ := regexp.Compile(`^[a-z][a-z\d\._-]*$`)
 	return re.MatchString(value)
 }

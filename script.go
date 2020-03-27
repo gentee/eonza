@@ -39,9 +39,15 @@ type scriptParam struct {
 	More    string    `json:"more,omitempty"`
 }
 
+type scriptTree struct {
+	Name     string       `json:"name"`
+	Children []scriptTree `json:"children,omitempty"`
+}
+
 type Script struct {
 	Settings scriptSettings `json:"settings"`
 	Params   []scriptParam  `json:"params,omitempty"`
+	Tree     []scriptTree   `json:"tree,omitempty"`
 	Code     string         `json:"code,omitempty"`
 
 	embedded bool // Embedded script
@@ -66,7 +72,7 @@ func InitScripts() {
 
 func (script *Script) Validate() error {
 	if !lib.ValidateSysName(script.Settings.Name) {
-		return fmt.Errorf(Lang(`invalidfield`), Lang(`uniquename`))
+		return fmt.Errorf(Lang(`invalidfield`), Lang(`name`))
 	}
 	if len(script.Settings.Title) == 0 {
 		return fmt.Errorf(Lang(`invalidfield`), Lang(`title`))
