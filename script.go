@@ -43,6 +43,7 @@ type scriptParam struct {
 type scriptTree struct {
 	Name     string       `json:"name"`
 	Open     bool         `json:"open,omitempty"`
+	Disable  bool         `json:"disable,omitempty"`
 	Children []scriptTree `json:"children,omitempty"`
 }
 
