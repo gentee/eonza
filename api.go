@@ -15,8 +15,13 @@ import (
 )
 
 func runHandle(c echo.Context) error {
-	if err := script.Encode(script.Header{
-		Name:      "World",
+	var response Response
+
+	name := c.QueryParam(`name`)
+	if _, ok := scripts[name]; !ok {
+		response.Error = Lang(`erropen`, name)
+	} else if err := script.Encode(script.Header{
+		Name:      name,
 		AssetsDir: cfg.AssetsDir,
 		HTTP: &lib.HTTPConfig{
 			Port:  3235,
@@ -24,12 +29,13 @@ func runHandle(c echo.Context) error {
 			Theme: cfg.HTTP.Theme,
 		},
 	}); err != nil {
-		return err
+		response.Error = fmt.Sprint(err)
+	} else {
+		response.Success = true
 	}
-	return c.HTML(http.StatusOK, "OK")
+	return c.JSON(http.StatusOK, response)
 }
 
 func pingHandle(c echo.Context) error {
-	fmt.Println(`PING`)
 	return c.HTML(http.StatusOK, Success)
 }

@@ -31,7 +31,7 @@ func Encode(header Header) error {
 	workspace := gentee.New()
 	bcode, _, err := workspace.Compile(`run {
 		Println("Alright")
-		Open("http://google.com")
+//		Open("http://google.com")
 	}`, "hello")
 	if err != nil {
 		return err

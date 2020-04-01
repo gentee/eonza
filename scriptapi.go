@@ -13,12 +13,13 @@ import (
 )
 
 type ScriptItem struct {
-	Name     string `json:"name"`
-	Title    string `json:"title"`
-	Desc     string `json:"desc,omitempty"`
-	Unrun    bool   `json:"unrun,omitempty"`
-	Embedded bool   `json:"embedded,omitempty"`
-	Folder   bool   `json:"folder,omitempty"`
+	Name     string        `json:"name"`
+	Title    string        `json:"title"`
+	Desc     string        `json:"desc,omitempty"`
+	Unrun    bool          `json:"unrun,omitempty"`
+	Embedded bool          `json:"embedded,omitempty"`
+	Folder   bool          `json:"folder,omitempty"`
+	Params   []scriptParam `json:"params,omitempty"`
 }
 
 type ScriptResponse struct {
@@ -39,14 +40,15 @@ var (
 )
 
 func deleteScriptHandle(c echo.Context) error {
-	var response ScriptResponse
+	var response Response
 
 	if err := DeleteScript(c.QueryParam(`name`)); err != nil {
 		response.Error = fmt.Sprint(err)
 	} else {
+		response.Success = true
 		hotVersion++
 	}
-	return c.JSON(http.StatusOK, &response)
+	return c.JSON(http.StatusOK, response)
 }
 
 func getScriptHandle(c echo.Context) error {
@@ -118,6 +120,7 @@ func listScriptHandle(c echo.Context) error {
 				Unrun:    item.Settings.Unrun,
 				Embedded: item.embedded,
 				Folder:   item.folder,
+				Params:   item.Params,
 			}
 		}
 		resp.List = list
