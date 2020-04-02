@@ -19,10 +19,12 @@ const (
 	DefUsers = `users`
 	// UserExt contains the user's settings
 	UserExt = `.usr`
-	// Success is the success api answer
+	// Success is the success ping answer
 	Success = `ok`
-	// HistoryLimit is the limit of history count
+	// Fail is the fail ping answer
 	HistoryLimit = 7
+	// Number of reserved ports
+	PortsPool = 1000
 )
 
 // AppInfo contains information about the application

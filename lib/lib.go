@@ -81,3 +81,11 @@ func ValidateSysName(value string) bool {
 	re, _ := regexp.Compile(`^[a-z][a-z\d\._-]*$`)
 	return re.MatchString(value)
 }
+
+func RndNum() uint32 {
+	return rand.Uint32()
+}
+
+func init() {
+	rand.Seed(time.Now().Unix())
+}

@@ -18,7 +18,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var stopchan = make(chan os.Signal)
+var (
+	stopchan   = make(chan os.Signal)
+	scriptTask *script.Script
+)
 
 func main() {
 	var e *echo.Echo
@@ -33,8 +36,9 @@ func main() {
 		golog.Fatal(err)
 	}
 	if fi.Mode()&os.ModeNamedPipe != 0 {
+		var err error
 		IsScript = true
-		scriptTask, err := script.Decode()
+		scriptTask, err = script.Decode()
 		if err != nil {
 			golog.Fatal(err)
 		}
@@ -46,6 +50,7 @@ func main() {
 			Open: true,
 			Lang: scriptTask.Header.Lang,
 		})
+		sendStatus(TaskActive)
 		scriptTask.Run()
 	} else {
 		LoadConfig()

@@ -17,11 +17,14 @@ import (
 )
 
 type Header struct {
-	Name      string
-	AssetsDir string
-	Theme     string
-	Lang      string
-	HTTP      *lib.HTTPConfig
+	Name       string
+	AssetsDir  string
+	Theme      string
+	Lang       string
+	UserID     uint32
+	TaskID     uint32
+	ServerPort int
+	HTTP       *lib.HTTPConfig
 }
 
 func Encode(header Header) error {

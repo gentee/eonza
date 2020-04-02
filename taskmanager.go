@@ -4,22 +4,67 @@
 
 package main
 
-import "time"
+import (
+	"fmt"
+	"net"
+	"time"
+)
 
 const ( // TaskStatus
-	TaskActive  = iota
+	TaskStart = iota
+	TaskActive
 	TaskWaiting // waiting for the user's action
 	TaskPaused
 	TaskFinished
+	TaskInterrupted
+	TaskFailed
 )
 
 type Task struct {
+	ID         uint32
 	Status     int
 	Name       string
 	StartTime  time.Time
 	FinishTime time.Time
+	UserID     uint32
 }
 
 var (
 	tasks []*Task
+	ports [PortsPool]bool
 )
+
+func usePort(port int) {
+	i := port - cfg.HTTP.Port - 1
+	if i < PortsPool {
+		ports[i] = true
+	}
+}
+
+func freePort(port int) {
+	i := port - cfg.HTTP.Port - 1
+	if i < PortsPool {
+		ports[i] = false
+	}
+}
+
+func getPort() (int, error) {
+	var (
+		i    int
+		port int
+	)
+	for ; i < PortsPool; i++ {
+		if !ports[i] {
+			port = cfg.HTTP.Port + 1 + i
+			if ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port)); err == nil {
+				_ = ln.Close()
+				ports[i] = true
+				break
+			}
+		}
+	}
+	if i == PortsPool {
+		return i, fmt.Errorf(`There is not available port in the pool`)
+	}
+	return port, nil
+}

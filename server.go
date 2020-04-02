@@ -240,11 +240,22 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/list", listScriptHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
+		e.POST("/api/taskstatus", taskStatusHandle)
 	}
-	url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
+	go func() {
+		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
+			if IsScript {
+				sendStatus(TaskFailed, err.Error())
+			}
+			golog.Fatal(err)
+		}
+	}()
 	if options.Open {
 		go func() {
-			var body []byte
+			var (
+				body []byte
+			)
+			url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
 			for string(body) != Success {
 				time.Sleep(100 * time.Millisecond)
 				resp, err := http.Get(url + `/ping`)
@@ -256,10 +267,5 @@ func RunServer(options WebSettings) *echo.Echo {
 			lib.Open(url)
 		}()
 	}
-	go func() {
-		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
-			golog.Fatal(err)
-		}
-	}()
 	return e
 }
