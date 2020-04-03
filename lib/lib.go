@@ -69,9 +69,12 @@ func Open(filename string) error {
 func UniqueName(count int) string {
 	b := make([]rune, count)
 	var alphabet = []rune("0123456789abcdefghijklmnopqrstuvwxyz")
-	rand.Seed(time.Now().Unix())
+	alen := len(alphabet)
 	for i := range b {
-		b[i] = alphabet[rand.Intn(len(alphabet))]
+		b[i] = alphabet[rand.Intn(alen)]
+	}
+	if b[0] < 'a' {
+		b[0] = alphabet[10+rand.Intn(alen-10)]
 	}
 	return string(b)
 }

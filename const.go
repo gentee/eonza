@@ -20,9 +20,9 @@ const (
 	// UserExt contains the user's settings
 	UserExt = `.usr`
 	// Success is the success ping answer
-	Success = `ok`
-	// Fail is the fail ping answer
+	Success      = `ok`
 	HistoryLimit = 7
+	RunLimit     = 20
 	// Number of reserved ports
 	PortsPool = 1000
 )

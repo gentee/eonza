@@ -238,6 +238,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
 		e.GET("/api/list", listScriptHandle)
+		e.GET("/api/listrun", listRunHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)
@@ -245,7 +246,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
 			if IsScript {
-				sendStatus(TaskFailed, err.Error())
+				sendStatus(TaskFailed, err)
 			}
 			golog.Fatal(err)
 		}

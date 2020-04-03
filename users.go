@@ -18,6 +18,7 @@ import (
 
 type History struct {
 	Editor []string `yaml:"editor"`
+	Run    []string `yaml:"run"`
 }
 
 // UserSettings stores the user's settings
@@ -116,10 +117,10 @@ func AddHistoryEditor(id uint32, name string) error {
 	return SaveUser(id)
 }
 
-// GetHistoryEditor returns the history list
-func GetHistoryEditor(id uint32) []ScriptItem {
-	ret := make([]ScriptItem, 0, len(userSettings[id].History.Editor))
-	for _, item := range userSettings[id].History.Editor {
+// GetHistory returns the history list
+func GetHistory(list []string) []ScriptItem {
+	ret := make([]ScriptItem, 0, len(list))
+	for _, item := range list {
 		script := scripts[item]
 		if script == nil {
 			continue
@@ -132,6 +133,11 @@ func GetHistoryEditor(id uint32) []ScriptItem {
 	return ret
 }
 
+// GetHistoryEditor returns the history list
+func GetHistoryEditor(id uint32) []ScriptItem {
+	return GetHistory(userSettings[id].History.Editor)
+}
+
 // LatestHistory returns the latest open project
 func LatestHistoryEditor(id uint32) (ret string) {
 	list := GetHistoryEditor(id)
@@ -139,6 +145,32 @@ func LatestHistoryEditor(id uint32) (ret string) {
 		return list[0].Name
 	}
 	return
+}
+
+// AddHistoryRun adds the launched item to the user's settings
+func AddHistoryRun(id uint32, name string) error {
+	var (
+		cur UserSettings
+	)
+	cur = userSettings[id]
+	ret := make([]string, 1, RunLimit+1)
+	ret[0] = name
+	for _, item := range cur.History.Run {
+		if item != name {
+			ret = append(ret, item)
+			if len(ret) == RunLimit {
+				break
+			}
+		}
+	}
+	cur.History.Run = ret
+	userSettings[id] = cur
+	return SaveUser(id)
+}
+
+// GetHistoryRun returns the launchedhistory list
+func GetHistoryRun(id uint32) []ScriptItem {
+	return GetHistory(userSettings[id].History.Run)
 }
 
 func SaveUser(id uint32) error {

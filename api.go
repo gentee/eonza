@@ -21,20 +21,23 @@ type TaskStatus struct {
 	Time    uint32 `json:"time,omitempty"`
 }
 
-func jsonError(c echo.Context, err error) error {
+func jsonError(c echo.Context, err interface{}) error {
 	return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
 }
 
 func runHandle(c echo.Context) error {
-	var response Response
-
 	name := c.QueryParam(`name`)
 	port, err := getPort()
 	if err != nil {
-		response.Error = fmt.Sprint(err)
-	} else if _, ok := scripts[name]; !ok {
-		response.Error = Lang(`erropen`, name)
-	} else if err := script.Encode(script.Header{
+		return jsonError(c, err)
+	}
+	if _, ok := scripts[name]; !ok {
+		return jsonError(c, Lang(`erropen`, name))
+	}
+	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
+		return jsonError(c, err)
+	}
+	if err := script.Encode(script.Header{
 		Name:       name,
 		AssetsDir:  cfg.AssetsDir,
 		UserID:     c.(*Auth).User.ID,
@@ -46,11 +49,9 @@ func runHandle(c echo.Context) error {
 			Theme: cfg.HTTP.Theme,
 		},
 	}); err != nil {
-		response.Error = fmt.Sprint(err)
-	} else {
-		response.Success = true
+		return jsonError(c, err)
 	}
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
 func pingHandle(c echo.Context) error {

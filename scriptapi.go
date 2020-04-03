@@ -30,7 +30,8 @@ type ScriptResponse struct {
 }
 
 type ListResponse struct {
-	List  map[string]ScriptItem `json:"list,omitempty"`
+	Map   map[string]ScriptItem `json:"map,omitempty"`
+	List  []ScriptItem          `json:"list,omitempty"`
 	Cache int32                 `json:"cache"`
 	Error string                `json:"error,omitempty"`
 }
@@ -104,6 +105,19 @@ func saveScriptHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
+func ScriptToItem(script *Script) ScriptItem {
+	return ScriptItem{
+		Name:     script.Settings.Name,
+		Title:    script.Settings.Title,
+		Desc:     script.Settings.Desc,
+		Unrun:    script.Settings.Unrun,
+		Embedded: script.embedded,
+		Folder:   script.folder,
+		Params:   script.Params,
+	}
+
+}
+
 func listScriptHandle(c echo.Context) error {
 	resp := &ListResponse{
 		Cache: hotVersion,
@@ -113,17 +127,25 @@ func listScriptHandle(c echo.Context) error {
 		list := make(map[string]ScriptItem)
 
 		for key, item := range scripts {
-			list[key] = ScriptItem{
-				Name:     key,
-				Title:    item.Settings.Title,
-				Desc:     item.Settings.Desc,
-				Unrun:    item.Settings.Unrun,
-				Embedded: item.embedded,
-				Folder:   item.folder,
-				Params:   item.Params,
-			}
+			list[key] = ScriptToItem(item)
 		}
-		resp.List = list
+		resp.Map = list
 	}
 	return c.JSON(http.StatusOK, resp)
+}
+
+func listRunHandle(c echo.Context) error {
+	list := make([]ScriptItem, 0)
+	userId := c.(*Auth).User.ID
+	if _, ok := userSettings[userId]; !ok {
+		return jsonError(c, Lang(`unknownuser`, userId))
+	}
+	for _, name := range userSettings[userId].History.Run {
+		if item, ok := scripts[name]; ok {
+			list = append(list, ScriptToItem(item))
+		}
+	}
+	return c.JSON(http.StatusOK, &ListResponse{
+		List: list,
+	})
 }
