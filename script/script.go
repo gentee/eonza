@@ -5,6 +5,8 @@
 package script
 
 import (
+	"os"
+
 	"github.com/gentee/gentee"
 )
 
@@ -13,10 +15,48 @@ type Script struct {
 	Exec   *gentee.Exec // Bytecode
 }
 
+type Settings struct {
+	ChStdin  chan []byte
+	ChStdout chan []byte
+	ChSystem chan int
+}
+
 var (
 //	scripts = make(map[string]*Script)
 )
 
-func (script *Script) Run() (interface{}, error) {
-	return script.Exec.Run(gentee.Settings{})
+func (script *Script) Run(options Settings) (interface{}, error) {
+	var (
+		settings   gentee.Settings
+		rIn, wIn   *os.File
+		rOut, wOut *os.File
+	)
+	settings.SysChan = options.ChSystem
+	rIn, wIn, _ = os.Pipe()
+	settings.Stdin = rIn
+	rOut, wOut, _ = os.Pipe()
+	settings.Stdout = wOut
+
+	go func() {
+		for {
+			buf := make([]byte, 1024)
+			n, err := rOut.Read(buf)
+			buf = buf[:n]
+			if err != nil {
+				break
+			}
+			options.ChStdout <- buf
+		}
+	}()
+	go func() {
+		var buf []byte
+		for {
+			buf = <-options.ChStdin
+			_, err := wIn.Write(buf)
+			if err != nil {
+
+			}
+		}
+	}()
+	return script.Exec.Run(settings)
 }

@@ -249,7 +249,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
 			if IsScript {
-				sendStatus(TaskFailed, err)
+				setStatus(TaskFailed, err)
 			}
 			golog.Fatal(err)
 		}

@@ -51,10 +51,11 @@ func main() {
 			Lang: scriptTask.Header.Lang,
 		})
 		go func() {
-			sendStatus(TaskActive)
-			scriptTask.Run()
-			sendStatus(TaskFinished)
-			wsChan <- WsCmd{Cmd: WcClose}
+			settings := initTask()
+			setStatus(TaskActive)
+			scriptTask.Run(settings)
+			setStatus(TaskFinished)
+			<-chFinish
 			stopchan <- os.Kill
 		}()
 	} else {
