@@ -50,8 +50,13 @@ func main() {
 			Open: true,
 			Lang: scriptTask.Header.Lang,
 		})
-		sendStatus(TaskActive)
-		scriptTask.Run()
+		go func() {
+			sendStatus(TaskActive)
+			scriptTask.Run()
+			sendStatus(TaskFinished)
+			wsChan <- WsCmd{Cmd: WcClose}
+			stopchan <- os.Kill
+		}()
 	} else {
 		LoadConfig()
 		LoadStorage()

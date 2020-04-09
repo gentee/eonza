@@ -26,12 +26,16 @@ func jsonError(c echo.Context, err interface{}) error {
 }
 
 func runHandle(c echo.Context) error {
+	var (
+		item *Script
+		ok   bool
+	)
 	name := c.QueryParam(`name`)
 	port, err := getPort()
 	if err != nil {
 		return jsonError(c, err)
 	}
-	if _, ok := scripts[name]; !ok {
+	if item, ok = scripts[name]; !ok {
 		return jsonError(c, Lang(`erropen`, name))
 	}
 	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
@@ -39,6 +43,7 @@ func runHandle(c echo.Context) error {
 	}
 	if err := script.Encode(script.Header{
 		Name:       name,
+		Title:      item.Settings.Title,
 		AssetsDir:  cfg.AssetsDir,
 		UserID:     c.(*Auth).User.ID,
 		TaskID:     lib.RndNum(),

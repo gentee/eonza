@@ -18,6 +18,7 @@ import (
 
 type Header struct {
 	Name       string
+	Title      string
 	AssetsDir  string
 	Theme      string
 	Lang       string
@@ -34,6 +35,10 @@ func Encode(header Header) error {
 	workspace := gentee.New()
 	bcode, _, err := workspace.Compile(`run {
 		Println("Alright")
+		for i in 1..20 {
+			Print("\{i} ")
+			sleep(1000)
+		}
 //		Open("http://google.com")
 	}`, "hello")
 	if err != nil {
@@ -50,8 +55,15 @@ func Encode(header Header) error {
 	command.Stdin = &data
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
-	fmt.Println(`START`)
-	return command.Start()
+	err = command.Start()
+	go func() {
+		if err == nil {
+			fmt.Println(`START`)
+			errCmd := command.Wait()
+			fmt.Println(`End`, errCmd)
+		}
+	}()
+	return err
 }
 
 func Decode() (script *Script, err error) {

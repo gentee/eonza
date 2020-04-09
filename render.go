@@ -15,6 +15,7 @@ type Render struct {
 	App     AppInfo
 	Version string
 	Develop bool
+	//	Port    int
 	/*	Params   map[string]string
 		Url      string
 		Index    bool
@@ -89,12 +90,7 @@ func RenderPage(url string) (string, error) {
 	render.App = appInfo
 	render.Version = Version
 	render.Develop = cfg.Develop
-	/*	render.Params = page.parent.Params
-		render.Langs = LangList(page)
-		render.Index = path.Base(page.url) == `index.html`
-		render.Url = page.url
-		render.Domain = cfg.Domain*/
-	//	render.Original = path.Join(path.Dir(page.url), path.Base(page.file))
+
 	buf := bytes.NewBuffer([]byte{})
 	if err = tmpl.ExecuteTemplate(buf, url, render); err != nil {
 		return ``, err

@@ -152,6 +152,7 @@ func indexHandle(c echo.Context) error {
 	if url == `/` {
 		if IsScript {
 			url = `script`
+			appInfo.Title = scriptTask.Header.Title
 		} else {
 			url = `index`
 		}
@@ -232,7 +233,9 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/images/*", fileHandle)
 	e.GET("/webfonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
-	if !IsScript {
+	if IsScript {
+		e.GET("/ws", wsTaskHandle)
+	} else {
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)

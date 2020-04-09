@@ -14,9 +14,9 @@ const ( // TaskStatus
 	TaskStart = iota
 	TaskActive
 	TaskWaiting // waiting for the user's action
-	TaskPaused
+	TaskSuspended
 	TaskFinished
-	TaskInterrupted
+	TaskTerminated
 	TaskFailed
 )
 
