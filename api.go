@@ -25,6 +25,10 @@ func jsonError(c echo.Context, err interface{}) error {
 	return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
 }
 
+func jsonSuccess(c echo.Context) error {
+	return c.JSON(http.StatusOK, Response{Success: true})
+}
+
 func runHandle(c echo.Context) error {
 	var (
 		item *Script

@@ -9,8 +9,10 @@ import (
 	"eonza/script"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/gentee/gentee"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
@@ -21,12 +23,14 @@ const (
 )
 
 type WsClient struct {
+	Full bool // false for task manager
 	Conn *websocket.Conn
 }
 
 type WsCmd struct {
-	Cmd    int `json:"cmd"`
-	Status int `json:"status,omitempty"`
+	Cmd     int    `json:"cmd"`
+	Status  int    `json:"status,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 var (
@@ -74,12 +78,9 @@ func initTask() script.Settings {
 		var cmd WsCmd
 		for task.Status <= TaskSuspended {
 			cmd = <-wsChan
-			debug(`get cmd`)
 			mutex.Lock()
-			debug(`clients`, len(clients))
 			for id, client := range clients {
 				err := client.Conn.WriteJSON(cmd)
-				debug(`ws`, id, err)
 				if err != nil {
 					client.Conn.Close()
 					delete(clients, id)
@@ -87,7 +88,6 @@ func initTask() script.Settings {
 			}
 			mutex.Unlock()
 		}
-		debug(`disconnect`)
 		for _, client := range clients {
 			client.Conn.Close()
 		}
@@ -112,6 +112,7 @@ func wsTaskHandle(c echo.Context) error {
 		Status: task.Status,
 	}); err == nil {
 		clients[lib.RndNum()] = WsClient{
+			Full: true,
 			Conn: ws,
 		}
 	}
@@ -136,6 +137,20 @@ func wsTaskHandle(c echo.Context) error {
 	return nil
 }
 
+func sysHandle(c echo.Context) error {
+	cmd, _ := strconv.ParseInt(c.QueryParam(`cmd`), 10, 64)
+	if cmd >= gentee.SysSuspend && cmd <= gentee.SysTerminate {
+		chSystem <- int(cmd)
+		switch cmd {
+		case gentee.SysSuspend:
+			wsChan <- WsCmd{Cmd: WcStatus, Status: TaskSuspended}
+		case gentee.SysResume:
+			wsChan <- WsCmd{Cmd: WcStatus, Status: task.Status}
+		}
+	}
+	return jsonSuccess(c)
+}
+
 func setStatus(status int, pars ...interface{}) {
 	/*	task := TaskStatus{
 			TaskID: scriptTask.Header.TaskID,
@@ -144,9 +159,12 @@ func setStatus(status int, pars ...interface{}) {
 		if len(pars) > 0 {
 			task.Message = fmt.Sprint(pars[0])
 		}*/
+	cmd := WsCmd{Cmd: WcStatus, Status: status}
+	if len(pars) > 0 {
+		cmd.Message = fmt.Sprint(pars...)
+	}
 	debug(`cmd`, status)
-	wsChan <- WsCmd{Cmd: WcStatus, Status: status}
-	debug(`cmd ok`)
+	wsChan <- cmd
 	task.Status = status
 }
 

@@ -235,6 +235,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/favicon.ico", fileHandle)
 	if IsScript {
 		e.GET("/ws", wsTaskHandle)
+		e.GET("/sys", sysHandle)
 	} else {
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)

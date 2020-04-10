@@ -53,8 +53,15 @@ func main() {
 		go func() {
 			settings := initTask()
 			setStatus(TaskActive)
-			scriptTask.Run(settings)
-			setStatus(TaskFinished)
+			_, err := scriptTask.Run(settings)
+			if err == nil {
+				setStatus(TaskFinished)
+			} else if err.Error() == `code execution has been terminated` {
+				// TODO: added sppecial func or compare errID
+				setStatus(TaskTerminated)
+			} else {
+				setStatus(TaskFailed, err)
+			}
 			<-chFinish
 			stopchan <- os.Kill
 		}()
