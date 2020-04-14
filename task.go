@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gentee/gentee"
@@ -18,8 +19,10 @@ import (
 )
 
 const (
-	WcClose = iota // close connection
-	WcStatus
+	WcClose  = iota // close connection
+	WcStatus        // change status
+	WcStdout        // new line in console
+	WcStdbuf        // current output including carriage
 )
 
 type WsClient struct {
@@ -33,11 +36,17 @@ type WsCmd struct {
 	Message string `json:"message,omitempty"`
 }
 
+type StdinForm struct {
+	Message string `json:"message"`
+}
+
 var (
-	task     Task
-	upgrader websocket.Upgrader
-	wsChan   chan WsCmd
-	clients  map[uint32]WsClient
+	task      Task
+	upgrader  websocket.Upgrader
+	wsChan    chan WsCmd
+	clients   map[uint32]WsClient
+	stdoutBuf []string
+	stdoutCur string
 
 	console *os.File
 
@@ -65,12 +74,47 @@ func initTask() script.Settings {
 	chStdout = make(chan []byte)
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
+	stdoutBuf = []string{``}
 
 	go func() {
 		var out []byte
 		for {
 			out = <-chStdout
-			console.Write(out)
+			mutex.Lock()
+			off := len(stdoutBuf) - 1
+			lines := strings.Split(string(out), "\n")
+			stdoutBuf[off] += lines[0]
+			for i := 1; i < len(lines)-1; i++ {
+				lines[i] = lib.ClearCarriage(lines[i])
+				stdoutBuf = append(stdoutBuf, lines[i])
+			}
+			if len(lines) > 1 {
+				stdoutBuf[off] = lib.ClearCarriage(stdoutBuf[off])
+				stdoutBuf = append(stdoutBuf, lines[len(lines)-1])
+			}
+			for id, client := range clients {
+				if client.Full {
+					for i := off; i < len(stdoutBuf)-1; i++ {
+						err := client.Conn.WriteJSON(WsCmd{
+							Cmd:     WcStdout,
+							Message: stdoutBuf[i],
+						})
+						if err != nil {
+							client.Conn.Close()
+							delete(clients, id)
+						}
+					}
+					err := client.Conn.WriteJSON(WsCmd{
+						Cmd:     WcStdbuf,
+						Message: lib.ClearCarriage(stdoutBuf[len(stdoutBuf)-1]),
+					})
+					if err != nil {
+						client.Conn.Close()
+						delete(clients, id)
+					}
+				}
+			}
+			mutex.Unlock()
 		}
 	}()
 
@@ -163,11 +207,24 @@ func setStatus(status int, pars ...interface{}) {
 	if len(pars) > 0 {
 		cmd.Message = fmt.Sprint(pars...)
 	}
-	debug(`cmd`, status)
 	wsChan <- cmd
 	task.Status = status
 }
 
 func debug(pars ...interface{}) {
 	console.Write([]byte(fmt.Sprintln(pars...)))
+}
+
+func stdinHandle(c echo.Context) error {
+	var (
+		form StdinForm
+		err  error
+	)
+	if err = c.Bind(&form); err != nil {
+		return jsonError(c, err)
+	}
+	msg := form.Message + "\n"
+	chStdin <- []byte(msg)
+	chStdout <- []byte(msg)
+	return jsonSuccess(c)
 }

@@ -36,6 +36,10 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 	settings.Stdin = rIn
 	rOut, wOut, _ = os.Pipe()
 	settings.Stdout = wOut
+	defer func() {
+		wIn.Close()
+		wOut.Close()
+	}()
 
 	go func() {
 		for {

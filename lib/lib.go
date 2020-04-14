@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/kataras/golog"
@@ -91,4 +92,21 @@ func RndNum() uint32 {
 
 func init() {
 	rand.Seed(time.Now().Unix())
+}
+
+func ClearCarriage(input string) string {
+	var start int
+	runes := []rune(string(strings.TrimRight(input, "\r")))
+	out := make([]rune, 0, len(runes))
+	for _, char := range []rune(runes) {
+		if char == 0xd {
+			out = out[:start]
+		} else {
+			out = append(out, char)
+			if char == 0xa {
+				start = len(out)
+			}
+		}
+	}
+	return string(out)
 }

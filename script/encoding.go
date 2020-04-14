@@ -35,8 +35,17 @@ func Encode(header Header) error {
 	workspace := gentee.New()
 	bcode, _, err := workspace.Compile(`run {
 		Println("Alright")
-		for i in 1..20 {
-			Print("\{i} ")
+		for i in 1..30 {
+			if i % 10 == 0 : Println("\{i}")
+			elif i % 5 == 0 : Print("\{i} \r\n = \n")
+			else : Print("\{i} ")
+			sleep(1000)
+		}
+		str name = ReadString("Enter your name:")
+		Println("Your name: \{name}")
+		for i in 0..10 {
+			if i < 6 : Print("Progress \{i*10}%\r")
+			else : Print("\rProgress \{i*10}%")
 			sleep(1000)
 		}
 //		Open("http://google.com")

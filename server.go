@@ -236,6 +236,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	if IsScript {
 		e.GET("/ws", wsTaskHandle)
 		e.GET("/sys", sysHandle)
+		e.POST("/stdin", stdinHandle)
 	} else {
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)
