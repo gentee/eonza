@@ -18,6 +18,7 @@ const ( // TaskStatus
 	TaskFinished
 	TaskTerminated
 	TaskFailed
+	TaskCrashed
 )
 
 type Task struct {
@@ -27,6 +28,8 @@ type Task struct {
 	StartTime  time.Time
 	FinishTime time.Time
 	UserID     uint32
+	Port       int
+	Message    string
 }
 
 var (

@@ -183,7 +183,14 @@ func wsTaskHandle(c echo.Context) error {
 
 func sysHandle(c echo.Context) error {
 	cmd, _ := strconv.ParseInt(c.QueryParam(`cmd`), 10, 64)
-	if cmd >= gentee.SysSuspend && cmd <= gentee.SysTerminate {
+	if cmd == gentee.SysTerminate {
+		go func() {
+			setStatus(TaskTerminated)
+			<-chFinish
+			os.Exit(1)
+		}()
+	}
+	if cmd >= gentee.SysSuspend && cmd < gentee.SysTerminate {
 		chSystem <- int(cmd)
 		switch cmd {
 		case gentee.SysSuspend:
