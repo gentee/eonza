@@ -7,7 +7,8 @@ package main
 import (
 	"fmt"
 	"net"
-	"time"
+
+	"github.com/kataras/golog"
 )
 
 const ( // TaskStatus
@@ -25,8 +26,8 @@ type Task struct {
 	ID         uint32
 	Status     int
 	Name       string
-	StartTime  time.Time
-	FinishTime time.Time
+	StartTime  int64
+	FinishTime int64
 	UserID     uint32
 	Port       int
 	Message    string
@@ -36,6 +37,18 @@ var (
 	tasks []*Task
 	ports [PortsPool]bool
 )
+
+func (task *Task) Head() string {
+	return fmt.Sprintf("%x,%x,%d,%s,%d\r\n", task.ID, task.UserID, task.Port, task.Name, task.StartTime)
+}
+
+func taskTrace(unixTime int64, status int, message string) {
+	out := fmt.Sprintf("%d,%x,%s\r\n", unixTime, status, message)
+
+	if _, err := cmdFile.Write([]byte(out)); err != nil {
+		golog.Fatal(err)
+	}
+}
 
 func usePort(port int) {
 	i := port - cfg.HTTP.Port - 1

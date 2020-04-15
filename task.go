@@ -9,12 +9,14 @@ import (
 	"eonza/script"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gentee/gentee"
 	"github.com/gorilla/websocket"
+	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
 
@@ -46,9 +48,11 @@ var (
 	wsChan    chan WsCmd
 	clients   map[uint32]WsClient
 	stdoutBuf []string
-	stdoutCur string
+	iStdout   int
 
 	console *os.File
+	cmdFile *os.File
+	outFile *os.File
 
 	chStdin  chan []byte
 	chStdout chan []byte
@@ -56,15 +60,42 @@ var (
 	chFinish chan bool
 )
 
+func closeTask() {
+	for ; iStdout < len(stdoutBuf); iStdout++ {
+		out := lib.ClearCarriage(stdoutBuf[iStdout]) + "\r\n"
+		if _, err := outFile.Write([]byte(out)); err != nil {
+			golog.Error(err)
+		}
+	}
+
+	cmdFile.Close()
+	outFile.Close()
+}
+
 func initTask() script.Settings {
+	var err error
+
 	task = Task{
 		ID:        scriptTask.Header.TaskID,
 		UserID:    scriptTask.Header.UserID,
 		Status:    TaskActive,
 		Name:      scriptTask.Header.Name,
-		StartTime: time.Now(),
+		StartTime: time.Now().Unix(),
+		Port:      scriptTask.Header.HTTP.Port,
 	}
-
+	cmdFile, err = os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
+		fmt.Sprintf(`%06x.trace`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
+	if err != nil {
+		golog.Fatal(err)
+	}
+	outFile, err = os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
+		fmt.Sprintf(`%06x.out`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
+	if err != nil {
+		golog.Fatal(err)
+	}
+	if _, err = cmdFile.Write([]byte(task.Head())); err != nil {
+		golog.Fatal(err)
+	}
 	console = os.Stdout
 	upgrader = websocket.Upgrader{}
 	wsChan = make(chan WsCmd)
@@ -92,6 +123,12 @@ func initTask() script.Settings {
 				stdoutBuf[off] = lib.ClearCarriage(stdoutBuf[off])
 				stdoutBuf = append(stdoutBuf, lines[len(lines)-1])
 			}
+			for i := off; i < len(stdoutBuf)-1; i++ {
+				if _, err := outFile.Write([]byte(stdoutBuf[i] + "\r\n")); err != nil {
+					golog.Error(err)
+				}
+			}
+			iStdout = len(stdoutBuf) - 1
 			for id, client := range clients {
 				if client.Full {
 					for i := off; i < len(stdoutBuf)-1; i++ {
@@ -186,6 +223,7 @@ func sysHandle(c echo.Context) error {
 	if cmd == gentee.SysTerminate {
 		go func() {
 			setStatus(TaskTerminated)
+			closeTask()
 			<-chFinish
 			os.Exit(1)
 		}()
@@ -194,8 +232,10 @@ func sysHandle(c echo.Context) error {
 		chSystem <- int(cmd)
 		switch cmd {
 		case gentee.SysSuspend:
+			taskTrace(time.Now().Unix(), TaskSuspended, ``)
 			wsChan <- WsCmd{Cmd: WcStatus, Status: TaskSuspended}
 		case gentee.SysResume:
+			taskTrace(time.Now().Unix(), task.Status, ``)
 			wsChan <- WsCmd{Cmd: WcStatus, Status: task.Status}
 		}
 	}
@@ -213,9 +253,12 @@ func setStatus(status int, pars ...interface{}) {
 	cmd := WsCmd{Cmd: WcStatus, Status: status}
 	if len(pars) > 0 {
 		cmd.Message = fmt.Sprint(pars...)
+		task.Message = cmd.Message
 	}
-	wsChan <- cmd
+	task.FinishTime = time.Now().Unix()
 	task.Status = status
+	taskTrace(task.FinishTime, status, task.Message)
+	wsChan <- cmd
 }
 
 func debug(pars ...interface{}) {

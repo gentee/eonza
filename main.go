@@ -63,6 +63,7 @@ func main() {
 				setStatus(TaskFailed, err)
 			}
 			<-chFinish
+			closeTask()
 			stopchan <- os.Kill
 		}()
 	} else {

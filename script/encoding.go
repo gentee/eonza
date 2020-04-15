@@ -20,6 +20,7 @@ type Header struct {
 	Name       string
 	Title      string
 	AssetsDir  string
+	LogDir     string
 	Theme      string
 	Lang       string
 	UserID     uint32
