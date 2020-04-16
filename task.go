@@ -5,9 +5,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"eonza/lib"
 	"eonza/script"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -61,15 +64,29 @@ var (
 )
 
 func closeTask() {
+	var files []string
+
 	for ; iStdout < len(stdoutBuf); iStdout++ {
 		out := lib.ClearCarriage(stdoutBuf[iStdout]) + "\r\n"
 		if _, err := outFile.Write([]byte(out)); err != nil {
 			golog.Error(err)
 		}
 	}
-
 	cmdFile.Close()
 	outFile.Close()
+	for _, item := range []string{"trace", "out"} {
+		files = append(files, filepath.Join(scriptTask.Header.LogDir,
+			fmt.Sprintf("%08x.%s", task.ID, item)))
+	}
+	output := filepath.Join(scriptTask.Header.LogDir, fmt.Sprintf("%08x.zip", task.ID))
+
+	if err := lib.ZipFiles(output, files); err != nil {
+		golog.Error(err)
+	} else {
+		for _, item := range files {
+			os.Remove(item)
+		}
+	}
 }
 
 func initTask() script.Settings {
@@ -84,12 +101,12 @@ func initTask() script.Settings {
 		Port:      scriptTask.Header.HTTP.Port,
 	}
 	cmdFile, err = os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
-		fmt.Sprintf(`%06x.trace`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
+		fmt.Sprintf(`%08x.trace`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
 	if err != nil {
 		golog.Fatal(err)
 	}
 	outFile, err = os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
-		fmt.Sprintf(`%06x.out`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
+		fmt.Sprintf(`%08x.out`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -243,13 +260,6 @@ func sysHandle(c echo.Context) error {
 }
 
 func setStatus(status int, pars ...interface{}) {
-	/*	task := TaskStatus{
-			TaskID: scriptTask.Header.TaskID,
-			Status: status,
-		}
-		if len(pars) > 0 {
-			task.Message = fmt.Sprint(pars[0])
-		}*/
 	cmd := WsCmd{Cmd: WcStatus, Status: status}
 	if len(pars) > 0 {
 		cmd.Message = fmt.Sprint(pars...)
@@ -258,6 +268,23 @@ func setStatus(status int, pars ...interface{}) {
 	task.FinishTime = time.Now().Unix()
 	task.Status = status
 	taskTrace(task.FinishTime, status, task.Message)
+
+	jsonValue, err := json.Marshal(TaskStatus{
+		TaskID:  task.ID,
+		Status:  task.Status,
+		Message: task.Message,
+		Time:    task.FinishTime,
+	})
+	if err == nil {
+		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
+			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			golog.Error(err)
+		} else {
+			resp.Body.Close()
+		}
+	}
+
 	wsChan <- cmd
 }
 

@@ -106,6 +106,9 @@ func LoadConfig() {
 		cfg.HTTP.Theme = DefTheme
 	}
 	SetLogging(basename)
+	if err = InitTaskManager(); err != nil {
+		golog.Fatal(err)
+	}
 }
 
 // Install creates config and data file on the first execution

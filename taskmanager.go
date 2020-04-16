@@ -5,8 +5,14 @@
 package main
 
 import (
+	"eonza/script"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/kataras/golog"
 )
@@ -34,8 +40,9 @@ type Task struct {
 }
 
 var (
-	tasks []*Task
-	ports [PortsPool]bool
+	traceFile *os.File
+	tasks     map[uint32]*Task
+	ports     [PortsPool]bool
 )
 
 func (task *Task) Head() string {
@@ -48,6 +55,86 @@ func taskTrace(unixTime int64, status int, message string) {
 	if _, err := cmdFile.Write([]byte(out)); err != nil {
 		golog.Fatal(err)
 	}
+}
+
+func SaveTrace(task *Task) (err error) {
+	_, err = traceFile.Write([]byte(fmt.Sprintf("%s\r\n", task.String())))
+	return
+}
+
+func NewTask(header script.Header) (err error) {
+	task := Task{
+		ID:        header.TaskID,
+		Status:    TaskActive,
+		Name:      header.Name,
+		StartTime: time.Now().Unix(),
+		UserID:    header.UserID,
+		Port:      header.HTTP.Port,
+	}
+	if err = SaveTrace(&task); err != nil {
+		return
+	}
+	if _, ok := tasks[task.ID]; ok {
+		return fmt.Errorf(`task %x exists`, task.ID)
+	}
+	tasks[task.ID] = &task
+	return
+}
+
+func (task *Task) String() string {
+	return fmt.Sprintf("%x,%x,%d,%s,%d,%d,%d,%s", task.ID, task.UserID, task.Port, task.Name,
+		task.StartTime, task.FinishTime, task.Status, task.Message)
+}
+
+func LogToTask(input string) (task Task, err error) {
+	var (
+		uival uint64
+		ival  int64
+	)
+	vals := strings.Split(strings.TrimSpace(input), `,`)
+	if len(vals) == 8 {
+		if uival, err = strconv.ParseUint(vals[0], 16, 32); err != nil {
+			return
+		}
+		task.ID = uint32(uival)
+		if uival, err = strconv.ParseUint(vals[1], 16, 32); err != nil {
+			return
+		}
+		task.UserID = uint32(uival)
+		if uival, err = strconv.ParseUint(vals[2], 10, 32); err != nil {
+			return
+		}
+		task.Port = int(uival)
+		task.Name = vals[3]
+		if ival, err = strconv.ParseInt(vals[4], 10, 64); err != nil {
+			return
+		}
+		task.StartTime = ival
+		if ival, err = strconv.ParseInt(vals[5], 10, 64); err != nil {
+			return
+		}
+		task.FinishTime = ival
+		if ival, err = strconv.ParseInt(vals[6], 10, 64); err != nil {
+			return
+		}
+		task.Status = int(ival)
+		task.Message = vals[7]
+	}
+	return
+}
+
+func InitTaskManager() (err error) {
+	traceFile, err = os.OpenFile(filepath.Join(cfg.Log.Dir,
+		fmt.Sprintf(`tasks.trace`)), os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+	if err != nil {
+		return
+	}
+	tasks = make(map[uint32]*Task)
+	return
+}
+
+func CloseTaskManager() {
+	traceFile.Close()
 }
 
 func usePort(port int) {

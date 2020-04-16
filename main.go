@@ -84,6 +84,9 @@ func main() {
 	signal.Notify(stopchan, os.Kill, os.Interrupt, syscall.SIGTERM)
 	<-stopchan
 
+	if !IsScript {
+		CloseTaskManager()
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
 	defer cancel()
 	e.Shutdown(ctx)

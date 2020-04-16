@@ -5,7 +5,9 @@
 package lib
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -109,4 +111,48 @@ func ClearCarriage(input string) string {
 		}
 	}
 	return string(out)
+}
+
+func ZipFiles(filename string, files []string) (err error) {
+	var zipFile *os.File
+	if zipFile, err = os.Create(filename); err != nil {
+		return
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	for _, file := range files {
+		if err = AddFileToZip(zipWriter, file); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func AddFileToZip(zipWriter *zip.Writer, filename string) error {
+	fileToZip, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer fileToZip.Close()
+
+	info, err := fileToZip.Stat()
+	if err != nil {
+		return err
+	}
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Name = filepath.Base(filename)
+	header.Method = zip.Deflate
+
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(writer, fileToZip)
+	return err
 }

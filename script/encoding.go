@@ -7,7 +7,6 @@ package script
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"os"
 	"os/exec"
 
@@ -68,9 +67,7 @@ func Encode(header Header) error {
 	err = command.Start()
 	go func() {
 		if err == nil {
-			fmt.Println(`START`)
-			errCmd := command.Wait()
-			fmt.Println(`End`, errCmd)
+			_ = command.Wait()
 		}
 	}()
 	return err

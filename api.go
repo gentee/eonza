@@ -18,7 +18,7 @@ type TaskStatus struct {
 	TaskID  uint32 `json:"taskid"`
 	Status  int    `json:"status"`
 	Message string `json:"msg,omitempty"`
-	Time    uint32 `json:"time,omitempty"`
+	Time    int64  `json:"time,omitempty"`
 }
 
 func jsonError(c echo.Context, err interface{}) error {
@@ -45,7 +45,7 @@ func runHandle(c echo.Context) error {
 	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
 		return jsonError(c, err)
 	}
-	if err := script.Encode(script.Header{
+	header := script.Header{
 		Name:       name,
 		Title:      item.Settings.Title,
 		AssetsDir:  cfg.AssetsDir,
@@ -58,7 +58,11 @@ func runHandle(c echo.Context) error {
 			Open:  true,
 			Theme: cfg.HTTP.Theme,
 		},
-	}); err != nil {
+	}
+	if err := script.Encode(header); err != nil {
+		return jsonError(c, err)
+	}
+	if err = NewTask(header); err != nil {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
@@ -69,19 +73,25 @@ func pingHandle(c echo.Context) error {
 }
 
 func taskStatusHandle(c echo.Context) error {
-	var taskStatus TaskStatus
+	var (
+		taskStatus TaskStatus
+		err        error
+	)
 
-	if err := c.Bind(&taskStatus); err != nil {
+	if err = c.Bind(&taskStatus); err != nil {
 		return jsonError(c, err)
 	}
-	switch taskStatus.Status {
-	case TaskActive:
-		//		usePort(taskStatus.Number)
-		fmt.Println(`ports`, ports[:16])
-	case TaskFailed:
-		//		ports[]
+	if taskStatus.Status >= TaskFinished {
+		if ptask, ok := tasks[taskStatus.TaskID]; ok {
+			ptask.Status = taskStatus.Status
+			ptask.Message = taskStatus.Message
+			ptask.FinishTime = taskStatus.Time
+			if ptask.Status >= TaskFinished {
+				if err = SaveTrace(ptask); err != nil {
+					return jsonError(c, err)
+				}
+			}
+		}
 	}
-	return c.JSON(http.StatusOK, Response{
-		Success: true,
-	})
+	return jsonSuccess(c)
 }
