@@ -5,11 +5,15 @@
 package main
 
 import (
+	"encoding/json"
 	"eonza/script"
 	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -29,14 +33,14 @@ const ( // TaskStatus
 )
 
 type Task struct {
-	ID         uint32
-	Status     int
-	Name       string
-	StartTime  int64
-	FinishTime int64
-	UserID     uint32
-	Port       int
-	Message    string
+	ID         uint32 `json:"id"`
+	Status     int    `json:"status"`
+	Name       string `json:"name"`
+	StartTime  int64  `json:"start"`
+	FinishTime int64  `json:"finish"`
+	UserID     uint32 `json:"userid"`
+	Port       int    `json:"port"`
+	Message    string `json:"message,omitempty"`
 }
 
 var (
@@ -58,7 +62,47 @@ func taskTrace(unixTime int64, status int, message string) {
 }
 
 func SaveTrace(task *Task) (err error) {
+	if task.Status >= TaskFinished {
+		freePort(task.Port)
+	}
 	_, err = traceFile.Write([]byte(fmt.Sprintf("%s\r\n", task.String())))
+	if len(tasks) > int(TasksLimit*1.2) {
+		if errSave := SaveTasks(); errSave != nil {
+			golog.Error(errSave)
+		}
+	}
+	return
+}
+
+func ListTasks() []*Task {
+	ret := make([]*Task, 0, len(tasks))
+	for _, task := range tasks {
+		ret = append(ret, task)
+	}
+	sort.Slice(ret, func(i, j int) bool {
+		if ret[i].StartTime == ret[j].StartTime {
+			return ret[i].FinishTime > ret[j].FinishTime
+		}
+		return ret[i].StartTime > ret[j].StartTime
+	})
+	if len(ret) > TasksLimit {
+		for i := TasksLimit; i < len(ret); i++ {
+			delete(tasks, ret[i].ID)
+		}
+		ret = ret[:TasksLimit]
+	}
+	return ret
+}
+
+func SaveTasks() (err error) {
+	list := ListTasks()
+	var out string
+	for i := len(list) - 1; i >= 0; i-- {
+		out += list[i].String() + "\r\n"
+	}
+	traceFile.Truncate(0)
+	traceFile.Seek(0, 0)
+	_, err = traceFile.Write([]byte(out))
 	return
 }
 
@@ -92,7 +136,7 @@ func LogToTask(input string) (task Task, err error) {
 		ival  int64
 	)
 	vals := strings.Split(strings.TrimSpace(input), `,`)
-	if len(vals) == 8 {
+	if len(vals) == 8 && len(vals[3]) > 0 {
 		if uival, err = strconv.ParseUint(vals[0], 16, 32); err != nil {
 			return
 		}
@@ -119,17 +163,49 @@ func LogToTask(input string) (task Task, err error) {
 		}
 		task.Status = int(ival)
 		task.Message = vals[7]
+	} else {
+		err = fmt.Errorf(`wrong task trace %s`, input)
 	}
 	return
 }
 
 func InitTaskManager() (err error) {
-	traceFile, err = os.OpenFile(filepath.Join(cfg.Log.Dir,
-		fmt.Sprintf(`tasks.trace`)), os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+	filename := filepath.Join(cfg.Log.Dir, `tasks.trace`)
+	traceFile, err = os.OpenFile(filename, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		return
 	}
 	tasks = make(map[uint32]*Task)
+	input, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return
+	}
+	for _, item := range strings.Split(string(input), "\n") {
+		if task, err := LogToTask(strings.TrimSpace(item)); err == nil {
+			tasks[task.ID] = &task
+		}
+	}
+	for key, item := range tasks {
+		if item.Status < TaskFinished {
+			url := fmt.Sprintf("http://localhost:%d", item.Port)
+			resp, err := http.Get(url + `/info`)
+			active := false
+			if err == nil {
+				if body, err := ioutil.ReadAll(resp.Body); err == nil {
+					var task Task
+					if err = json.Unmarshal(body, &task); err == nil && task.ID == item.ID {
+						active = true
+					}
+					resp.Body.Close()
+				}
+			}
+			if !active {
+				tasks[key].Status = TaskCrashed
+				tasks[key].FinishTime = time.Now().Unix()
+			}
+		}
+	}
+	err = SaveTasks()
 	return
 }
 

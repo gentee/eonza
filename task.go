@@ -235,8 +235,16 @@ func wsTaskHandle(c echo.Context) error {
 	return nil
 }
 
+func infoHandle(c echo.Context) error {
+	return c.JSON(http.StatusOK, task)
+}
+
 func sysHandle(c echo.Context) error {
 	cmd, _ := strconv.ParseInt(c.QueryParam(`cmd`), 10, 64)
+	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
+	if uint32(id) != task.ID {
+		return jsonError(c, fmt.Errorf(`wrong task id`))
+	}
 	if cmd == gentee.SysTerminate {
 		go func() {
 			setStatus(TaskTerminated)
@@ -297,6 +305,10 @@ func stdinHandle(c echo.Context) error {
 		form StdinForm
 		err  error
 	)
+	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
+	if uint32(id) != task.ID {
+		return jsonError(c, fmt.Errorf(`wrong task id`))
+	}
 	if err = c.Bind(&form); err != nil {
 		return jsonError(c, err)
 	}

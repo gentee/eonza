@@ -22,6 +22,11 @@ type Render struct {
 	*/
 }
 
+type RenderScript struct {
+	Task
+	Title string
+}
+
 var (
 	tmpl *template.Template
 )
@@ -53,8 +58,10 @@ func InitTemplates() {
 
 func RenderPage(url string) (string, error) {
 	var (
-		err    error
-		render Render
+		err          error
+		render       Render
+		renderScript RenderScript
+		data         interface{}
 	)
 
 	/*	file := filepath.Join(cfg.WebDir, filepath.FromSlash(page.url))
@@ -87,12 +94,19 @@ func RenderPage(url string) (string, error) {
 			return page.body, err
 		}
 		render.Content = template.HTML(``)*/
-	render.App = appInfo
-	render.Version = Version
-	render.Develop = cfg.Develop
+	if IsScript {
+		renderScript.Task = task
+		renderScript.Title = scriptTask.Header.Title
+		data = renderScript
+	} else {
+		render.App = appInfo
+		render.Version = Version
+		render.Develop = cfg.Develop
+		data = render
+	}
 
 	buf := bytes.NewBuffer([]byte{})
-	if err = tmpl.ExecuteTemplate(buf, url, render); err != nil {
+	if err = tmpl.ExecuteTemplate(buf, url, data); err != nil {
 		return ``, err
 	}
 	return buf.String(), err

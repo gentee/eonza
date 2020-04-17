@@ -152,7 +152,6 @@ func indexHandle(c echo.Context) error {
 	if url == `/` {
 		if IsScript {
 			url = `script`
-			appInfo.Title = scriptTask.Header.Title
 		} else {
 			url = `index`
 		}
@@ -236,6 +235,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	if IsScript {
 		e.GET("/ws", wsTaskHandle)
 		e.GET("/sys", sysHandle)
+		e.GET("/info", infoHandle)
 		e.POST("/stdin", stdinHandle)
 	} else {
 		e.GET("/api/exit", exitHandle)
@@ -244,6 +244,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/script", getScriptHandle)
 		e.GET("/api/list", listScriptHandle)
 		e.GET("/api/listrun", listRunHandle)
+		e.GET("/api/tasks", tasksHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)
