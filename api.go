@@ -93,10 +93,28 @@ func taskStatusHandle(c echo.Context) error {
 	var (
 		taskStatus TaskStatus
 		err        error
+		finish     string
 	)
 
 	if err = c.Bind(&taskStatus); err != nil {
 		return jsonError(c, err)
+	}
+	if taskStatus.Time != 0 {
+		finish = time.Unix(taskStatus.Time, 0).Format(TimeFormat)
+	}
+	cmd := WsCmd{
+		TaskID:  taskStatus.TaskID,
+		Cmd:     WcStatus,
+		Status:  taskStatus.Status,
+		Message: taskStatus.Message,
+		Time:    finish,
+	}
+	for id, client := range clients {
+		err := client.Conn.WriteJSON(cmd)
+		if err != nil {
+			client.Conn.Close()
+			delete(clients, id)
+		}
 	}
 	if taskStatus.Status >= TaskFinished {
 		if ptask, ok := tasks[taskStatus.TaskID]; ok {

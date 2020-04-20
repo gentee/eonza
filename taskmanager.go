@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"eonza/lib"
 	"eonza/script"
 	"fmt"
 	"io/ioutil"
@@ -19,6 +20,7 @@ import (
 	"time"
 
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 )
 
 const ( // TaskStatus
@@ -195,6 +197,7 @@ func InitTaskManager() (err error) {
 					var task Task
 					if err = json.Unmarshal(body, &task); err == nil && task.ID == item.ID {
 						active = true
+						tasks[key].Status = task.Status
 					}
 					resp.Body.Close()
 				}
@@ -246,4 +249,15 @@ func getPort() (int, error) {
 		return i, fmt.Errorf(`There is not available port in the pool`)
 	}
 	return port, nil
+}
+
+func wsMainHandle(c echo.Context) error {
+	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return err
+	}
+	clients[lib.RndNum()] = WsClient{
+		Conn: ws,
+	}
+	return nil
 }

@@ -36,9 +36,11 @@ type WsClient struct {
 }
 
 type WsCmd struct {
+	TaskID  uint32 `json:"taskid"`
 	Cmd     int    `json:"cmd"`
 	Status  int    `json:"status,omitempty"`
 	Message string `json:"message,omitempty"`
+	Time    string `json:"finish,omitempty"`
 }
 
 type StdinForm struct {
@@ -46,10 +48,10 @@ type StdinForm struct {
 }
 
 var (
-	task      Task
-	upgrader  websocket.Upgrader
-	wsChan    chan WsCmd
-	clients   map[uint32]WsClient
+	task     Task
+	upgrader websocket.Upgrader
+	wsChan   chan WsCmd
+
 	stdoutBuf []string
 	iStdout   int
 
@@ -61,6 +63,8 @@ var (
 	chStdout chan []byte
 	chSystem chan int
 	chFinish chan bool
+
+	clients = make(map[uint32]WsClient)
 )
 
 func closeTask() {
@@ -116,7 +120,6 @@ func initTask() script.Settings {
 	console = os.Stdout
 	upgrader = websocket.Upgrader{}
 	wsChan = make(chan WsCmd)
-	clients = make(map[uint32]WsClient)
 
 	chStdin = make(chan []byte)
 	chStdout = make(chan []byte)
@@ -150,6 +153,7 @@ func initTask() script.Settings {
 				if client.Full {
 					for i := off; i < len(stdoutBuf)-1; i++ {
 						err := client.Conn.WriteJSON(WsCmd{
+							TaskID:  task.ID,
 							Cmd:     WcStdout,
 							Message: stdoutBuf[i],
 						})
@@ -159,6 +163,7 @@ func initTask() script.Settings {
 						}
 					}
 					err := client.Conn.WriteJSON(WsCmd{
+						TaskID:  task.ID,
 						Cmd:     WcStdbuf,
 						Message: lib.ClearCarriage(stdoutBuf[len(stdoutBuf)-1]),
 					})
@@ -206,6 +211,7 @@ func wsTaskHandle(c echo.Context) error {
 		return err
 	}
 	if err = ws.WriteJSON(WsCmd{
+		TaskID: task.ID,
 		Cmd:    WcStatus,
 		Status: task.Status,
 	}); err == nil {
@@ -239,6 +245,27 @@ func infoHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, task)
 }
 
+func sendCmdStatus(status int, timeStamp int64, message string) {
+	taskTrace(timeStamp, status, message)
+	jsonValue, err := json.Marshal(TaskStatus{
+		TaskID:  task.ID,
+		Status:  status,
+		Message: message,
+		Time:    timeStamp,
+	})
+	if err == nil {
+		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
+			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			golog.Error(err)
+		} else {
+			resp.Body.Close()
+		}
+	}
+
+	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status}
+}
+
 func sysHandle(c echo.Context) error {
 	cmd, _ := strconv.ParseInt(c.QueryParam(`cmd`), 10, 64)
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
@@ -257,43 +284,44 @@ func sysHandle(c echo.Context) error {
 		chSystem <- int(cmd)
 		switch cmd {
 		case gentee.SysSuspend:
-			taskTrace(time.Now().Unix(), TaskSuspended, ``)
-			wsChan <- WsCmd{Cmd: WcStatus, Status: TaskSuspended}
+			sendCmdStatus(TaskSuspended, time.Now().Unix(), ``)
 		case gentee.SysResume:
-			taskTrace(time.Now().Unix(), task.Status, ``)
-			wsChan <- WsCmd{Cmd: WcStatus, Status: task.Status}
+			sendCmdStatus(task.Status, time.Now().Unix(), ``)
 		}
 	}
 	return jsonSuccess(c)
 }
 
 func setStatus(status int, pars ...interface{}) {
-	cmd := WsCmd{Cmd: WcStatus, Status: status}
+	var message string
+	//	cmd := WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status}
 	if len(pars) > 0 {
-		cmd.Message = fmt.Sprint(pars...)
-		task.Message = cmd.Message
+		message = fmt.Sprint(pars...)
+		task.Message = message
 	}
 	task.FinishTime = time.Now().Unix()
 	task.Status = status
-	taskTrace(task.FinishTime, status, task.Message)
+	sendCmdStatus(task.Status, task.FinishTime, message)
 
-	jsonValue, err := json.Marshal(TaskStatus{
-		TaskID:  task.ID,
-		Status:  task.Status,
-		Message: task.Message,
-		Time:    task.FinishTime,
-	})
-	if err == nil {
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
-			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
-		if err != nil {
-			golog.Error(err)
-		} else {
-			resp.Body.Close()
+	/*	taskTrace(task.FinishTime, status, task.Message)
+
+		jsonValue, err := json.Marshal(TaskStatus{
+			TaskID:  task.ID,
+			Status:  task.Status,
+			Message: task.Message,
+			Time:    task.FinishTime,
+		})
+		if err == nil {
+			resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
+				scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
+			if err != nil {
+				golog.Error(err)
+			} else {
+				resp.Body.Close()
+			}
 		}
-	}
 
-	wsChan <- cmd
+	 	wsChan <- cmd */
 }
 
 func debug(pars ...interface{}) {

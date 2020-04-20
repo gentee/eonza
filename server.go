@@ -238,6 +238,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/info", infoHandle)
 		e.POST("/stdin", stdinHandle)
 	} else {
+		e.GET("/ws", wsMainHandle)
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
