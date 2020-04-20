@@ -221,6 +221,10 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
+	/*	e.Use(md.CORSWithConfig(md.CORSConfig{
+		AllowOrigins: []string{"http://localhost"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost},
+	}))*/
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
@@ -245,7 +249,10 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/script", getScriptHandle)
 		e.GET("/api/list", listScriptHandle)
 		e.GET("/api/listrun", listRunHandle)
+		e.GET("/api/task", showTaskHandle)
 		e.GET("/api/tasks", tasksHandle)
+		e.GET("/api/remove/:id", removeTaskHandle)
+		e.GET("/api/sys", sysTaskHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)

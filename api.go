@@ -7,11 +7,16 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"eonza/lib"
 	"eonza/script"
 
+	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
 
@@ -131,6 +136,31 @@ func taskStatusHandle(c echo.Context) error {
 	return jsonSuccess(c)
 }
 
+func sysTaskHandle(c echo.Context) error {
+	var (
+		err    error
+		taskid uint64
+	)
+	cmd := c.QueryParam(`cmd`)
+	if taskid, err = strconv.ParseUint(c.QueryParam(`taskid`), 10, 32); err != nil {
+		return jsonError(c, err)
+	}
+
+	for _, item := range tasks {
+		if item.ID == uint32(taskid) {
+			url := fmt.Sprintf("http://localhost:%d/sys?cmd=%s&taskid=%d", item.Port, cmd, taskid)
+			go func() {
+				resp, err := http.Get(url)
+				if err == nil {
+					resp.Body.Close()
+				}
+			}()
+			break
+		}
+	}
+	return jsonSuccess(c)
+}
+
 func tasksHandle(c echo.Context) error {
 	list := ListTasks()
 	/*	for i := len(list)/2 - 1; i >= 0; i-- {
@@ -157,4 +187,29 @@ func tasksHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, &TasksResponse{
 		List: listInfo,
 	})
+}
+
+func removeTaskHandle(c echo.Context) error {
+	idTask, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+	if _, ok := tasks[uint32(idTask)]; !ok {
+		return jsonError(c, fmt.Errorf(`task %d has not been found`, idTask))
+	}
+	delete(tasks, uint32(idTask))
+	pref := fmt.Sprintf("%08x.", idTask)
+	if err := filepath.Walk(cfg.Log.Dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if strings.HasPrefix(info.Name(), pref) {
+			os.Remove(path)
+		}
+		return nil
+	}); err != nil {
+		golog.Error(err)
+	}
+
+	return tasksHandle(c)
 }
