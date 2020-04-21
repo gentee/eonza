@@ -5,6 +5,8 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
 	"encoding/json"
 	"eonza/lib"
 	"eonza/script"
@@ -76,6 +78,26 @@ func SaveTrace(task *Task) (err error) {
 	return
 }
 
+func RemoveTask(id uint32) {
+	for _, ext := range []string{`zip`, `out`, `trace`, `log`} {
+		os.Remove(filepath.Join(cfg.Log.Dir, fmt.Sprintf("%08x.%s", id, ext)))
+	}
+	/*	if err := filepath.Walk(cfg.Log.Dir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			if strings.HasPrefix(info.Name(), pref) {
+				os.Remove(path)
+			}
+			return nil
+		}); err != nil {
+			golog.Error(err)
+		}*/
+}
+
 func ListTasks() []*Task {
 	ret := make([]*Task, 0, len(tasks))
 	for _, task := range tasks {
@@ -90,6 +112,7 @@ func ListTasks() []*Task {
 	if len(ret) > TasksLimit {
 		for i := TasksLimit; i < len(ret); i++ {
 			delete(tasks, ret[i].ID)
+			RemoveTask(ret[i].ID)
 		}
 		ret = ret[:TasksLimit]
 	}
@@ -260,4 +283,34 @@ func wsMainHandle(c echo.Context) error {
 		Conn: ws,
 	}
 	return nil
+}
+
+func GetStdoutTask(id uint32) string {
+	fname := fmt.Sprintf(`%08x.`, id)
+	if stdout, err := ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+`out`)); err == nil {
+		return string(stdout)
+	}
+	r, err := zip.OpenReader(filepath.Join(cfg.Log.Dir, fname+`zip`))
+	if err != nil {
+		return ``
+	}
+	defer func() {
+		r.Close()
+	}()
+	for _, f := range r.File {
+		if f.Name == fname+`out` {
+			rc, err := f.Open()
+			if err != nil {
+				break
+			}
+			var buf bytes.Buffer
+			_, err = buf.ReadFrom(rc)
+			rc.Close()
+			if err == nil {
+				return string(buf.Bytes())
+			}
+			break
+		}
+	}
+	return ``
 }

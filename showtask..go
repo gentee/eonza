@@ -4,8 +4,25 @@
 
 package main
 
-import "github.com/labstack/echo/v4"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+)
 
 func showTaskHandle(c echo.Context) error {
-	return jsonSuccess(c)
+	idtask, _ := strconv.ParseUint(c.Param(`id`), 10, 32)
+	ptask := tasks[uint32(idtask)]
+	if ptask == nil {
+		return jsonError(c, fmt.Errorf(`task %d has not been found`, idtask))
+	}
+	if item := scripts[ptask.Name]; item != nil {
+		c.Set(`Title`, item.Settings.Title)
+	} else {
+		c.Set(`Title`, ptask.Name)
+	}
+	c.Set(`Task`, ptask)
+	c.Set(`tpl`, `script`)
+	return indexHandle(c)
 }

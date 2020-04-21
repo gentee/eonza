@@ -146,17 +146,23 @@ func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func indexHandle(c echo.Context) error {
-	var err error
-	//	req := c.Request()
-	url := c.Request().URL.String()
-	if url == `/` {
-		if IsScript {
-			url = `script`
-		} else {
-			url = `index`
+	var (
+		err error
+		url string
+	)
+	if c.Get(`tpl`) != nil {
+		url = c.Get(`tpl`).(string)
+	} else {
+		url = c.Request().URL.String()
+		if url == `/` {
+			if IsScript {
+				url = `script`
+			} else {
+				url = `index`
+			}
 		}
 	}
-	data, err := RenderPage(url)
+	data, err := RenderPage(c, url)
 	if err != nil {
 		if err == ErrNotFound {
 			err = echo.NewHTTPError(http.StatusNotFound)
@@ -243,13 +249,13 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/stdin", stdinHandle)
 	} else {
 		e.GET("/ws", wsMainHandle)
+		e.GET("/task/:id", showTaskHandle)
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
 		e.GET("/api/list", listScriptHandle)
 		e.GET("/api/listrun", listRunHandle)
-		e.GET("/api/task", showTaskHandle)
 		e.GET("/api/tasks", tasksHandle)
 		e.GET("/api/remove/:id", removeTaskHandle)
 		e.GET("/api/sys", sysTaskHandle)

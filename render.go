@@ -7,8 +7,11 @@ package main
 import (
 	"bytes"
 	"html/template"
+	"strings"
+	"time"
 
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 )
 
 type Render struct {
@@ -24,7 +27,11 @@ type Render struct {
 
 type RenderScript struct {
 	Task
-	Title string
+	Title    string
+	IsScript bool
+	Start    string
+	Finish   string
+	Stdout   template.HTML
 }
 
 var (
@@ -56,7 +63,7 @@ func InitTemplates() {
 	}
 }
 
-func RenderPage(url string) (string, error) {
+func RenderPage(c echo.Context, url string) (string, error) {
 	var (
 		err          error
 		render       Render
@@ -94,9 +101,21 @@ func RenderPage(url string) (string, error) {
 			return page.body, err
 		}
 		render.Content = template.HTML(``)*/
-	if IsScript {
-		renderScript.Task = task
-		renderScript.Title = scriptTask.Header.Title
+	if url == `script` {
+		if IsScript {
+			renderScript.Task = task
+			renderScript.Title = scriptTask.Header.Title
+		} else {
+			renderScript.Task = *c.Get(`Task`).(*Task)
+			renderScript.Title = c.Get(`Title`).(string)
+			renderScript.Stdout = template.HTML(strings.ReplaceAll(
+				GetStdoutTask(renderScript.Task.ID), "\n", `<br>`))
+		}
+		renderScript.Start = time.Unix(renderScript.Task.StartTime, 0).Format(TimeFormat)
+		if renderScript.FinishTime != 0 && renderScript.Task.Status >= TaskFinished {
+			renderScript.Finish = time.Unix(renderScript.Task.FinishTime, 0).Format(TimeFormat)
+		}
+		renderScript.IsScript = IsScript
 		data = renderScript
 	} else {
 		render.App = appInfo

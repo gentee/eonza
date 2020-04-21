@@ -31,8 +31,8 @@ const (
 )
 
 type WsClient struct {
-	Full bool // false for task manager
-	Conn *websocket.Conn
+	StdoutCount int
+	Conn        *websocket.Conn
 }
 
 type WsCmd struct {
@@ -48,9 +48,10 @@ type StdinForm struct {
 }
 
 var (
-	task     Task
-	upgrader websocket.Upgrader
-	wsChan   chan WsCmd
+	task       Task
+	prevStatus int
+	upgrader   websocket.Upgrader
+	wsChan     chan WsCmd
 
 	stdoutBuf []string
 	iStdout   int
@@ -150,27 +151,27 @@ func initTask() script.Settings {
 			}
 			iStdout = len(stdoutBuf) - 1
 			for id, client := range clients {
-				if client.Full {
-					for i := off; i < len(stdoutBuf)-1; i++ {
-						err := client.Conn.WriteJSON(WsCmd{
-							TaskID:  task.ID,
-							Cmd:     WcStdout,
-							Message: stdoutBuf[i],
-						})
-						if err != nil {
-							client.Conn.Close()
-							delete(clients, id)
-						}
-					}
+				for i := client.StdoutCount; i < len(stdoutBuf)-1; i++ {
 					err := client.Conn.WriteJSON(WsCmd{
 						TaskID:  task.ID,
-						Cmd:     WcStdbuf,
-						Message: lib.ClearCarriage(stdoutBuf[len(stdoutBuf)-1]),
+						Cmd:     WcStdout,
+						Message: stdoutBuf[i],
 					})
 					if err != nil {
 						client.Conn.Close()
 						delete(clients, id)
 					}
+				}
+				client.StdoutCount = len(stdoutBuf) - 1
+				clients[id] = client
+				err := client.Conn.WriteJSON(WsCmd{
+					TaskID:  task.ID,
+					Cmd:     WcStdbuf,
+					Message: lib.ClearCarriage(stdoutBuf[len(stdoutBuf)-1]),
+				})
+				if err != nil {
+					client.Conn.Close()
+					delete(clients, id)
 				}
 			}
 			mutex.Unlock()
@@ -216,7 +217,6 @@ func wsTaskHandle(c echo.Context) error {
 		Status: task.Status,
 	}); err == nil {
 		clients[lib.RndNum()] = WsClient{
-			Full: true,
 			Conn: ws,
 		}
 	}
@@ -262,8 +262,13 @@ func sendCmdStatus(status int, timeStamp int64, message string) {
 			resp.Body.Close()
 		}
 	}
-
-	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status}
+	var finish string
+	task.Status = status
+	if task.Status >= TaskFinished {
+		task.FinishTime = timeStamp
+		finish = time.Unix(timeStamp, 0).Format(TimeFormat)
+	}
+	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status, Time: finish}
 }
 
 func sysHandle(c echo.Context) error {
@@ -284,9 +289,10 @@ func sysHandle(c echo.Context) error {
 		chSystem <- int(cmd)
 		switch cmd {
 		case gentee.SysSuspend:
+			prevStatus = task.Status
 			sendCmdStatus(TaskSuspended, time.Now().Unix(), ``)
 		case gentee.SysResume:
-			sendCmdStatus(task.Status, time.Now().Unix(), ``)
+			sendCmdStatus(prevStatus, time.Now().Unix(), ``)
 		}
 	}
 	return jsonSuccess(c)
@@ -299,9 +305,7 @@ func setStatus(status int, pars ...interface{}) {
 		message = fmt.Sprint(pars...)
 		task.Message = message
 	}
-	task.FinishTime = time.Now().Unix()
-	task.Status = status
-	sendCmdStatus(task.Status, task.FinishTime, message)
+	sendCmdStatus(status, time.Now().Unix(), message)
 
 	/*	taskTrace(task.FinishTime, status, task.Message)
 

@@ -7,16 +7,12 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"eonza/lib"
 	"eonza/script"
 
-	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
 
@@ -100,7 +96,6 @@ func taskStatusHandle(c echo.Context) error {
 		err        error
 		finish     string
 	)
-
 	if err = c.Bind(&taskStatus); err != nil {
 		return jsonError(c, err)
 	}
@@ -121,15 +116,13 @@ func taskStatusHandle(c echo.Context) error {
 			delete(clients, id)
 		}
 	}
-	if taskStatus.Status >= TaskFinished {
-		if ptask, ok := tasks[taskStatus.TaskID]; ok {
-			ptask.Status = taskStatus.Status
+	if ptask := tasks[taskStatus.TaskID]; ptask != nil {
+		ptask.Status = taskStatus.Status
+		if taskStatus.Status >= TaskFinished {
 			ptask.Message = taskStatus.Message
 			ptask.FinishTime = taskStatus.Time
-			if ptask.Status >= TaskFinished {
-				if err = SaveTrace(ptask); err != nil {
-					return jsonError(c, err)
-				}
+			if err = SaveTrace(ptask); err != nil {
+				return jsonError(c, err)
 			}
 		}
 	}
@@ -195,21 +188,6 @@ func removeTaskHandle(c echo.Context) error {
 		return jsonError(c, fmt.Errorf(`task %d has not been found`, idTask))
 	}
 	delete(tasks, uint32(idTask))
-	pref := fmt.Sprintf("%08x.", idTask)
-	if err := filepath.Walk(cfg.Log.Dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-		if strings.HasPrefix(info.Name(), pref) {
-			os.Remove(path)
-		}
-		return nil
-	}); err != nil {
-		golog.Error(err)
-	}
-
+	RemoveTask(uint32(idTask))
 	return tasksHandle(c)
 }
