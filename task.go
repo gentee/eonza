@@ -94,6 +94,23 @@ func closeTask() {
 	}
 }
 
+func sendStdout(client WsClient) error {
+	for i := client.StdoutCount; i < iStdout; i++ {
+		if err := client.Conn.WriteJSON(WsCmd{
+			TaskID:  task.ID,
+			Cmd:     WcStdout,
+			Message: stdoutBuf[i],
+		}); err != nil {
+			return err
+		}
+	}
+	return client.Conn.WriteJSON(WsCmd{
+		TaskID:  task.ID,
+		Cmd:     WcStdbuf,
+		Message: lib.ClearCarriage(stdoutBuf[iStdout]),
+	})
+}
+
 func initTask() script.Settings {
 	var err error
 
@@ -151,25 +168,10 @@ func initTask() script.Settings {
 			}
 			iStdout = len(stdoutBuf) - 1
 			for id, client := range clients {
-				for i := client.StdoutCount; i < len(stdoutBuf)-1; i++ {
-					err := client.Conn.WriteJSON(WsCmd{
-						TaskID:  task.ID,
-						Cmd:     WcStdout,
-						Message: stdoutBuf[i],
-					})
-					if err != nil {
-						client.Conn.Close()
-						delete(clients, id)
-					}
-				}
-				client.StdoutCount = len(stdoutBuf) - 1
-				clients[id] = client
-				err := client.Conn.WriteJSON(WsCmd{
-					TaskID:  task.ID,
-					Cmd:     WcStdbuf,
-					Message: lib.ClearCarriage(stdoutBuf[len(stdoutBuf)-1]),
-				})
-				if err != nil {
+				if sendStdout(client) == nil {
+					client.StdoutCount = iStdout
+					clients[id] = client
+				} else {
 					client.Conn.Close()
 					delete(clients, id)
 				}
@@ -216,8 +218,14 @@ func wsTaskHandle(c echo.Context) error {
 		Cmd:    WcStatus,
 		Status: task.Status,
 	}); err == nil {
-		clients[lib.RndNum()] = WsClient{
+		client := WsClient{
 			Conn: ws,
+		}
+		if sendStdout(client) == nil {
+			client.StdoutCount = iStdout
+			clients[lib.RndNum()] = client
+		} else {
+			client.Conn.Close()
 		}
 	}
 	/*	defer ws.Close()

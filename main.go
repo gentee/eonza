@@ -47,7 +47,7 @@ func main() {
 		}
 		e = RunServer(WebSettings{
 			Port: scriptTask.Header.HTTP.Port,
-			Open: true,
+			Open: scriptTask.Header.HTTP.Open,
 			Lang: scriptTask.Header.Lang,
 		})
 		go func() {

@@ -52,7 +52,11 @@ func runHandle(c echo.Context) error {
 		item *Script
 		ok   bool
 	)
+	open := true
 	name := c.QueryParam(`name`)
+	if len(c.QueryParam(`silent`)) > 0 {
+		open = false
+	}
 	port, err := getPort()
 	if err != nil {
 		return jsonError(c, err)
@@ -73,7 +77,7 @@ func runHandle(c echo.Context) error {
 		ServerPort: cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
 			Port:  port,
-			Open:  true,
+			Open:  open,
 			Theme: cfg.HTTP.Theme,
 		},
 	}
