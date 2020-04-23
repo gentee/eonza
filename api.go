@@ -76,9 +76,10 @@ func runHandle(c echo.Context) error {
 		TaskID:     lib.RndNum(),
 		ServerPort: cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
-			Port:  port,
-			Open:  open,
-			Theme: cfg.HTTP.Theme,
+			Port:   port,
+			Open:   open,
+			Theme:  cfg.HTTP.Theme,
+			Access: cfg.HTTP.Access,
 		},
 	}
 	if err := script.Encode(header); err != nil {

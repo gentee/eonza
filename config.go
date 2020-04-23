@@ -38,6 +38,11 @@ type Config struct {
 	path string // path to cfg file
 }
 
+const (
+	AccessLocalhost = `localhost`
+	AccessPrivate   = `private`
+)
+
 var (
 	cfg = Config{
 		Version: Version,
@@ -46,9 +51,10 @@ var (
 			Level: logLevelInfo,
 		},
 		HTTP: lib.HTTPConfig{
-			Port:  DefPort,
-			Open:  true,
-			Theme: `default`,
+			Port:   DefPort,
+			Open:   true,
+			Theme:  `default`,
+			Access: AccessLocalhost,
 		},
 	}
 )
@@ -104,6 +110,11 @@ func LoadConfig() {
 	}
 	if len(cfg.HTTP.Theme) == 0 {
 		cfg.HTTP.Theme = DefTheme
+	}
+	switch cfg.HTTP.Access {
+	case AccessPrivate:
+	default:
+		cfg.HTTP.Access = AccessLocalhost
 	}
 	SetLogging(basename)
 	if err = InitTaskManager(); err != nil {

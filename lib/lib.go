@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,10 +23,25 @@ import (
 
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
-	Port  int    `yaml:"port"`  // if empty, then DefPort
-	Open  bool   `yaml:"open"`  // if true then host is opened
-	Theme string `yaml:"theme"` // theme of web interface. if it is empty - DefTheme
+	Port   int    `yaml:"port"`   // if empty, then DefPort
+	Open   bool   `yaml:"open"`   // if true then host is opened
+	Theme  string `yaml:"theme"`  // theme of web interface. if it is empty - DefTheme
+	Access string `yaml:"access"` // Access level - localhost, private - DefAccess == localhost
 }
+
+var (
+	privateIPBlocks []*net.IPNet
+	ipPrivateList   = []string{
+		"127.0.0.0/8",    // IPv4 loopback
+		"10.0.0.0/8",     // RFC1918
+		"172.16.0.0/12",  // RFC1918
+		"192.168.0.0/16", // RFC1918
+		"169.254.0.0/16", // RFC3927 link-local
+		"::1/128",        // IPv6 loopback
+		"fe80::/10",      // IPv6 link-local
+		"fc00::/7",       // IPv6 unique local addr
+	}
+)
 
 // AppPath returns the full path of the current application file
 func AppPath(path ...string) (ret string) {
@@ -94,6 +110,14 @@ func RndNum() uint32 {
 
 func init() {
 	rand.Seed(time.Now().Unix())
+
+	for _, cidr := range ipPrivateList {
+		_, block, err := net.ParseCIDR(cidr)
+		if err != nil {
+			golog.Error(err)
+		}
+		privateIPBlocks = append(privateIPBlocks, block)
+	}
 }
 
 func ClearCarriage(input string) string {
@@ -155,4 +179,35 @@ func AddFileToZip(zipWriter *zip.Writer, filename string) error {
 	}
 	_, err = io.Copy(writer, fileToZip)
 	return err
+}
+
+func IsLocalhost(host, ipaddr string) bool {
+	if host != `localhost` && host != `127.0.0.1` {
+		return false
+	}
+	ip := net.ParseIP(ipaddr)
+	return ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast()
+}
+
+func IsPrivate(host, ipaddr string) bool {
+	var ip net.IP
+	isPrivate := func() bool {
+		for _, block := range privateIPBlocks {
+			if block.Contains(ip) {
+				return true
+			}
+		}
+		return false
+	}
+	if host != `localhost` {
+		ip = net.ParseIP(host)
+		if ip == nil || !isPrivate() {
+			return false
+		}
+	}
+	ip = net.ParseIP(ipaddr)
+	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return true
+	}
+	return isPrivate()
 }

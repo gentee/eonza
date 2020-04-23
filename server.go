@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"eonza/lib"
@@ -50,6 +51,24 @@ var (
 
 func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
+		var (
+			access   string
+			isAccess bool
+		)
+		host := c.Request().Host[:strings.LastIndex(c.Request().Host, `:`)]
+		if IsScript {
+			access = scriptTask.Header.HTTP.Access
+		} else {
+			access = cfg.HTTP.Access
+		}
+		if access == AccessPrivate {
+			isAccess = lib.IsPrivate(host, c.RealIP())
+		} else {
+			isAccess = lib.IsLocalhost(host, c.RealIP())
+		}
+		if !isAccess {
+			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+		}
 		mutex.Lock()
 		// TODO: JWT user
 		var user *User
@@ -172,24 +191,15 @@ func indexHandle(c echo.Context) error {
 	return c.HTML(http.StatusOK, data)
 }
 
-func customHTTPErrorHandler(err error, c echo.Context) {
+/*func customHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 	}
-	//	url := fmt.Sprintf("/%d.html", code)
 	message := http.StatusText(code)
-	/*	if _, ok := pages[url]; ok {
-		if data, err := RenderPage(url); err == nil {
-			message = data
-		}
-	}*/
 	c.HTML(code, message)
-	/*	if err := c.File(errorPage); err != nil {
-			c.Logger().Error(err)
-		}
-		c.Logger().Error(err)*/
-}
+
+}*/
 
 func exitHandle(c echo.Context) error {
 	golog.Info(`Finish`)
@@ -232,7 +242,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		AllowMethods: []string{http.MethodGet, http.MethodPost},
 	}))*/
 
-	e.HTTPErrorHandler = customHTTPErrorHandler
+	//e.HTTPErrorHandler = customHTTPErrorHandler
 
 	e.GET("/", indexHandle)
 	e.GET("/ping", pingHandle)
