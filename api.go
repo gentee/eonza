@@ -82,7 +82,7 @@ func runHandle(c echo.Context) error {
 			Access: cfg.HTTP.Access,
 		},
 	}
-	if err := script.Encode(header); err != nil {
+	if err := script.Encode(header, GenSource(item)); err != nil {
 		return jsonError(c, err)
 	}
 	if err = NewTask(header); err != nil {

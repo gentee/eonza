@@ -51,6 +51,7 @@ func main() {
 			Lang: scriptTask.Header.Lang,
 		})
 		go func() {
+			start := time.Now()
 			settings := initTask()
 			setStatus(TaskActive)
 			_, err := scriptTask.Run(settings)
@@ -63,6 +64,11 @@ func main() {
 				setStatus(TaskFailed, err)
 			}
 			<-chFinish
+			if scriptTask.Header.HTTP.Open {
+				if duration := time.Since(start).Milliseconds(); duration < TimeoutOpen {
+					time.Sleep(time.Duration(TimeoutOpen-duration) * time.Millisecond)
+				}
+			}
 			closeTask()
 			stopchan <- os.Kill
 		}()
@@ -87,6 +93,7 @@ func main() {
 	if !IsScript {
 		CloseTaskManager()
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
 	defer cancel()
 	e.Shutdown(ctx)

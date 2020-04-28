@@ -28,28 +28,12 @@ type Header struct {
 	HTTP       *lib.HTTPConfig
 }
 
-func Encode(header Header) error {
+func Encode(header Header, source string) error {
 	var (
 		data bytes.Buffer
 	)
 	workspace := gentee.New()
-	bcode, _, err := workspace.Compile(`run {
-		Println("Alright")
-		for i in 1..30 {
-			if i % 10 == 0 : Println("\{i}")
-			elif i % 5 == 0 : Print("\{i} \r\n = \n")
-			else : Print("\{i} ")
-			sleep(1000)
-		}
-		str name = ReadString("Enter your name:")
-		Println("Your name: \{name}")
-		for i in 0..10 {
-			if i < 6 : Print("Progress \{i*10}%\r")
-			else : Print("\rProgress \{i*10}%")
-			sleep(1000)
-		}
-//		Open("http://google.com")
-	}`, "hello")
+	bcode, _, err := workspace.Compile(source, header.Name)
 	if err != nil {
 		return err
 	}
