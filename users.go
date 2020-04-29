@@ -121,7 +121,7 @@ func AddHistoryEditor(id uint32, name string) error {
 func GetHistory(list []string) []ScriptItem {
 	ret := make([]ScriptItem, 0, len(list))
 	for _, item := range list {
-		script := scripts[item]
+		script := getScript(item)
 		if script == nil {
 			continue
 		}

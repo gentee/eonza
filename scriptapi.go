@@ -62,7 +62,7 @@ func getScriptHandle(c echo.Context) error {
 			name = `new`
 		}
 	}
-	script := scripts[name]
+	script := getScript(name)
 	if script == nil {
 		response.Error = Lang(`erropen`, name)
 	} else {
@@ -126,8 +126,8 @@ func listScriptHandle(c echo.Context) error {
 	if c.QueryParam(`cache`) != fmt.Sprint(hotVersion) {
 		list := make(map[string]ScriptItem)
 
-		for key, item := range scripts {
-			list[key] = ScriptToItem(item)
+		for _, item := range scripts {
+			list[item.Settings.Name] = ScriptToItem(item)
 		}
 		resp.Map = list
 	}
@@ -141,7 +141,7 @@ func listRunHandle(c echo.Context) error {
 		return jsonError(c, Lang(`unknownuser`, userId))
 	}
 	for _, name := range userSettings[userId].History.Run {
-		if item, ok := scripts[name]; ok {
+		if item := getScript(name); item != nil {
 			list = append(list, ScriptToItem(item))
 		}
 	}

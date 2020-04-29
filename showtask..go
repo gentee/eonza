@@ -17,7 +17,7 @@ func showTaskHandle(c echo.Context) error {
 	if ptask == nil {
 		return jsonError(c, fmt.Errorf(`task %d has not been found`, idtask))
 	}
-	if item := scripts[ptask.Name]; item != nil {
+	if item := getScript(ptask.Name); item != nil {
 		c.Set(`Title`, item.Settings.Title)
 	} else {
 		c.Set(`Title`, ptask.Name)

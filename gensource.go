@@ -12,6 +12,11 @@ type Source struct {
 	Body   string
 }
 
+func processScript(script *Script, src *Source) (body string) {
+
+	return
+}
+
 func GenSource(script *Script) string {
 	src := Source{
 		Linked: make(map[string]bool),

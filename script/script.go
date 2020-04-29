@@ -21,10 +21,6 @@ type Settings struct {
 	ChSystem chan int
 }
 
-var (
-//	scripts = make(map[string]*Script)
-)
-
 func (script *Script) Run(options Settings) (interface{}, error) {
 	var (
 		settings   gentee.Settings

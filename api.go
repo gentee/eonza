@@ -50,7 +50,6 @@ func jsonSuccess(c echo.Context) error {
 func runHandle(c echo.Context) error {
 	var (
 		item *Script
-		ok   bool
 	)
 	open := true
 	name := c.QueryParam(`name`)
@@ -61,7 +60,7 @@ func runHandle(c echo.Context) error {
 	if err != nil {
 		return jsonError(c, err)
 	}
-	if item, ok = scripts[name]; !ok {
+	if item = getScript(name); item == nil {
 		return jsonError(c, Lang(`erropen`, name))
 	}
 	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {

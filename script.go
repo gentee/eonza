@@ -57,6 +57,20 @@ type Script struct {
 	embedded bool           // Embedded script
 }
 
+func getScript(name string) (script *Script) {
+	return scripts[lib.IdName(name)]
+}
+
+func setScript(name string, script *Script) {
+	scripts[lib.IdName(name)] = script
+}
+
+func delScript(name string) {
+	name = lib.IdName(name)
+	delete(scripts, name)
+	delete(storage.Scripts, name)
+}
+
 func InitScripts() {
 	scripts = make(map[string]*Script)
 	isfolder := func(script *Script) bool {
@@ -72,11 +86,11 @@ func InitScripts() {
 		}
 		script.embedded = true
 		script.folder = isfolder(&script)
-		scripts[script.Settings.Name] = &script
+		setScript(script.Settings.Name, &script)
 	}
 	for name, item := range storage.Scripts {
 		item.folder = isfolder(item)
-		scripts[name] = item
+		setScript(name, item)
 	}
 }
 
@@ -102,24 +116,23 @@ func (script *Script) SaveScript(original string) error {
 		// TODO: error
 	}
 	if len(original) > 0 && original != script.Settings.Name {
-		if _, ok := scripts[script.Settings.Name]; ok {
-			// TODO: error exists
+		if getScript(script.Settings.Name) != nil {
+			return fmt.Errorf(Lang(`errscriptname`), script.Settings.Name)
 		}
 		if deps := ScriptDependences(original); len(deps) > 0 {
 			// TODO: error dependences
 		}
-		delete(scripts, original)
-		delete(storage.Scripts, original)
+		delScript(original)
 	}
 	script.folder = script.Settings.Name == `source-code` ||
 		strings.Contains(script.Code, `%body%`)
-	scripts[script.Settings.Name] = script
-	storage.Scripts[script.Settings.Name] = script
+	setScript(script.Settings.Name, script)
+	storage.Scripts[lib.IdName(script.Settings.Name)] = script
 	return SaveStorage()
 }
 
 func DeleteScript(name string) error {
-	script := scripts[name]
+	script := getScript(name)
 	if script == nil {
 		return fmt.Errorf(Lang(`erropen`, name))
 	}
@@ -129,7 +142,6 @@ func DeleteScript(name string) error {
 	if deps := ScriptDependences(name); len(deps) > 0 {
 		// TODO: error dependences
 	}
-	delete(scripts, name)
-	delete(storage.Scripts, name)
+	delScript(name)
 	return SaveStorage()
 }

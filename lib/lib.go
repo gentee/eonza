@@ -98,6 +98,11 @@ func UniqueName(count int) string {
 	return string(b)
 }
 
+func IdName(value string) string {
+	out := strings.ReplaceAll(value, `.`, `_`)
+	return strings.ReplaceAll(out, `-`, `_`)
+}
+
 // ValidateSysName checks the system name
 func ValidateSysName(value string) bool {
 	re, _ := regexp.Compile(`^[a-z][a-z\d\._-]*$`)
