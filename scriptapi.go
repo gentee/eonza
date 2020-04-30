@@ -20,6 +20,7 @@ type ScriptItem struct {
 	Embedded bool          `json:"embedded,omitempty"`
 	Folder   bool          `json:"folder,omitempty"`
 	Params   []scriptParam `json:"params,omitempty"`
+	Initial  string        `json:"initial,omitempty"`
 }
 
 type ScriptResponse struct {
@@ -114,6 +115,7 @@ func ScriptToItem(script *Script) ScriptItem {
 		Embedded: script.embedded,
 		Folder:   script.folder,
 		Params:   script.Params,
+		Initial:  script.initial,
 	}
 
 }

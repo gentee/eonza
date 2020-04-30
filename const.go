@@ -28,6 +28,7 @@ const (
 	TasksLimit  = 50
 	TimeFormat  = `2006/01/02 15:04:05`
 	TimeoutOpen = 3000
+	SourceCode  = `source-code`
 )
 
 // AppInfo contains information about the application

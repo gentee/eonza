@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"eonza/lib"
 	"fmt"
 	"path"
@@ -32,12 +33,19 @@ type scriptSettings struct {
 	Unrun bool   `json:"unrun,omitempty"`
 }
 
+type scriptOptions struct {
+	Initial  string `yaml:"initial,omitempty"`
+	Default  string `yaml:"default,omitempty"`
+	Required bool   `yaml:"required,omitempty"`
+}
+
 type scriptParam struct {
 	Name    string    `json:"name"`
 	Title   string    `json:"title"`
 	Type    ParamType `json:"type"`
-	Default string    `json:"default,omitempty"`
-	More    string    `json:"more,omitempty"`
+	Options string    `json:"options,omitempty"`
+
+	options scriptOptions
 }
 
 type scriptTree struct {
@@ -55,14 +63,40 @@ type Script struct {
 	Code     string         `json:"code,omitempty"`
 	folder   bool           // can have other commands inside
 	embedded bool           // Embedded script
+	initial  string         // Initial value
 }
 
 func getScript(name string) (script *Script) {
 	return scripts[lib.IdName(name)]
 }
 
-func setScript(name string, script *Script) {
+func setScript(name string, script *Script) error {
+	var ivalues map[string]string
+
 	scripts[lib.IdName(name)] = script
+	if len(script.Params) > 0 {
+		ivalues = make(map[string]string)
+	}
+	for i, par := range script.Params {
+		if len(par.Options) > 0 {
+			var options scriptOptions
+			if err := yaml.Unmarshal([]byte(par.Options), &options); err != nil {
+				return err
+			}
+			script.Params[i].options = options
+			if len(options.Initial) > 0 {
+				ivalues[par.Name] = options.Initial
+			}
+		}
+	}
+	if len(ivalues) > 0 {
+		initial, err := json.Marshal(ivalues)
+		if err != nil {
+			return err
+		}
+		script.initial = string(initial)
+	}
+	return nil
 }
 
 func delScript(name string) {
@@ -74,7 +108,7 @@ func delScript(name string) {
 func InitScripts() {
 	scripts = make(map[string]*Script)
 	isfolder := func(script *Script) bool {
-		return script.Settings.Name == `source-code` ||
+		return script.Settings.Name == SourceCode ||
 			strings.Contains(script.Code, `%body%`)
 	}
 	for _, tpl := range _escDirs["../eonza-assets/scripts"] {
@@ -86,11 +120,20 @@ func InitScripts() {
 		}
 		script.embedded = true
 		script.folder = isfolder(&script)
-		setScript(script.Settings.Name, &script)
+		if err := setScript(script.Settings.Name, &script); err != nil {
+			golog.Fatal(err)
+		}
 	}
 	for name, item := range storage.Scripts {
+		// TODO: this is a temporary fix
+		if strings.Contains(name, `-`) {
+			continue
+		}
+		//
 		item.folder = isfolder(item)
-		setScript(name, item)
+		if err := setScript(name, item); err != nil {
+			golog.Fatal(err)
+		}
 	}
 }
 
@@ -124,9 +167,11 @@ func (script *Script) SaveScript(original string) error {
 		}
 		delScript(original)
 	}
-	script.folder = script.Settings.Name == `source-code` ||
+	script.folder = script.Settings.Name == SourceCode ||
 		strings.Contains(script.Code, `%body%`)
-	setScript(script.Settings.Name, script)
+	if err := setScript(script.Settings.Name, script); err != nil {
+		return err
+	}
 	storage.Scripts[lib.IdName(script.Settings.Name)] = script
 	return SaveStorage()
 }

@@ -50,6 +50,7 @@ func jsonSuccess(c echo.Context) error {
 func runHandle(c echo.Context) error {
 	var (
 		item *Script
+		src  string
 	)
 	open := true
 	name := c.QueryParam(`name`)
@@ -81,7 +82,11 @@ func runHandle(c echo.Context) error {
 			Access: cfg.HTTP.Access,
 		},
 	}
-	if err := script.Encode(header, GenSource(item)); err != nil {
+	if src, err = GenSource(item); err != nil {
+		return jsonError(c, err)
+	}
+	fmt.Println(src)
+	if err := script.Encode(header, src); err != nil {
 		return jsonError(c, err)
 	}
 	if err = NewTask(header); err != nil {
