@@ -143,6 +143,18 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	return fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`)), nil
 }
 
+func ValToStr(input string) string {
+	var out string
+
+	if strings.ContainsAny(input, "`%$") {
+		out = strings.ReplaceAll(input, `\`, `\\`)
+		out = `"` + strings.ReplaceAll(out, `"`, `\"`) + `"`
+	} else {
+		out = "`" + input + "`"
+	}
+	return out
+}
+
 func GenSource(script *Script) (string, error) {
 	src := &Source{
 		Linked:      make(map[string]bool),
@@ -157,7 +169,7 @@ func GenSource(script *Script) (string, error) {
 	if len(src.Strings) > 0 {
 		constStr = "const {\r\n"
 		for i, val := range src.Strings {
-			constStr += fmt.Sprintf("STR%d = `%s`\r\n", i, val)
+			constStr += fmt.Sprintf("STR%d = %s\r\n", i, ValToStr(val))
 		}
 		constStr += "}\r\n"
 	}
