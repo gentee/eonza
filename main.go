@@ -58,7 +58,7 @@ func main() {
 			if err == nil {
 				setStatus(TaskFinished)
 			} else if err.Error() == `code execution has been terminated` {
-				// TODO: added sppecial func or compare errID
+				// TODO: added special func or compare errID
 				setStatus(TaskTerminated)
 			} else {
 				setStatus(TaskFailed, err)

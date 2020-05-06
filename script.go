@@ -147,11 +147,41 @@ func (script *Script) Validate() error {
 	return nil
 }
 
+func scanTree(tree []scriptTree, name string) bool {
+	for _, item := range tree {
+		if item.Name == name {
+			return true
+		}
+		if len(item.Children) > 0 && scanTree(item.Children, name) {
+			return true
+		}
+	}
+	return false
+}
+
 func ScriptDependences(name string) []ScriptItem {
 	var ret []ScriptItem
 
-	// TODO: enumerate all commands
+	for _, item := range scripts {
+		if item.embedded {
+			continue
+		}
+		if scanTree(item.Tree, name) {
+			ret = append(ret, ScriptToItem(item))
+		}
+	}
 	return ret
+}
+
+func checkDep(name, title string) error {
+	if deps := ScriptDependences(name); len(deps) > 0 {
+		ret := make([]string, len(deps))
+		for i, item := range deps {
+			ret[i] = item.Title
+		}
+		return fmt.Errorf(Lang(`depscript`), title, strings.Join(ret, `,`))
+	}
+	return nil
 }
 
 func (script *Script) SaveScript(original string) error {
@@ -162,8 +192,8 @@ func (script *Script) SaveScript(original string) error {
 		if getScript(script.Settings.Name) != nil {
 			return fmt.Errorf(Lang(`errscriptname`), script.Settings.Name)
 		}
-		if deps := ScriptDependences(original); len(deps) > 0 {
-			// TODO: error dependences
+		if err := checkDep(original, script.Settings.Title); err != nil {
+			return err
 		}
 		delScript(original)
 	}
@@ -184,8 +214,8 @@ func DeleteScript(name string) error {
 	if script.embedded {
 		// TODO: error
 	}
-	if deps := ScriptDependences(name); len(deps) > 0 {
-		// TODO: error dependences
+	if err := checkDep(name, script.Settings.Title); err != nil {
+		return err
 	}
 	delScript(name)
 	return SaveStorage()

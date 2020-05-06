@@ -126,13 +126,21 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				src.Counter++
 			}
 		}
+		code = strings.TrimRight(code, "\r\n")
 		if script.Settings.Name != SourceCode {
 			for _, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
 			}
+			if len(script.Tree) > 0 {
+				tmp, err = src.Tree(script.Tree)
+				if err != nil {
+					return ``, err
+				}
+				code += "\r\n" + tmp
+			}
 		}
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
-			strings.TrimRight(code, "\r\n") + "\r\n}\r\n"
+			code + "\r\n}\r\n"
 	}
 	params = params[:0]
 	if script.Settings.Name != SourceCode {
@@ -156,10 +164,26 @@ func ValToStr(input string) string {
 }
 
 func GenSource(script *Script) (string, error) {
+	var params string
 	src := &Source{
 		Linked:      make(map[string]bool),
 		CRCTable:    crc64.MakeTable(crc64.ISO),
 		HashStrings: make(map[uint64]int),
+	}
+	values, err := src.ScriptValues(script, scriptTree{})
+	if err != nil {
+		return ``, err
+	}
+	for _, par := range values {
+		val := par.Value
+		if par.Type == `str` {
+			val = ValToStr(val)
+		}
+		params += fmt.Sprintf("%s %s = %s\r\n", par.Type, par.Name, val)
+	}
+	code := strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
+	if len(code) > 0 {
+		code += "\r\n"
 	}
 	body, err := src.Tree(script.Tree)
 	if err != nil {
@@ -173,5 +197,5 @@ func GenSource(script *Script) (string, error) {
 		}
 		constStr += "}\r\n"
 	}
-	return fmt.Sprintf("%s%s\r\nrun {\r\n%s}", constStr, src.Funcs, body), nil
+	return fmt.Sprintf("%s%s\r\nrun {\r\n%s%s%s}", constStr, src.Funcs, params, code, body), nil
 }
