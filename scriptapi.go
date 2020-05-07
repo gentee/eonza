@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"gopkg.in/yaml.v2"
 )
 
 type ScriptItem struct {
@@ -150,4 +151,25 @@ func listRunHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, &ListResponse{
 		List: list,
 	})
+}
+
+func exportHandle(c echo.Context) error {
+	var response Response
+
+	name := c.QueryParam(`name`)
+	script := getScript(name)
+	if script == nil {
+		response.Error = Lang(`erropen`, name)
+	} else {
+		data, err := yaml.Marshal(script)
+		if err != nil {
+			response.Error = err.Error()
+		} else {
+			c.Response().Header().Set(echo.HeaderContentDisposition,
+				fmt.Sprintf("attachment; filename=%s.yaml", script.Settings.Name))
+			//http.ServeContent(c.Response(), c.Request(), "ok.yaml", time.Now(), bytes.NewReader(data))
+			return c.Blob(http.StatusOK, "text/yaml", data)
+		}
+	}
+	return c.JSON(http.StatusOK, response)
 }

@@ -27,10 +27,10 @@ const (
 )
 
 type scriptSettings struct {
-	Name  string `json:"name"`
-	Title string `json:"title"`
-	Desc  string `json:"desc,omitempty"`
-	Unrun bool   `json:"unrun,omitempty"`
+	Name  string `json:"name" yaml:"name"`
+	Title string `json:"title" yaml:"title"`
+	Desc  string `json:"desc,omitempty" yaml:"desc,omitempty"`
+	Unrun bool   `json:"unrun,omitempty" yaml:"unrun,omitempty"`
 }
 
 type scriptOptions struct {
@@ -40,27 +40,27 @@ type scriptOptions struct {
 }
 
 type scriptParam struct {
-	Name    string    `json:"name"`
-	Title   string    `json:"title"`
-	Type    ParamType `json:"type"`
-	Options string    `json:"options,omitempty"`
+	Name    string    `json:"name" yaml:"name"`
+	Title   string    `json:"title" yaml:"title"`
+	Type    ParamType `json:"type" yaml:"type"`
+	Options string    `json:"options,omitempty" yaml:"options,omitempty"`
 
 	options scriptOptions
 }
 
 type scriptTree struct {
-	Name     string                 `json:"name"`
-	Open     bool                   `json:"open,omitempty"`
-	Disable  bool                   `json:"disable,omitempty"`
-	Values   map[string]interface{} `json:"values,omitempty"`
-	Children []scriptTree           `json:"children,omitempty"`
+	Name     string                 `json:"name" yaml:"name"`
+	Open     bool                   `json:"open,omitempty" yaml:"open,omitempty"`
+	Disable  bool                   `json:"disable,omitempty" yaml:"disable,omitempty"`
+	Values   map[string]interface{} `json:"values,omitempty" yaml:"values,omitempty"`
+	Children []scriptTree           `json:"children,omitempty" yaml:"children,omitempty"`
 }
 
 type Script struct {
-	Settings scriptSettings `json:"settings"`
-	Params   []scriptParam  `json:"params,omitempty"`
-	Tree     []scriptTree   `json:"tree,omitempty"`
-	Code     string         `json:"code,omitempty"`
+	Settings scriptSettings `json:"settings" yaml:"settings"`
+	Params   []scriptParam  `json:"params,omitempty" yaml:"params,omitempty"`
+	Tree     []scriptTree   `json:"tree,omitempty" yaml:"tree,omitempty"`
+	Code     string         `json:"code,omitempty" yaml:"code,omitempty"`
 	folder   bool           // can have other commands inside
 	embedded bool           // Embedded script
 	initial  string         // Initial value
@@ -125,6 +125,10 @@ func InitScripts() {
 		}
 	}
 	for name, item := range storage.Scripts {
+		if scripts[lib.IdName(name)] != nil {
+			golog.Errorf(`The '%s' script has been loaded as embedded script`, name)
+			continue
+		}
 		// TODO: this is a temporary fix
 		if strings.Contains(name, `-`) {
 			continue
@@ -185,8 +189,8 @@ func checkDep(name, title string) error {
 }
 
 func (script *Script) SaveScript(original string) error {
-	if script.embedded {
-		// TODO: error
+	if curScript := getScript(original); curScript != nil && curScript.embedded {
+		return fmt.Errorf(Lang(`errembed`))
 	}
 	if len(original) > 0 && original != script.Settings.Name {
 		if getScript(script.Settings.Name) != nil {
@@ -212,7 +216,7 @@ func DeleteScript(name string) error {
 		return fmt.Errorf(Lang(`erropen`, name))
 	}
 	if script.embedded {
-		// TODO: error
+		return fmt.Errorf(Lang(`errembed`))
 	}
 	if err := checkDep(name, script.Settings.Title); err != nil {
 		return err

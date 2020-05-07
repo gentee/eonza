@@ -35,8 +35,9 @@ type WebSettings struct {
 }
 
 type Response struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error,omitempty"`
+	Success bool `json:"success"`
+	//	Message string `json:"message,omitempty"`
+	Error string `json:"error,omitempty"`
 }
 
 type Auth struct {
@@ -261,6 +262,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/ws", wsMainHandle)
 		e.GET("/task/:id", showTaskHandle)
 		e.GET("/api/exit", exitHandle)
+		e.GET("/api/export", exportHandle)
 		e.GET("/api/reload", reloadHandle)
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
