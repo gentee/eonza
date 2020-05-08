@@ -70,10 +70,10 @@ func getScript(name string) (script *Script) {
 	return scripts[lib.IdName(name)]
 }
 
-func setScript(name string, script *Script) error {
+func setScript(script *Script) error {
 	var ivalues map[string]string
 
-	scripts[lib.IdName(name)] = script
+	scripts[lib.IdName(script.Settings.Name)] = script
 	if len(script.Params) > 0 {
 		ivalues = make(map[string]string)
 	}
@@ -120,7 +120,7 @@ func InitScripts() {
 		}
 		script.embedded = true
 		script.folder = isfolder(&script)
-		if err := setScript(script.Settings.Name, &script); err != nil {
+		if err := setScript(&script); err != nil {
 			golog.Fatal(err)
 		}
 	}
@@ -135,7 +135,7 @@ func InitScripts() {
 		}
 		//
 		item.folder = isfolder(item)
-		if err := setScript(name, item); err != nil {
+		if err := setScript(item); err != nil {
 			golog.Fatal(err)
 		}
 	}
@@ -203,7 +203,7 @@ func (script *Script) SaveScript(original string) error {
 	}
 	script.folder = script.Settings.Name == SourceCode ||
 		strings.Contains(script.Code, `%body%`)
-	if err := setScript(script.Settings.Name, script); err != nil {
+	if err := setScript(script); err != nil {
 		return err
 	}
 	storage.Scripts[lib.IdName(script.Settings.Name)] = script

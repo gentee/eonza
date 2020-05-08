@@ -274,6 +274,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)
+		e.POST("/api/import", importHandle)
 	}
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {

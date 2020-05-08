@@ -5,9 +5,11 @@
 package main
 
 import (
+	"bytes"
 	"eonza/lib"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
@@ -170,6 +172,75 @@ func exportHandle(c echo.Context) error {
 			//http.ServeContent(c.Response(), c.Request(), "ok.yaml", time.Now(), bytes.NewReader(data))
 			return c.Blob(http.StatusOK, "text/yaml", data)
 		}
+	}
+	return c.JSON(http.StatusOK, response)
+}
+
+func importHandle(c echo.Context) error {
+	var (
+		count                          int
+		pscript                        *Script
+		response                       ScriptResponse
+		errFormat, errExists, errEmbed []string
+	)
+	overwrite := c.FormValue("overwrite") == `true`
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return jsonError(c, err)
+	}
+	files := form.File["files"]
+
+	for _, file := range files {
+		src, err := file.Open()
+		if err == nil {
+			buf := bytes.NewBuffer([]byte{})
+			_, err = buf.ReadFrom(src)
+			src.Close()
+			if err == nil {
+				var script Script
+				if err = yaml.Unmarshal(buf.Bytes(), &script); err == nil {
+					cur := getScript(script.Settings.Name)
+					if cur != nil {
+						if cur.embedded {
+							errEmbed = append(errEmbed, file.Filename)
+							continue
+						}
+						if !overwrite {
+							errExists = append(errExists, file.Filename)
+							continue
+						}
+					}
+					if err = setScript(&script); err == nil {
+						storage.Scripts[lib.IdName(script.Settings.Name)] = &script
+						pscript = &script
+						count++
+					}
+				}
+			}
+		}
+		if err != nil {
+			errFormat = append(errFormat, file.Filename)
+		}
+	}
+	if count > 0 {
+		SaveStorage()
+		hotVersion++
+		response.Script = *pscript
+		response.Original = pscript.Settings.Name
+		AddHistoryEditor(c.(*Auth).User.ID, pscript.Settings.Name)
+		response.History = GetHistoryEditor(c.(*Auth).User.ID)
+	}
+	if len(errFormat) > 0 {
+		response.Error = fmt.Sprintf(`Invalid format: %s `, strings.Join(errFormat, `, `))
+	}
+	if len(errEmbed) > 0 {
+		response.Error += fmt.Sprintf(`Can't update embedded scripts: %s `,
+			strings.Join(errEmbed, `, `))
+	}
+	if len(errExists) > 0 {
+		response.Error = fmt.Sprintf(`Can't update the existing scripts: %s`,
+			strings.Join(errExists, `, `))
 	}
 	return c.JSON(http.StatusOK, response)
 }
