@@ -129,10 +129,6 @@ func InitScripts() {
 			golog.Errorf(`The '%s' script has been loaded as embedded script`, name)
 			continue
 		}
-		// TODO: this is a temporary fix
-		if strings.Contains(name, `-`) {
-			continue
-		}
 		//
 		item.folder = isfolder(item)
 		if err := setScript(item); err != nil {
