@@ -8,7 +8,7 @@ run {
     $GOPATH = RegExp(env, `GOPATH="?([^"|\n|\r]*)`)
 
     $ /home/ak/go/bin/esc -ignore "\.git|LICENSE|README.md" -o assets.go ../eonza-assets 
-    $ go install -tags "pa standard"
+    $ go install -tags "eonza standard"
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
     $ /home/ak/app/eonza/eonza
 //    $ /home/ak/app/eonza/eonza -cfg /home/ak/app/eonza/config

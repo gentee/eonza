@@ -63,7 +63,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			} else {
 				value = `true`
 			}
-		case PTextarea:
+		case PTextarea, PSingleText:
 			ptype = `str`
 			if len(value) == 0 {
 				if par.options.Required {

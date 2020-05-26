@@ -24,6 +24,7 @@ type ParamType int
 const (
 	PCheckbox ParamType = iota
 	PTextarea
+	PSingleText
 )
 
 type scriptSettings struct {
