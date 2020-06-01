@@ -25,6 +25,7 @@ const (
 	PCheckbox ParamType = iota
 	PTextarea
 	PSingleText
+	PSelect
 )
 
 type scriptSettings struct {
@@ -34,19 +35,24 @@ type scriptSettings struct {
 	Unrun bool   `json:"unrun,omitempty" yaml:"unrun,omitempty"`
 }
 
+type scriptItem struct {
+	Title string `json:"title" yaml:"title"`
+	Value string `json:"value,omitempty" yaml:"value,omitempty"`
+	Type  string `json:"type,omitempty" yaml:"type,omitempty"`
+}
+
 type scriptOptions struct {
-	Initial  string `yaml:"initial,omitempty"`
-	Default  string `yaml:"default,omitempty"`
-	Required bool   `yaml:"required,omitempty"`
+	Initial  string       `json:"initial,omitempty" yaml:"initial,omitempty"`
+	Default  string       `json:"default,omitempty" yaml:"default,omitempty"`
+	Required bool         `json:"required,omitempty" yaml:"required,omitempty"`
+	Items    []scriptItem `json:"items,omitempty" yaml:"items,omitempty"`
 }
 
 type scriptParam struct {
-	Name    string    `json:"name" yaml:"name"`
-	Title   string    `json:"title" yaml:"title"`
-	Type    ParamType `json:"type" yaml:"type"`
-	Options string    `json:"options,omitempty" yaml:"options,omitempty"`
-
-	options scriptOptions
+	Name    string        `json:"name" yaml:"name"`
+	Title   string        `json:"title" yaml:"title"`
+	Type    ParamType     `json:"type" yaml:"type"`
+	Options scriptOptions `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
 type scriptTree struct {
@@ -78,16 +84,16 @@ func setScript(script *Script) error {
 	if len(script.Params) > 0 {
 		ivalues = make(map[string]string)
 	}
-	for i, par := range script.Params {
-		if len(par.Options) > 0 {
-			var options scriptOptions
-			if err := yaml.Unmarshal([]byte(par.Options), &options); err != nil {
-				return err
-			}
-			script.Params[i].options = options
-			if len(options.Initial) > 0 {
-				ivalues[par.Name] = options.Initial
-			}
+	for _, par := range script.Params {
+		if len(par.Options.Initial) > 0 {
+			/*			var options scriptOptions
+						if err := yaml.Unmarshal([]byte(par.Options), &options); err != nil {
+							return err
+						}
+						script.Params[i].Options = options
+						if len(options.Initial) > 0 {*/
+			ivalues[par.Name] = par.Options.Initial
+			//			}
 		}
 	}
 	if len(ivalues) > 0 {

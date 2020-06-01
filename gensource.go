@@ -66,11 +66,11 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 		case PTextarea, PSingleText:
 			ptype = `str`
 			if len(value) == 0 {
-				if par.options.Required {
+				if par.Options.Required {
 					return nil, fmt.Errorf("The '%s' field is required in the '%s' command", par.Title,
 						script.Settings.Title)
 				}
-				value = par.options.Default
+				value = par.Options.Default
 			}
 			if script.Settings.Name != SourceCode {
 				crc := crc64.Checksum([]byte(value), src.CRCTable)
@@ -81,6 +81,8 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				}
 				value = fmt.Sprintf(`STR%d`, id)
 			}
+		case PSelect:
+			fmt.Println(`select`, par)
 		}
 		values = append(values, Param{
 			Value: value,
