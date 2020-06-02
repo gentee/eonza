@@ -43,13 +43,25 @@ func (src *Source) Tree(tree []scriptTree) (string, error) {
 	return body, nil
 }
 
+func (src *Source) FindStrConst(value string) string {
+	var (
+		id int
+		ok bool
+	)
+	crc := crc64.Checksum([]byte(value), src.CRCTable)
+	if id, ok = src.HashStrings[crc]; !ok {
+		id = len(src.Strings)
+		src.HashStrings[crc] = id
+		src.Strings = append(src.Strings, value)
+	}
+	return fmt.Sprintf(`STR%d`, id)
+}
+
 func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error) {
 	values := make([]Param, 0, len(script.Params))
 	for _, par := range script.Params {
 		var (
 			ptype, value string
-			id           int
-			ok           bool
 		)
 		val := node.Values[par.Name]
 		if val != nil {
@@ -73,16 +85,15 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				value = par.Options.Default
 			}
 			if script.Settings.Name != SourceCode {
-				crc := crc64.Checksum([]byte(value), src.CRCTable)
-				if id, ok = src.HashStrings[crc]; !ok {
-					id = len(src.Strings)
-					src.HashStrings[crc] = id
-					src.Strings = append(src.Strings, value)
-				}
-				value = fmt.Sprintf(`STR%d`, id)
+				value = src.FindStrConst(value)
 			}
 		case PSelect:
-			fmt.Println(`select`, par)
+			if len(par.Options.Type) > 0 {
+				ptype = par.Options.Type
+			} else {
+				ptype = `str`
+				value = src.FindStrConst(value)
+			}
 		}
 		values = append(values, Param{
 			Value: value,
@@ -199,5 +210,8 @@ func GenSource(script *Script) (string, error) {
 		}
 		constStr += "}\r\n"
 	}
+	constStr += `const IOTA {
+	LOG_ERROR LOG_WARN LOG_INFO	LOG_DEBUG }
+`
 	return fmt.Sprintf("%s%s\r\nrun {\r\n%s%s%s}", constStr, src.Funcs, params, code, body), nil
 }

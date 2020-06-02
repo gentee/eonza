@@ -38,13 +38,13 @@ type scriptSettings struct {
 type scriptItem struct {
 	Title string `json:"title" yaml:"title"`
 	Value string `json:"value,omitempty" yaml:"value,omitempty"`
-	Type  string `json:"type,omitempty" yaml:"type,omitempty"`
 }
 
 type scriptOptions struct {
 	Initial  string       `json:"initial,omitempty" yaml:"initial,omitempty"`
 	Default  string       `json:"default,omitempty" yaml:"default,omitempty"`
 	Required bool         `json:"required,omitempty" yaml:"required,omitempty"`
+	Type     string       `json:"type,omitempty" yaml:"type,omitempty"`
 	Items    []scriptItem `json:"items,omitempty" yaml:"items,omitempty"`
 }
 
