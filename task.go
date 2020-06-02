@@ -28,10 +28,12 @@ const (
 	WcStatus        // change status
 	WcStdout        // new line in console
 	WcStdbuf        // current output including carriage
+	WcLogout        // log output
 )
 
 type WsClient struct {
 	StdoutCount int
+	LogoutCount int
 	Conn        *websocket.Conn
 }
 
@@ -54,14 +56,18 @@ var (
 	wsChan     chan WsCmd
 
 	stdoutBuf []string
+	logoutBuf []string
 	iStdout   int
+	iLogout   int
 
-	console *os.File
-	cmdFile *os.File
-	outFile *os.File
+	console   *os.File
+	cmdFile   *os.File
+	outFile   *os.File
+	logScript *os.File
 
 	chStdin  chan []byte
 	chStdout chan []byte
+	chLogout chan string
 	chSystem chan int
 	chFinish chan bool
 
@@ -79,7 +85,8 @@ func closeTask() {
 	}
 	cmdFile.Close()
 	outFile.Close()
-	for _, item := range []string{"trace", "out"} {
+	logScript.Close()
+	for _, item := range []string{"trace", "out", "log"} {
 		files = append(files, filepath.Join(scriptTask.Header.LogDir,
 			fmt.Sprintf("%08x.%s", task.ID, item)))
 	}
@@ -111,6 +118,18 @@ func sendStdout(client WsClient) error {
 	})
 }
 
+func sendLogout(client WsClient) error {
+	for i := client.LogoutCount; i < iLogout; i++ {
+		if err := client.Conn.WriteJSON(WsCmd{
+			TaskID:  task.ID,
+			Cmd:     WcLogout,
+			Message: logoutBuf[i],
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func initTask() script.Settings {
 	var err error
 
@@ -122,16 +141,20 @@ func initTask() script.Settings {
 		StartTime: time.Now().Unix(),
 		Port:      scriptTask.Header.HTTP.Port,
 	}
-	cmdFile, err = os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
-		fmt.Sprintf(`%08x.trace`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
-	if err != nil {
-		golog.Fatal(err)
+
+	createFile := func(ext string) *os.File {
+		ret, err := os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
+			fmt.Sprintf(`%08x.`+ext, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
+		if err != nil {
+			golog.Fatal(err)
+		}
+		return ret
 	}
-	outFile, err = os.OpenFile(filepath.Join(scriptTask.Header.LogDir,
-		fmt.Sprintf(`%08x.out`, task.ID)), os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0666)
-	if err != nil {
-		golog.Fatal(err)
-	}
+
+	cmdFile = createFile(`trace`)
+	outFile = createFile(`out`)
+	logScript = createFile(`log`)
+
 	if _, err = cmdFile.Write([]byte(task.Head())); err != nil {
 		golog.Fatal(err)
 	}
@@ -141,9 +164,11 @@ func initTask() script.Settings {
 
 	chStdin = make(chan []byte)
 	chStdout = make(chan []byte)
+	chLogout = make(chan string)
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
 	stdoutBuf = []string{``}
+	logoutBuf = make([]string, 0, 32)
 
 	go func() {
 		var out []byte
@@ -181,6 +206,29 @@ func initTask() script.Settings {
 	}()
 
 	go func() {
+		var out string
+		for {
+			out = <-chLogout
+			mutex.Lock()
+			if _, err := logScript.Write([]byte(out + "\r\n")); err != nil {
+				golog.Error(err)
+			}
+			logoutBuf = append(logoutBuf, out)
+			iLogout = len(logoutBuf)
+			for id, client := range clients {
+				if sendLogout(client) == nil {
+					client.LogoutCount = iLogout
+					clients[id] = client
+				} else {
+					client.Conn.Close()
+					delete(clients, id)
+				}
+			}
+			mutex.Unlock()
+		}
+	}()
+
+	go func() {
 		var cmd WsCmd
 		for task.Status <= TaskSuspended {
 			cmd = <-wsChan
@@ -200,6 +248,7 @@ func initTask() script.Settings {
 		chFinish <- true
 	}()
 
+	script.InitData(chLogout)
 	return script.Settings{
 		ChStdin:  chStdin,
 		ChStdout: chStdout,
@@ -223,29 +272,16 @@ func wsTaskHandle(c echo.Context) error {
 		}
 		if sendStdout(client) == nil {
 			client.StdoutCount = iStdout
-			clients[lib.RndNum()] = client
+			if sendLogout(client) == nil {
+				client.LogoutCount = iLogout
+				clients[lib.RndNum()] = client
+			} else {
+				client.Conn.Close()
+			}
 		} else {
 			client.Conn.Close()
 		}
 	}
-	/*	defer ws.Close()
-		fmt.Println(`Connected`)
-		for {
-			cmd = <-wsChan
-			// Write
-			//		err := ws.WriteMessage(websocket.TextMessage, []byte("Hello, Client!"))
-			err := ws.WriteJSON(cmd)
-			if err != nil {
-				// TODO: what's about error?
-				fmt.Println(err)
-			}
-					// Read
-					_, msg, err := ws.ReadMessage()
-					if err != nil {
-						c.Logger().Error(err)
-					}
-					fmt.Printf("%s\n", msg)
-		}*/
 	return nil
 }
 

@@ -285,20 +285,31 @@ func wsMainHandle(c echo.Context) error {
 	return nil
 }
 
-func GetStdoutTask(id uint32) string {
+func GetOutTask(id uint32) (retStdout string, retLogout string) {
+	var (
+		isStd, isLog bool
+	)
 	fname := fmt.Sprintf(`%08x.`, id)
 	if stdout, err := ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+`out`)); err == nil {
-		return string(stdout)
+		retStdout = string(stdout)
+		isStd = true
+	}
+	if logout, err := ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+`log`)); err == nil {
+		retLogout = string(logout)
+		isLog = true
+	}
+	if isStd && isLog {
+		return
 	}
 	r, err := zip.OpenReader(filepath.Join(cfg.Log.Dir, fname+`zip`))
 	if err != nil {
-		return ``
+		return ``, ``
 	}
 	defer func() {
 		r.Close()
 	}()
 	for _, f := range r.File {
-		if f.Name == fname+`out` {
+		if (!isStd && f.Name == fname+`out`) || (!isLog && f.Name == fname+`log`) {
 			rc, err := f.Open()
 			if err != nil {
 				break
@@ -307,10 +318,13 @@ func GetStdoutTask(id uint32) string {
 			_, err = buf.ReadFrom(rc)
 			rc.Close()
 			if err == nil {
-				return string(buf.Bytes())
+				if strings.HasSuffix(f.Name, `out`) {
+					retStdout = string(buf.Bytes())
+				} else {
+					retLogout = string(buf.Bytes())
+				}
 			}
-			break
 		}
 	}
-	return ``
+	return
 }

@@ -29,6 +29,9 @@ func main() {
 	golog.SetTimeFormat("2006/01/02 15:04:05")
 	flag.StringVar(&cfg.path, "cfg", "", "The path of the `config file`")
 	flag.Parse()
+	if err := script.InitEngine(); err != nil {
+		golog.Fatal(err)
+	}
 	script.InitWorkspace()
 
 	fi, err := os.Stdin.Stat()

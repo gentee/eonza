@@ -32,6 +32,7 @@ func Encode(header Header, source string) error {
 	var (
 		data bytes.Buffer
 	)
+
 	workspace := gentee.New()
 	bcode, _, err := workspace.Compile(source, header.Name)
 	if err != nil {

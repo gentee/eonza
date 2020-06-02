@@ -32,6 +32,7 @@ type RenderScript struct {
 	Start    string
 	Finish   string
 	Stdout   template.HTML
+	Logout   template.HTML
 }
 
 var (
@@ -108,8 +109,9 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
-			renderScript.Stdout = template.HTML(strings.ReplaceAll(
-				GetStdoutTask(renderScript.Task.ID), "\n", `<br>`))
+			Std, Log := GetOutTask(renderScript.Task.ID)
+			renderScript.Stdout = template.HTML(strings.ReplaceAll(Std, "\n", `<br>`))
+			renderScript.Logout = template.HTML(strings.ReplaceAll(Log, "\n", `<br>`))
 		}
 		renderScript.Start = time.Unix(renderScript.Task.StartTime, 0).Format(TimeFormat)
 		if renderScript.FinishTime != 0 && renderScript.Task.Status >= TaskFinished {

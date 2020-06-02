@@ -210,7 +210,7 @@ func GenSource(script *Script) (string, error) {
 		}
 		constStr += "}\r\n"
 	}
-	constStr += `const IOTA {
+	constStr += `const IOTA { LOG_DISABLE
 	LOG_ERROR LOG_WARN LOG_INFO	LOG_DEBUG }
 `
 	return fmt.Sprintf("%s%s\r\nrun {\r\n%s%s%s}", constStr, src.Funcs, params, code, body), nil
