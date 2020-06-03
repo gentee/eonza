@@ -94,6 +94,15 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				ptype = `str`
 				value = src.FindStrConst(value)
 			}
+		case PNumber:
+			ptype = `int`
+			if len(value) == 0 {
+				if par.Options.Required {
+					return nil, fmt.Errorf("The '%s' field is required in the '%s' command", par.Title,
+						script.Settings.Title)
+				}
+				value = par.Options.Default
+			}
 		}
 		values = append(values, Param{
 			Value: value,

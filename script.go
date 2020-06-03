@@ -26,6 +26,7 @@ const (
 	PTextarea
 	PSingleText
 	PSelect
+	PNumber
 )
 
 type scriptSettings struct {
