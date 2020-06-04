@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"strings"
 	"time"
@@ -102,6 +103,17 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			return page.body, err
 		}
 		render.Content = template.HTML(``)*/
+	out2html := func(input string, isLog bool) template.HTML {
+		out := strings.ReplaceAll(input, "\n", `<br>`)
+		if isLog {
+			for key, item := range map[string]string{`INFO`: `egreen`, `WARN`: `eyellow`,
+				`ERROR`: `ered`} {
+				out = strings.ReplaceAll(out, "["+key+"]", fmt.Sprintf(`<span class="%s">[%s]</span>`,
+					item, key))
+			}
+		}
+		return template.HTML(out)
+	}
 	if url == `script` {
 		if IsScript {
 			renderScript.Task = task
@@ -110,8 +122,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
 			Std, Log := GetOutTask(renderScript.Task.ID)
-			renderScript.Stdout = template.HTML(strings.ReplaceAll(Std, "\n", `<br>`))
-			renderScript.Logout = template.HTML(strings.ReplaceAll(Log, "\n", `<br>`))
+			renderScript.Stdout = out2html(Std, false)
+			renderScript.Logout = out2html(Log, true)
 		}
 		renderScript.Start = time.Unix(renderScript.Task.StartTime, 0).Format(TimeFormat)
 		if renderScript.FinishTime != 0 && renderScript.Task.Status >= TaskFinished {
