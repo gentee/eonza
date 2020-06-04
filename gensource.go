@@ -149,9 +149,11 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			}
 		}
 		code = strings.TrimRight(code, "\r\n")
+		var parNames string
 		if script.Settings.Name != SourceCode {
 			for _, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
+				parNames += `,` + par.Name
 			}
 			if len(script.Tree) > 0 {
 				tmp, err = src.Tree(script.Tree)
@@ -161,6 +163,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				code += "\r\n" + tmp
 			}
 		}
+		code = fmt.Sprintf("initcmd(`%s`%s)\r\n", script.Settings.Name, parNames) + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			code + "\r\n}\r\n"
 	}

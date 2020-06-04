@@ -6,6 +6,7 @@ package script
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gentee/gentee"
@@ -17,6 +18,7 @@ const (
 	LOG_WARN
 	LOG_INFO
 	LOG_DEBUG
+	LOG_INHERIT
 )
 
 type Data struct {
@@ -27,8 +29,23 @@ var (
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
+		{Prototype: `initcmd(str)`, Object: InitCmd},
 	}
 )
+
+func InitCmd(name string, pars ...interface{}) bool {
+	params := make([]string, len(pars))
+	for i, par := range pars {
+		switch par.(type) {
+		case string:
+			params[i] = `"` + fmt.Sprint(par) + `"`
+		default:
+			params[i] = fmt.Sprint(par)
+		}
+	}
+	LogOutput(LOG_DEBUG, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+	return true
+}
 
 func LogOutput(level int64, message string) {
 	var mode = []string{``, `ERROR`, `WARN`, `INFO`, `DEBUG`}

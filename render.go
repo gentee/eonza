@@ -73,36 +73,6 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		data         interface{}
 	)
 
-	/*	file := filepath.Join(cfg.WebDir, filepath.FromSlash(page.url))
-		var exist bool
-		if cfg.mode != ModeDynamic {
-			if _, err := os.Stat(file); err == nil {
-				exist = true
-			}
-		}
-		switch cfg.mode {
-		case ModeLive:
-		case ModeCache:
-		case ModeStatic:
-			if !exist {
-				return ``, ErrNotFound
-			}
-		}
-		if exist {
-			data, err := ioutil.ReadFile(file)
-			if err != nil {
-				return ``, err
-			}
-			return string(data), nil
-		}
-		if len(page.Template) == 0 {
-			page.Template = page.parent.Template
-		}
-		tpl := page.Template
-		if len(tpl) == 0 {
-			return page.body, err
-		}
-		render.Content = template.HTML(``)*/
 	out2html := func(input string, isLog bool) template.HTML {
 		out := strings.ReplaceAll(input, "\n", `<br>`)
 		if isLog {

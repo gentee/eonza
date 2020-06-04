@@ -9,6 +9,7 @@ import (
 	"compress/gzip"
 	"encoding/gob"
 	"eonza/lib"
+	"eonza/script"
 	"io/ioutil"
 	"sync"
 	"time"
@@ -21,22 +22,24 @@ const (
 )
 
 // Setting contains settings of the application
-/*type Settings struct {
-	Lang string // the language of the interface
-}*/
+type Settings struct {
+	LogLevel int `json: "loglevel"`
+	//Lang string // the language of the interface
+}
 
 // Storage contains all application data
 type Storage struct {
-	//	Settings   Settings
-	Users   map[uint32]*User
-	Scripts map[string]*Script
+	Settings Settings
+	Users    map[uint32]*User
+	Scripts  map[string]*Script
 }
 
 var (
 	storage = Storage{
-		/*		Settings: Settings{
-				Lang: appInfo.Lang,
-			},*/
+		Settings: Settings{
+			LogLevel: script.LOG_INFO,
+			//				Lang: appInfo.Lang,
+		},
 		Users:   make(map[uint32]*User),
 		Scripts: make(map[string]*Script),
 	}

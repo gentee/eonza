@@ -30,10 +30,11 @@ const (
 )
 
 type scriptSettings struct {
-	Name  string `json:"name" yaml:"name"`
-	Title string `json:"title" yaml:"title"`
-	Desc  string `json:"desc,omitempty" yaml:"desc,omitempty"`
-	Unrun bool   `json:"unrun,omitempty" yaml:"unrun,omitempty"`
+	Name     string `json:"name" yaml:"name"`
+	Title    string `json:"title" yaml:"title"`
+	Desc     string `json:"desc,omitempty" yaml:"desc,omitempty"`
+	LogLevel int    `json:"loglevel" yaml:"loglevel"`
+	Unrun    bool   `json:"unrun,omitempty" yaml:"unrun,omitempty"`
 }
 
 type scriptItem struct {
