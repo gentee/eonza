@@ -31,7 +31,6 @@ type WebSettings struct {
 	Domain string // Domain, localhost if it sempty
 	Port   int
 	Open   bool // if true then webpage is opened
-	Lang   string
 }
 
 type Response struct {
@@ -221,13 +220,13 @@ func fileHandle(c echo.Context) error {
 func reloadHandle(c echo.Context) error {
 	ClearAsset()
 	InitTemplates()
-	InitLang(curLang)
+	InitLang()
 	InitScripts()
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
 func RunServer(options WebSettings) *echo.Echo {
-	InitLang(options.Lang)
+	InitLang()
 	InitTemplates()
 	if len(options.Domain) == 0 {
 		options.Domain = `localhost`
@@ -271,10 +270,12 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/tasks", tasksHandle)
 		e.GET("/api/remove/:id", removeTaskHandle)
 		e.GET("/api/sys", sysTaskHandle)
+		e.GET("/api/settings", settingsHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)
 		e.POST("/api/import", importHandle)
+		e.POST("/api/settings", saveSettingsHandle)
 	}
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {

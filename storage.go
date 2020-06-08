@@ -23,7 +23,7 @@ const (
 
 // Setting contains settings of the application
 type Settings struct {
-	LogLevel int `json: "loglevel"`
+	LogLevel int `json:"loglevel"`
 	//Lang string // the language of the interface
 }
 

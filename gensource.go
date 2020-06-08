@@ -116,7 +116,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 func (src *Source) Script(node scriptTree) (string, error) {
 	script := getScript(node.Name)
 	if script == nil {
-		return ``, fmt.Errorf(Lang(`erropen`), node.Name)
+		return ``, fmt.Errorf(Lang(DefLang, `erropen`), node.Name)
 	}
 	idname := lib.IdName(script.Settings.Name)
 	values, err := src.ScriptValues(script, node)

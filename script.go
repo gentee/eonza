@@ -148,10 +148,10 @@ func InitScripts() {
 
 func (script *Script) Validate() error {
 	if !lib.ValidateSysName(script.Settings.Name) {
-		return fmt.Errorf(Lang(`invalidfield`), Lang(`name`))
+		return fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `name`))
 	}
 	if len(script.Settings.Title) == 0 {
-		return fmt.Errorf(Lang(`invalidfield`), Lang(`title`))
+		return fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `title`))
 	}
 	return nil
 }
@@ -188,18 +188,18 @@ func checkDep(name, title string) error {
 		for i, item := range deps {
 			ret[i] = item.Title
 		}
-		return fmt.Errorf(Lang(`depscript`), title, strings.Join(ret, `,`))
+		return fmt.Errorf(Lang(DefLang, `depscript`), title, strings.Join(ret, `,`))
 	}
 	return nil
 }
 
 func (script *Script) SaveScript(original string) error {
 	if curScript := getScript(original); curScript != nil && curScript.embedded {
-		return fmt.Errorf(Lang(`errembed`))
+		return fmt.Errorf(Lang(DefLang, `errembed`))
 	}
 	if len(original) > 0 && original != script.Settings.Name {
 		if getScript(script.Settings.Name) != nil {
-			return fmt.Errorf(Lang(`errscriptname`), script.Settings.Name)
+			return fmt.Errorf(Lang(DefLang, `errscriptname`), script.Settings.Name)
 		}
 		if err := checkDep(original, script.Settings.Title); err != nil {
 			return err
@@ -218,10 +218,10 @@ func (script *Script) SaveScript(original string) error {
 func DeleteScript(name string) error {
 	script := getScript(name)
 	if script == nil {
-		return fmt.Errorf(Lang(`erropen`, name))
+		return fmt.Errorf(Lang(DefLang, `erropen`, name))
 	}
 	if script.embedded {
-		return fmt.Errorf(Lang(`errembed`))
+		return fmt.Errorf(Lang(DefLang, `errembed`))
 	}
 	if err := checkDep(name, script.Settings.Title); err != nil {
 		return err

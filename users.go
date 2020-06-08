@@ -23,9 +23,9 @@ type History struct {
 
 // UserSettings stores the user's settings
 type UserSettings struct {
-	ID      uint32  `yaml:"id"`
-	Lang    string  `yaml:"lang"`
-	History History `yaml:"history"`
+	ID      uint32  `json:"id" yaml:"id"`
+	Lang    string  `json:"lang" yaml:"lang"`
+	History History `json:"history" yaml:"history"`
 }
 
 // User stores user's parameters
@@ -74,11 +74,11 @@ func NewUser(nickname string) error {
 		Nickname: nickname,
 	}
 	if !lib.ValidateSysName(nickname) {
-		return fmt.Errorf(Lang(`invalidfield`), Lang(`nickname`))
+		return fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
 	}
 	for _, item := range storage.Users {
 		if item.Nickname == nickname {
-			return fmt.Errorf(Lang(`errnickname`), nickname)
+			return fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
 		}
 
 	}
@@ -93,6 +93,10 @@ func NewUser(nickname string) error {
 		return err
 	}
 	storage.Users[user.ID] = &user
+	userSettings[user.ID] = UserSettings{
+		ID:   user.ID,
+		Lang: appInfo.Lang,
+	}
 	return nil
 }
 

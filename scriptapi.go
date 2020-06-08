@@ -66,14 +66,15 @@ func getScriptHandle(c echo.Context) error {
 			name = `new`
 		}
 	}
+	idLang := GetIdLang(c.(*Auth).User)
 	script := getScript(name)
 	if script == nil {
-		response.Error = Lang(`erropen`, name)
+		response.Error = Lang(idLang, `erropen`, name)
 	} else {
 		response.Script = *script
 		if response.Script.Settings.Name == `new` {
 			response.Script.Settings.Name = lib.UniqueName(7)
-			response.Script.Settings.Title = Lang(`newscript`)
+			response.Script.Settings.Title = Lang(idLang, `newscript`)
 		} else {
 			AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name)
 			response.Original = name
@@ -143,7 +144,7 @@ func listRunHandle(c echo.Context) error {
 	list := make([]ScriptItem, 0)
 	userId := c.(*Auth).User.ID
 	if _, ok := userSettings[userId]; !ok {
-		return jsonError(c, Lang(`unknownuser`, userId))
+		return jsonError(c, Lang(DefLang, `unknownuser`, userId))
 	}
 	for _, name := range userSettings[userId].History.Run {
 		if item := getScript(name); item != nil {
@@ -161,7 +162,7 @@ func exportHandle(c echo.Context) error {
 	name := c.QueryParam(`name`)
 	script := getScript(name)
 	if script == nil {
-		response.Error = Lang(`erropen`, name)
+		response.Error = Lang(DefLang, `erropen`, name)
 	} else {
 		data, err := yaml.Marshal(script)
 		if err != nil {

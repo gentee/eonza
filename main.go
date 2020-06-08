@@ -51,7 +51,6 @@ func main() {
 		e = RunServer(WebSettings{
 			Port: scriptTask.Header.HTTP.Port,
 			Open: scriptTask.Header.HTTP.Open,
-			Lang: scriptTask.Header.Lang,
 		})
 		go func() {
 			start := time.Now()
@@ -87,7 +86,6 @@ func main() {
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,
 			Open: cfg.HTTP.Open,
-			Lang: appInfo.Lang,
 		})
 	}
 	signal.Notify(stopchan, os.Kill, os.Interrupt, syscall.SIGTERM)

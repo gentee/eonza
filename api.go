@@ -62,7 +62,7 @@ func runHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if item = getScript(name); item == nil {
-		return jsonError(c, Lang(`erropen`, name))
+		return jsonError(c, Lang(DefLang, `erropen`, name))
 	}
 	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
 		return jsonError(c, err)
@@ -73,6 +73,7 @@ func runHandle(c echo.Context) error {
 		AssetsDir:  cfg.AssetsDir,
 		LogDir:     cfg.Log.Dir,
 		UserID:     c.(*Auth).User.ID,
+		Lang:       GetIdLang(c.(*Auth).User),
 		TaskID:     lib.RndNum(),
 		ServerPort: cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{

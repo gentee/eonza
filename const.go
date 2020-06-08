@@ -29,6 +29,7 @@ const (
 	TimeFormat  = `2006/01/02 15:04:05`
 	TimeoutOpen = 3000
 	SourceCode  = `source-code`
+	DefLang     = 0
 )
 
 // AppInfo contains information about the application

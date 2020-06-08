@@ -19,6 +19,7 @@ type Render struct {
 	App     AppInfo
 	Version string
 	Develop bool
+	Langs   map[string]string
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -47,7 +48,6 @@ func Html(par string) template.HTML {
 func InitTemplates() {
 	var err error
 	tmpl = template.New(`assets`).Delims(`[[`, `]]`).Funcs(template.FuncMap{
-		"lang": Lang,
 		"html": Html,
 	})
 	for _, tpl := range _escDirs["../eonza-assets/themes/default/templates"] {
@@ -105,6 +105,10 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.App = appInfo
 		render.Version = Version
 		render.Develop = cfg.Develop
+		render.Langs = make(map[string]string)
+		for i, lang := range langs {
+			render.Langs[lang] = Lang(i, `native`)
+		}
 		data = render
 	}
 
@@ -112,5 +116,10 @@ func RenderPage(c echo.Context, url string) (string, error) {
 	if err = tmpl.ExecuteTemplate(buf, url, data); err != nil {
 		return ``, err
 	}
-	return buf.String(), err
+	body := buf.String()
+	if strings.IndexRune(body, LangChar) != -1 {
+		body = RenderLang([]rune(body), GetIdLang(c.(*Auth).User))
+	}
+
+	return body, err
 }
