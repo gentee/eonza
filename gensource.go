@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"hash/crc64"
 	"strings"
+
+	es "eonza/script"
 )
 
 type Source struct {
@@ -163,9 +165,14 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				code += "\r\n" + tmp
 			}
 		}
+		var prefix, suffix string
+		if script.Settings.LogLevel < es.LOG_INHERIT {
+			prefix = fmt.Sprintf("int prevLog = SetLogLevel(%d)\r\n", script.Settings.LogLevel)
+			suffix = "\r\nSetLogLevel(prevLog)"
+		}
 		code = fmt.Sprintf("initcmd(`%s`%s)\r\n", script.Settings.Name, parNames) + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
-			code + "\r\n}\r\n"
+			prefix + code + suffix + "\r\n}\r\n"
 	}
 	params = params[:0]
 	if script.Settings.Name != SourceCode {
@@ -206,6 +213,11 @@ func GenSource(script *Script) (string, error) {
 		}
 		params += fmt.Sprintf("%s %s = %s\r\n", par.Type, par.Name, val)
 	}
+	level := storage.Settings.LogLevel
+	if script.Settings.LogLevel < es.LOG_INHERIT {
+		level = script.Settings.LogLevel
+	}
+	params += fmt.Sprintf("SetLogLevel(%d)\r\n", level)
 	code := strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
 	if len(code) > 0 {
 		code += "\r\n"
