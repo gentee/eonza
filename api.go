@@ -86,7 +86,11 @@ func runHandle(c echo.Context) error {
 	if src, err = GenSource(item); err != nil {
 		return jsonError(c, err)
 	}
-	fmt.Println(src)
+	if storage.Settings.IncludeSrc {
+		if header.SourceCode, err = lib.GzipCompress([]byte(src)); err != nil {
+			return jsonError(c, err)
+		}
+	}
 	if err := script.Encode(header, src); err != nil {
 		return jsonError(c, err)
 	}

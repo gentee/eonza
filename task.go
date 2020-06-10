@@ -31,6 +31,13 @@ const (
 	WcLogout        // log output
 )
 
+const (
+	TExtTrace = iota
+	TExtOut
+	TExtLog
+	TExtSrc
+)
+
 type WsClient struct {
 	StdoutCount int
 	LogoutCount int
@@ -54,6 +61,7 @@ var (
 	prevStatus int
 	upgrader   websocket.Upgrader
 	wsChan     chan WsCmd
+	TaskExt    = []string{"trace", "out", "log", "g"}
 
 	stdoutBuf []string
 	logoutBuf []string
@@ -86,7 +94,7 @@ func closeTask() {
 	cmdFile.Close()
 	outFile.Close()
 	logScript.Close()
-	for _, item := range []string{"trace", "out", "log"} {
+	for _, item := range TaskExt {
 		files = append(files, filepath.Join(scriptTask.Header.LogDir,
 			fmt.Sprintf("%08x.%s", task.ID, item)))
 	}
@@ -157,6 +165,18 @@ func initTask() script.Settings {
 
 	if _, err = cmdFile.Write([]byte(task.Head())); err != nil {
 		golog.Fatal(err)
+	}
+	if len(scriptTask.Header.SourceCode) > 0 {
+		var out []byte
+		if out, err = lib.GzipDecompress(scriptTask.Header.SourceCode); err != nil {
+			golog.Fatal(err)
+		}
+		task.SourceCode = string(out)
+		srcFile := createFile(`g`)
+		if _, err = srcFile.Write(out); err != nil {
+			golog.Fatal(err)
+		}
+		srcFile.Close()
 	}
 	console = os.Stdout
 	upgrader = websocket.Upgrader{}

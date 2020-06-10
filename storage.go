@@ -12,7 +12,6 @@ import (
 	"eonza/script"
 	"io/ioutil"
 	"sync"
-	"time"
 
 	"github.com/kataras/golog"
 )
@@ -23,8 +22,8 @@ const (
 
 // Setting contains settings of the application
 type Settings struct {
-	LogLevel int `json:"loglevel"`
-	//Lang string // the language of the interface
+	LogLevel   int  `json:"loglevel"`
+	IncludeSrc bool `json:"includesrc"`
 }
 
 // Storage contains all application data
@@ -38,7 +37,6 @@ var (
 	storage = Storage{
 		Settings: Settings{
 			LogLevel: script.LOG_INFO,
-			//				Lang: appInfo.Lang,
 		},
 		Users:   make(map[uint32]*User),
 		Scripts: make(map[string]*Script),
@@ -50,26 +48,17 @@ var (
 func SaveStorage() error {
 	var (
 		data bytes.Buffer
-		buf  bytes.Buffer
+		out  []byte
 		err  error
 	)
 	enc := gob.NewEncoder(&data)
 	if err = enc.Encode(storage); err != nil {
 		return err
 	}
-	zw := gzip.NewWriter(&buf)
-	zw.Name = "data"
-	zw.Comment = ""
-	zw.ModTime = time.Now()
-	_, err = zw.Write(data.Bytes())
-	if err != nil {
+	if out, err = lib.GzipCompress(data.Bytes()); err != nil {
 		return err
 	}
-	if err = zw.Close(); err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(lib.ChangeExt(cfg.path, StorageExt), buf.Bytes(), 0777 /*os.ModePerm*/)
+	return ioutil.WriteFile(lib.ChangeExt(cfg.path, StorageExt), out, 0777 /*os.ModePerm*/)
 }
 
 func LoadStorage() {

@@ -45,6 +45,7 @@ type Task struct {
 	UserID     uint32 `json:"userid"`
 	Port       int    `json:"port"`
 	Message    string `json:"message,omitempty"`
+	SourceCode string `json:"sourcecode,omitempty"`
 }
 
 var (
@@ -79,7 +80,7 @@ func SaveTrace(task *Task) (err error) {
 }
 
 func RemoveTask(id uint32) {
-	for _, ext := range []string{`zip`, `out`, `trace`, `log`} {
+	for _, ext := range append(TaskExt, `zip`) {
 		os.Remove(filepath.Join(cfg.Log.Dir, fmt.Sprintf("%08x.%s", id, ext)))
 	}
 	/*	if err := filepath.Walk(cfg.Log.Dir, func(path string, info os.FileInfo, err error) error {
@@ -285,45 +286,50 @@ func wsMainHandle(c echo.Context) error {
 	return nil
 }
 
-func GetOutTask(id uint32) (retStdout string, retLogout string) {
+func GetTaskFiles(id uint32) (ret []string) {
 	var (
-		isStd, isLog bool
+		err error
+		out []byte
 	)
 	fname := fmt.Sprintf(`%08x.`, id)
-	if stdout, err := ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+`out`)); err == nil {
-		retStdout = string(stdout)
-		isStd = true
+
+	ret = make([]string, TExtSrc+1)
+	for i, ext := range TaskExt {
+		if i == TExtTrace {
+			continue
+		}
+		if out, err = ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+ext)); err == nil {
+			ret[i] = string(out)
+		}
 	}
-	if logout, err := ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+`log`)); err == nil {
-		retLogout = string(logout)
-		isLog = true
-	}
-	if isStd && isLog {
+	if len(ret[TExtLog]) > 0 && len(ret[TExtOut]) > 0 && len(ret[TExtSrc]) > 0 {
 		return
 	}
 	r, err := zip.OpenReader(filepath.Join(cfg.Log.Dir, fname+`zip`))
 	if err != nil {
-		return ``, ``
+		return
 	}
 	defer func() {
 		r.Close()
 	}()
 	for _, f := range r.File {
-		if (!isStd && f.Name == fname+`out`) || (!isLog && f.Name == fname+`log`) {
-			rc, err := f.Open()
-			if err != nil {
-				break
+		for i, ext := range TaskExt {
+			if i == TExtTrace {
+				continue
 			}
-			var buf bytes.Buffer
-			_, err = buf.ReadFrom(rc)
-			rc.Close()
-			if err == nil {
-				if strings.HasSuffix(f.Name, `out`) {
-					retStdout = string(buf.Bytes())
-				} else {
-					retLogout = string(buf.Bytes())
+			if len(ret[i]) == 0 && f.Name == fname+ext {
+				rc, err := f.Open()
+				if err != nil {
+					break
+				}
+				var buf bytes.Buffer
+				_, err = buf.ReadFrom(rc)
+				rc.Close()
+				if err == nil {
+					ret[i] = string(buf.Bytes())
 				}
 			}
+
 		}
 	}
 	return

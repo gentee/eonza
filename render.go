@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"eonza/lib"
 	"fmt"
 	"html/template"
 	"strings"
@@ -33,6 +34,7 @@ type RenderScript struct {
 	IsScript bool
 	Start    string
 	Finish   string
+	Source   template.HTML
 	Stdout   template.HTML
 	Logout   template.HTML
 }
@@ -91,9 +93,15 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
-			Std, Log := GetOutTask(renderScript.Task.ID)
-			renderScript.Stdout = out2html(Std, false)
-			renderScript.Logout = out2html(Log, true)
+			files := GetTaskFiles(renderScript.Task.ID)
+			renderScript.Stdout = out2html(files[TExtOut], false)
+			renderScript.Logout = out2html(files[TExtLog], true)
+			renderScript.Task.SourceCode = files[TExtSrc]
+		}
+		if len(renderScript.Task.SourceCode) > 0 {
+			if out, err := lib.Markdown("```go\r\n" + renderScript.Task.SourceCode + "\r\n```"); err == nil {
+				renderScript.Source = template.HTML(out)
+			}
 		}
 		renderScript.Start = time.Unix(renderScript.Task.StartTime, 0).Format(TimeFormat)
 		if renderScript.FinishTime != 0 && renderScript.Task.Status >= TaskFinished {

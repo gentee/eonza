@@ -21,6 +21,7 @@ type Header struct {
 	AssetsDir  string
 	LogDir     string
 	Theme      string
+	SourceCode []byte
 	Lang       int
 	UserID     uint32
 	TaskID     uint32
