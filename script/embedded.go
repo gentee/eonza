@@ -20,10 +20,18 @@ const (
 	LOG_INFO
 	LOG_DEBUG
 	LOG_INHERIT
+
+	VarChar   = '#'
+	VarLength = 32
+	VarDeep   = 16
+
+	ErrVarLoop = `%s variable refers to itself`
+	ErrVarDeep = `maximum depth reached`
 )
 
 type Data struct {
 	LogLevel int64
+	Vars     []map[string]string
 	Mutex    sync.Mutex
 	chLogout chan string
 }
@@ -31,11 +39,27 @@ type Data struct {
 var (
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
+		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(str)`, Object: InitCmd},
+		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
+		{Prototype: `macro(str) str`, Object: Macro},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
+		{Prototype: `SetVariable(str,str)`, Object: SetVariable},
 	}
 )
+
+func Deinit() {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	dataScript.Vars = dataScript.Vars[:len(dataScript.Vars)-1]
+}
+
+func Init() {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	dataScript.Vars = append(dataScript.Vars, make(map[string]string))
+}
 
 func InitCmd(name string, pars ...interface{}) bool {
 	params := make([]string, len(pars))
@@ -65,6 +89,74 @@ func LogOutput(level int64, message string) {
 		mode[level], time.Now().Format(`2006/01/02 15:04:05`), message)
 }
 
+func replace(values map[string]string, input []rune, stack *[]string) ([]rune, error) {
+	if len(input) == 0 || strings.IndexRune(string(input), VarChar) == -1 {
+		return input, nil
+	}
+	var (
+		err        error
+		isName, ok bool
+		value      string
+		tmp        []rune
+	)
+	result := make([]rune, 0, len(input))
+	name := make([]rune, 0, VarLength+1)
+
+	for i := 0; i < len(input); i++ {
+		r := input[i]
+		if r != VarChar {
+			if isName {
+				name = append(name, r)
+				if len(name) > VarLength {
+					result = append(append(result, VarChar), name...)
+					isName = false
+					name = name[:0]
+				}
+			} else {
+				result = append(result, r)
+			}
+			continue
+		}
+		if isName {
+			value, ok = values[string(name)]
+			if ok {
+				if len(*stack) < VarDeep {
+					for _, item := range *stack {
+						if item == string(name) {
+							return result, fmt.Errorf(ErrVarLoop, item)
+						}
+					}
+				} else {
+					return result, fmt.Errorf(ErrVarDeep)
+				}
+				*stack = append(*stack, string(name))
+				if tmp, err = replace(values, []rune(value), stack); err != nil {
+					return result, err
+				}
+				*stack = (*stack)[:len(*stack)-1]
+				result = append(result, tmp...)
+			} else {
+				result = append(append(result, VarChar), name...)
+				i--
+			}
+			name = name[:0]
+		}
+		isName = !isName
+	}
+	if isName {
+		result = append(append(result, VarChar), name...)
+	}
+	return result, nil
+}
+
+func Macro(in string) (string, error) {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	stack := make([]string, 0)
+	out, err := replace(dataScript.Vars[len(dataScript.Vars)-1], []rune(in), &stack)
+	return string(out), err
+}
+
 func SetLogLevel(level int64) int64 {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
@@ -75,7 +167,15 @@ func SetLogLevel(level int64) int64 {
 	return ret
 }
 
+func SetVariable(name, value string) {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	id := len(dataScript.Vars) - 1
+	dataScript.Vars[id][name] = value
+}
+
 func InitData(chLogout chan string) {
+	dataScript.Vars = make([]map[string]string, 0, 8)
 	dataScript.chLogout = chLogout
 }
 

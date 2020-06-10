@@ -312,7 +312,7 @@ func sendCmdStatus(status int, timeStamp int64, message string) {
 		task.FinishTime = timeStamp
 		finish = time.Unix(timeStamp, 0).Format(TimeFormat)
 	}
-	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status, Time: finish}
+	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status, Message: message, Time: finish}
 }
 
 func sysHandle(c echo.Context) error {

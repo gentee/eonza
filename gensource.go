@@ -64,6 +64,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 	for _, par := range script.Params {
 		var (
 			ptype, value string
+			isMacro      bool
 		)
 		val := node.Values[par.Name]
 		if val != nil {
@@ -87,7 +88,11 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				value = par.Options.Default
 			}
 			if script.Settings.Name != SourceCode {
+				isMacro = strings.ContainsRune(value, es.VarChar)
 				value = src.FindStrConst(value)
+				if isMacro {
+					value = fmt.Sprintf("macro(%s)", value)
+				}
 			}
 		case PSelect:
 			if len(par.Options.Type) > 0 {
@@ -158,11 +163,13 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				parNames += `,` + par.Name
 			}
 			if len(script.Tree) > 0 {
+				code += "\r\ninit()"
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
 					return ``, err
 				}
 				code += "\r\n" + tmp
+				code += "\r\ndeinit()"
 			}
 		}
 		var prefix, suffix string
@@ -217,7 +224,7 @@ func GenSource(script *Script) (string, error) {
 	if script.Settings.LogLevel < es.LOG_INHERIT {
 		level = script.Settings.LogLevel
 	}
-	params += fmt.Sprintf("SetLogLevel(%d)\r\n", level)
+	params += fmt.Sprintf("SetLogLevel(%d)\r\ninit()\r\n", level)
 	code := strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
 	if len(code) > 0 {
 		code += "\r\n"
@@ -237,5 +244,6 @@ func GenSource(script *Script) (string, error) {
 	constStr += `const IOTA { LOG_DISABLE
 	LOG_ERROR LOG_WARN LOG_INFO	LOG_DEBUG }
 `
-	return fmt.Sprintf("%s%s\r\nrun {\r\n%s%s%s}", constStr, src.Funcs, params, code, body), nil
+	return fmt.Sprintf("%s%s\r\nrun {\r\n%s%s%s\r\ndeinit()}", constStr, src.Funcs, params,
+		code, body), nil
 }
