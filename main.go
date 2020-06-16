@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"flag"
 	"os"
 	"os/signal"
@@ -33,6 +34,8 @@ func main() {
 		golog.Fatal(err)
 	}
 	script.InitWorkspace()
+	gob.Register([]interface{}{})
+	gob.Register(map[string]interface{}{})
 
 	fi, err := os.Stdin.Stat()
 	if err != nil {

@@ -99,7 +99,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Task.SourceCode = files[TExtSrc]
 		}
 		if len(renderScript.Task.SourceCode) > 0 {
-			if out, err := lib.Markdown("```go\r\n" + renderScript.Task.SourceCode + "\r\n```"); err == nil {
+			if out, err := lib.Markdown("```go\r\n" + renderScript.Task.SourceCode +
+				"\r\n```"); err == nil {
 				renderScript.Source = template.HTML(out)
 			}
 		}

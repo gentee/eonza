@@ -27,6 +27,7 @@ const (
 	PSingleText
 	PSelect
 	PNumber
+	PList
 )
 
 type scriptSettings struct {
@@ -43,11 +44,12 @@ type scriptItem struct {
 }
 
 type scriptOptions struct {
-	Initial  string       `json:"initial,omitempty" yaml:"initial,omitempty"`
-	Default  string       `json:"default,omitempty" yaml:"default,omitempty"`
-	Required bool         `json:"required,omitempty" yaml:"required,omitempty"`
-	Type     string       `json:"type,omitempty" yaml:"type,omitempty"`
-	Items    []scriptItem `json:"items,omitempty" yaml:"items,omitempty"`
+	Initial  string        `json:"initial,omitempty" yaml:"initial,omitempty"`
+	Default  string        `json:"default,omitempty" yaml:"default,omitempty"`
+	Required bool          `json:"required,omitempty" yaml:"required,omitempty"`
+	Type     string        `json:"type,omitempty" yaml:"type,omitempty"`
+	Items    []scriptItem  `json:"items,omitempty" yaml:"items,omitempty"`
+	List     []scriptParam `json:"list,omitempty" yaml:"list,omitempty"`
 }
 
 type scriptParam struct {
@@ -80,14 +82,16 @@ func getScript(name string) (script *Script) {
 }
 
 func setScript(script *Script) error {
-	var ivalues map[string]string
+	var ivalues map[string]interface{} //string
 
 	scripts[lib.IdName(script.Settings.Name)] = script
 	if len(script.Params) > 0 {
-		ivalues = make(map[string]string)
+		ivalues = make(map[string]interface{}) //string)
 	}
 	for _, par := range script.Params {
-		if len(par.Options.Initial) > 0 {
+		if par.Type == PList {
+			ivalues[par.Name] = []interface{}{}
+		} else if len(par.Options.Initial) > 0 {
 			/*			var options scriptOptions
 						if err := yaml.Unmarshal([]byte(par.Options), &options); err != nil {
 							return err
