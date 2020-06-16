@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"eonza/lib"
 	"fmt"
 	"hash/crc64"
@@ -110,6 +111,13 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				}
 				value = par.Options.Default
 			}
+		case PList:
+			ptype = `str`
+			out, err := json.Marshal(val)
+			if err != nil {
+				return nil, err
+			}
+			value = src.FindStrConst(string(out))
 		}
 		values = append(values, Param{
 			Value: value,

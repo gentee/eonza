@@ -29,6 +29,7 @@ const (
 	WcStdout        // new line in console
 	WcStdbuf        // current output including carriage
 	WcLogout        // log output
+	WcForm          // form output
 )
 
 const (
@@ -37,6 +38,10 @@ const (
 	TExtLog
 	TExtSrc
 )
+
+type FormResponse struct {
+	FormID uint32 `json:"formid"`
+}
 
 type WsClient struct {
 	StdoutCount int
@@ -65,6 +70,7 @@ var (
 
 	stdoutBuf []string
 	logoutBuf []string
+	formData  []script.FormInfo
 	iStdout   int
 	iLogout   int
 
@@ -73,11 +79,13 @@ var (
 	outFile   *os.File
 	logScript *os.File
 
-	chStdin  chan []byte
-	chStdout chan []byte
-	chLogout chan string
-	chSystem chan int
-	chFinish chan bool
+	chStdin    chan []byte
+	chStdout   chan []byte
+	chLogout   chan string
+	chForm     chan script.FormInfo
+	chFormNext chan bool
+	chSystem   chan int
+	chFinish   chan bool
 
 	clients = make(map[uint32]WsClient)
 )
@@ -107,6 +115,18 @@ func closeTask() {
 			os.Remove(item)
 		}
 	}
+}
+
+func sendForm(client WsClient) error {
+	if len(formData) == 0 {
+		return nil
+	}
+	return client.Conn.WriteJSON(WsCmd{
+		TaskID:  task.ID,
+		Cmd:     WcForm,
+		Message: formData[0].Data,
+		Status:  int(formData[0].ID),
+	})
 }
 
 func sendStdout(client WsClient) error {
@@ -185,6 +205,8 @@ func initTask() script.Settings {
 	chStdin = make(chan []byte)
 	chStdout = make(chan []byte)
 	chLogout = make(chan string)
+	chForm = make(chan script.FormInfo)
+	chFormNext = make(chan bool)
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
 	stdoutBuf = []string{``}
@@ -249,6 +271,28 @@ func initTask() script.Settings {
 	}()
 
 	go func() {
+		var out script.FormInfo
+		for {
+			select {
+			case out = <-chForm:
+				formData = append(formData, out)
+				if len(formData) > 1 {
+					continue
+				}
+			case <-chFormNext:
+			}
+			mutex.Lock()
+			for id, client := range clients {
+				if sendForm(client) != nil {
+					client.Conn.Close()
+					delete(clients, id)
+				}
+			}
+			mutex.Unlock()
+		}
+	}()
+
+	go func() {
 		var cmd WsCmd
 		for task.Status <= TaskSuspended {
 			cmd = <-wsChan
@@ -268,7 +312,7 @@ func initTask() script.Settings {
 		chFinish <- true
 	}()
 
-	script.InitData(chLogout)
+	script.InitData(chLogout, chForm)
 	return script.Settings{
 		ChStdin:  chStdin,
 		ChStdout: chStdout,
@@ -290,15 +334,16 @@ func wsTaskHandle(c echo.Context) error {
 		client := WsClient{
 			Conn: ws,
 		}
-		if sendStdout(client) == nil {
+		if err = sendStdout(client); err == nil {
 			client.StdoutCount = iStdout
-			if sendLogout(client) == nil {
+			if err = sendLogout(client); err == nil {
 				client.LogoutCount = iLogout
-				clients[lib.RndNum()] = client
-			} else {
-				client.Conn.Close()
+				if err = sendForm(client); err == nil {
+					clients[lib.RndNum()] = client
+				}
 			}
-		} else {
+		}
+		if err != nil {
 			client.Conn.Close()
 		}
 	}
@@ -411,5 +456,27 @@ func stdinHandle(c echo.Context) error {
 	msg := form.Message + "\n"
 	chStdin <- []byte(msg)
 	chStdout <- []byte(msg)
+	return jsonSuccess(c)
+}
+
+func formHandle(c echo.Context) error {
+	var (
+		form FormResponse
+		err  error
+	)
+	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
+	if uint32(id) != task.ID {
+		return jsonError(c, fmt.Errorf(`wrong task id`))
+	}
+	if err = c.Bind(&form); err != nil {
+		return jsonError(c, err)
+	}
+	if len(formData) > 0 && formData[0].ID == form.FormID {
+		formData[0].ChResponse <- true
+		formData = formData[1:]
+		if len(formData) > 0 {
+			chFormNext <- true
+		}
+	}
 	return jsonSuccess(c)
 }

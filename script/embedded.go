@@ -29,19 +29,28 @@ const (
 	ErrVarDeep = `maximum depth reached`
 )
 
+type FormInfo struct {
+	ChResponse chan bool
+	Data       string
+	ID         uint32
+}
+
 type Data struct {
 	LogLevel int64
 	Vars     []map[string]string
 	Mutex    sync.Mutex
 	chLogout chan string
+	chForm   chan FormInfo
 }
 
 var (
+	formID     uint32
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
+		{Prototype: `Form(str)`, Object: Form},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `macro(str) str`, Object: Macro},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
@@ -73,6 +82,20 @@ func InitCmd(name string, pars ...interface{}) bool {
 	}
 	LogOutput(LOG_DEBUG, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
 	return true
+}
+
+func Form(data string) {
+	ch := make(chan bool)
+	dataScript.Mutex.Lock()
+	form := FormInfo{
+		ChResponse: ch,
+		Data:       data,
+		ID:         formID,
+	}
+	formID++
+	dataScript.Mutex.Unlock()
+	dataScript.chForm <- form
+	<-ch
 }
 
 func LogOutput(level int64, message string) {
@@ -174,9 +197,10 @@ func SetVariable(name, value string) {
 	dataScript.Vars[id][name] = value
 }
 
-func InitData(chLogout chan string) {
+func InitData(chLogout chan string, chForm chan FormInfo) {
 	dataScript.Vars = make([]map[string]string, 0, 8)
 	dataScript.chLogout = chLogout
+	dataScript.chForm = chForm
 }
 
 func InitEngine() error {

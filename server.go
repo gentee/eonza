@@ -257,6 +257,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/sys", sysHandle)
 		e.GET("/info", infoHandle)
 		e.POST("/stdin", stdinHandle)
+		e.POST("/form", formHandle)
 	} else {
 		e.GET("/ws", wsMainHandle)
 		e.GET("/task/:id", showTaskHandle)
