@@ -92,7 +92,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				isMacro = strings.ContainsRune(value, es.VarChar)
 				value = src.FindStrConst(value)
 				if isMacro {
-					value = fmt.Sprintf("macro(%s)", value)
+					value = fmt.Sprintf("Macro(%s)", value)
 				}
 			}
 		case PSelect:

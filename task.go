@@ -40,7 +40,8 @@ const (
 )
 
 type FormResponse struct {
-	FormID uint32 `json:"formid"`
+	FormID uint32                 `json:"formid"`
+	Values map[string]interface{} `json:"values"`
 }
 
 type WsClient struct {
@@ -472,6 +473,9 @@ func formHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if len(formData) > 0 && formData[0].ID == form.FormID {
+		for key, val := range form.Values {
+			script.SetVariable(key, fmt.Sprint(val))
+		}
 		formData[0].ChResponse <- true
 		formData = formData[1:]
 		if len(formData) > 0 {

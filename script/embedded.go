@@ -5,6 +5,7 @@
 package script
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -51,8 +52,9 @@ var (
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `Form(str)`, Object: Form},
+		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
-		{Prototype: `macro(str) str`, Object: Macro},
+		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetVariable(str,str)`, Object: SetVariable},
 	}
@@ -84,8 +86,26 @@ func InitCmd(name string, pars ...interface{}) bool {
 	return true
 }
 
+func IsVar(key string) bool {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Lock()
+	_, ret := dataScript.Vars[len(dataScript.Vars)-1][key]
+	return ret
+}
+
 func Form(data string) {
 	ch := make(chan bool)
+	var dataList []map[string]interface{}
+
+	if json.Unmarshal([]byte(data), &dataList) == nil {
+		for i, item := range dataList {
+			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][fmt.Sprint(item["var"])])
+			dataList[i]["value"] = val
+		}
+		if out, err := json.Marshal(dataList); err == nil {
+			data = string(out)
+		}
+	}
 	dataScript.Mutex.Lock()
 	form := FormInfo{
 		ChResponse: ch,
