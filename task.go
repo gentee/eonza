@@ -476,6 +476,11 @@ func formHandle(c echo.Context) error {
 		for key, val := range form.Values {
 			script.SetVariable(key, fmt.Sprint(val))
 		}
+		if forLog, err := json.Marshal(form.Values); err != nil {
+			script.LogOutput(script.LOG_ERROR, err.Error())
+		} else {
+			script.LogOutput(script.LOG_FORM, string(forLog))
+		}
 		formData[0].ChResponse <- true
 		formData = formData[1:]
 		if len(formData) > 0 {

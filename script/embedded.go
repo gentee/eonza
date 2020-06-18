@@ -18,6 +18,7 @@ const (
 	LOG_DISABLE = iota
 	LOG_ERROR
 	LOG_WARN
+	LOG_FORM
 	LOG_INFO
 	LOG_DEBUG
 	LOG_INHERIT
@@ -119,7 +120,7 @@ func Form(data string) {
 }
 
 func LogOutput(level int64, message string) {
-	var mode = []string{``, `ERROR`, `WARN`, `INFO`, `DEBUG`}
+	var mode = []string{``, `ERROR`, `WARN`, `FORM`, `INFO`, `DEBUG`}
 	if level < LOG_ERROR || level > LOG_DEBUG {
 		return
 	}

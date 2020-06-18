@@ -78,8 +78,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 	out2html := func(input string, isLog bool) template.HTML {
 		out := strings.ReplaceAll(input, "\n", `<br>`)
 		if isLog {
-			for key, item := range map[string]string{`INFO`: `egreen`, `WARN`: `eyellow`,
-				`ERROR`: `ered`} {
+			for key, item := range map[string]string{`INFO`: `egreen`, `FORM`: `eblue`,
+				`WARN`: `eyellow`, `ERROR`: `ered`} {
 				out = strings.ReplaceAll(out, "["+key+"]", fmt.Sprintf(`<span class="%s">[%s]</span>`,
 					item, key))
 			}
