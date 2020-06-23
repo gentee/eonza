@@ -474,7 +474,7 @@ func formHandle(c echo.Context) error {
 	}
 	if len(formData) > 0 && formData[0].ID == form.FormID {
 		for key, val := range form.Values {
-			script.SetVariable(key, fmt.Sprint(val))
+			script.SetVar(key, fmt.Sprint(val))
 		}
 		if forLog, err := json.Marshal(form.Values); err != nil {
 			script.LogOutput(script.LOG_ERROR, err.Error())

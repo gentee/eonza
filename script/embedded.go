@@ -57,7 +57,8 @@ var (
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
-		{Prototype: `SetVariable(str,str)`, Object: SetVariable},
+		{Prototype: `SetVar(str,str)`, Object: SetVar},
+		{Prototype: `GetVar(str) str`, Object: GetVar},
 	}
 )
 
@@ -65,6 +66,14 @@ func Deinit() {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	dataScript.Vars = dataScript.Vars[:len(dataScript.Vars)-1]
+}
+
+func GetVar(name string) (ret string, err error) {
+	if IsVar(name) {
+		id := len(dataScript.Vars) - 1
+		ret, err = Macro(dataScript.Vars[id][name])
+	}
+	return
 }
 
 func Init() {
@@ -89,7 +98,7 @@ func InitCmd(name string, pars ...interface{}) bool {
 
 func IsVar(key string) bool {
 	dataScript.Mutex.Lock()
-	defer dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
 	_, ret := dataScript.Vars[len(dataScript.Vars)-1][key]
 	return ret
 }
@@ -211,7 +220,7 @@ func SetLogLevel(level int64) int64 {
 	return ret
 }
 
-func SetVariable(name, value string) {
+func SetVar(name, value string) {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	id := len(dataScript.Vars) - 1
