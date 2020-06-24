@@ -81,6 +81,33 @@ func getScript(name string) (script *Script) {
 	return scripts[lib.IdName(name)]
 }
 
+func retypeValues(value interface{}) interface{} {
+	switch v := value.(type) {
+	case map[string]interface{}:
+		for key, item := range v {
+			if val := retypeValues(item); val != nil {
+				v[key] = val
+			}
+		}
+	case []interface{}:
+		for i, item := range v {
+			if val := retypeValues(item); val != nil {
+				v[i] = val
+			}
+		}
+	case map[interface{}]interface{}:
+		ret := make(map[string]interface{})
+		for key, item := range v {
+			if val := retypeValues(item); val != nil {
+				item = val
+			}
+			ret[fmt.Sprint(key)] = item
+		}
+		return ret
+	}
+	return nil
+}
+
 func setScript(script *Script) error {
 	var ivalues map[string]interface{} //string
 
