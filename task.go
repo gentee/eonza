@@ -103,7 +103,10 @@ func closeTask() {
 	cmdFile.Close()
 	outFile.Close()
 	logScript.Close()
-	for _, item := range TaskExt {
+	for i, item := range TaskExt {
+		if i == TExtSrc && !storage.Settings.IncludeSrc {
+			continue
+		}
 		files = append(files, filepath.Join(scriptTask.Header.LogDir,
 			fmt.Sprintf("%08x.%s", task.ID, item)))
 	}

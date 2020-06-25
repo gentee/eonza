@@ -9,8 +9,8 @@ run {
 
     $ /home/ak/go/bin/esc -ignore "\.git|LICENSE|README.md" -o assets.go ../eonza-assets 
     $ go install -tags "eonza standard"
-    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
-    $ /home/ak/app/eonza/eonza
+    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/eonza
+    $ /home/ak/app/eonza-dev/eonza
 //    $ /home/ak/app/eonza/eonza -cfg /home/ak/app/eonza/config
 //  /home/ak/go/bin/esc -o assets.go ../eonza-assets/default
 }
