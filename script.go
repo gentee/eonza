@@ -68,13 +68,14 @@ type scriptTree struct {
 }
 
 type Script struct {
-	Settings scriptSettings `json:"settings" yaml:"settings"`
-	Params   []scriptParam  `json:"params,omitempty" yaml:"params,omitempty"`
-	Tree     []scriptTree   `json:"tree,omitempty" yaml:"tree,omitempty"`
-	Code     string         `json:"code,omitempty" yaml:"code,omitempty"`
-	folder   bool           // can have other commands inside
-	embedded bool           // Embedded script
-	initial  string         // Initial value
+	Settings scriptSettings               `json:"settings" yaml:"settings"`
+	Params   []scriptParam                `json:"params,omitempty" yaml:"params,omitempty"`
+	Tree     []scriptTree                 `json:"tree,omitempty" yaml:"tree,omitempty"`
+	Langs    map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
+	Code     string                       `json:"code,omitempty" yaml:"code,omitempty"`
+	folder   bool                         // can have other commands inside
+	embedded bool                         // Embedded script
+	initial  string                       // Initial value
 }
 
 func getScript(name string) (script *Script) {
