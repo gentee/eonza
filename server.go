@@ -77,8 +77,12 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			break
 		}
 		lang := `en`
-		if u, ok := userSettings[user.ID]; ok {
-			lang = u.Lang
+		if IsScript {
+			lang = scriptTask.Header.Lang
+		} else {
+			if u, ok := userSettings[user.ID]; ok {
+				lang = u.Lang
+			}
 		}
 		auth := &Auth{
 			Context: c,
