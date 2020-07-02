@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	es "eonza/script"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Source struct {
@@ -19,6 +21,7 @@ type Source struct {
 	Strings     []string
 	CRCTable    *crc64.Table
 	HashStrings map[uint64]int
+	Header      *es.Header
 	Counter     int
 	Funcs       string
 }
@@ -128,6 +131,28 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 	return values, nil
 }
 
+func (src *Source) Predefined(script *Script) (ret string, err error) {
+	if len(script.Langs[`en`]) > 0 {
+		var data []byte
+		predef := make(map[string]string)
+
+		for name, value := range script.Langs[`en`] {
+			predef[name] = value
+		}
+		if src.Header.Lang != `en` {
+			for name, value := range script.Langs[src.Header.Lang] {
+				predef[name] = value
+			}
+		}
+		data, err = yaml.Marshal(predef)
+		if err != nil {
+			return
+		}
+		ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
+	}
+	return
+}
+
 func (src *Source) Script(node scriptTree) (string, error) {
 	script := getScript(node.Name)
 	if script == nil {
@@ -141,13 +166,17 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	var params []string
 	if !src.Linked[idname] || script.Settings.Name == SourceCode {
 		src.Linked[idname] = true
+
 		tmp, err := src.Tree(node.Children)
 		if err != nil {
 			return ``, err
 		}
 		var (
-			code string
+			code, predef string
 		)
+		if predef, err = src.Predefined(script); err != nil {
+			return ``, err
+		}
 		if script.Settings.Name == SourceCode {
 			code = values[1].Value
 		} else {
@@ -171,21 +200,26 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				parNames += `,` + par.Name
 			}
 			if len(script.Tree) > 0 {
-				code += "\r\ninit()"
+				//				code += "\r\ninit()"
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
 					return ``, err
 				}
 				code += "\r\n" + tmp
-				code += "\r\ndeinit()"
+				//				code += "\r\ndeinit()"
 			}
 		}
-		var prefix, suffix string
+		var prefix, suffix, initcmd string
 		if script.Settings.LogLevel < es.LOG_INHERIT {
 			prefix = fmt.Sprintf("int prevLog = SetLogLevel(%d)\r\n", script.Settings.LogLevel)
 			suffix = "\r\nSetLogLevel(prevLog)"
 		}
-		code = fmt.Sprintf("initcmd(`%s`%s)\r\n", script.Settings.Name, parNames) + code
+		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", script.Settings.Name, parNames)
+		if len(script.Tree) > 0 || len(predef) > 0 {
+			initcmd += "init()\r\n" + predef
+			code += "\r\ndeinit()"
+		}
+		code = initcmd + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"
 	}
@@ -210,12 +244,13 @@ func ValToStr(input string) string {
 	return out
 }
 
-func GenSource(script *Script) (string, error) {
+func GenSource(script *Script, header *es.Header) (string, error) {
 	var params string
 	src := &Source{
 		Linked:      make(map[string]bool),
 		CRCTable:    crc64.MakeTable(crc64.ISO),
 		HashStrings: make(map[uint64]int),
+		Header:      header,
 	}
 	values, err := src.ScriptValues(script, scriptTree{})
 	if err != nil {
@@ -236,6 +271,11 @@ func GenSource(script *Script) (string, error) {
 	code := strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
 	if len(code) > 0 {
 		code += "\r\n"
+	}
+	if predef, err := src.Predefined(script); err != nil {
+		return ``, err
+	} else {
+		code = predef + code
 	}
 	body, err := src.Tree(script.Tree)
 	if err != nil {

@@ -32,17 +32,30 @@ func InitLang() {
 	}
 }
 
-func GetIdLang(user *User) (ret int) {
+func GetLangCode(user *User) (ret string) {
 	if user == nil && IsScript {
 		return scriptTask.Header.Lang
 	}
 	if u, ok := userSettings[user.ID]; ok {
+		return u.Lang
+	}
+	return `en`
+}
+
+func GetLangId(user *User) (ret int) {
+	find := func(code string) int {
 		for i, lang := range langs {
-			if lang == u.Lang {
-				ret = i
-				break
+			if lang == code {
+				return i
 			}
 		}
+		return 0
+	}
+	if user == nil && IsScript {
+		return find(scriptTask.Header.Lang)
+	}
+	if u, ok := userSettings[user.ID]; ok {
+		return find(u.Lang)
 	}
 	return
 }

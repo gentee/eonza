@@ -127,7 +127,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 	}
 	body := buf.String()
 	if strings.IndexRune(body, LangChar) != -1 {
-		body = RenderLang([]rune(body), GetIdLang(c.(*Auth).User))
+		body = RenderLang([]rune(body), GetLangId(c.(*Auth).User))
 	}
 
 	return body, err

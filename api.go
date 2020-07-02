@@ -73,7 +73,7 @@ func runHandle(c echo.Context) error {
 		AssetsDir:  cfg.AssetsDir,
 		LogDir:     cfg.Log.Dir,
 		UserID:     c.(*Auth).User.ID,
-		Lang:       GetIdLang(c.(*Auth).User),
+		Lang:       GetLangCode(c.(*Auth).User),
 		TaskID:     lib.RndNum(),
 		ServerPort: cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
@@ -83,7 +83,7 @@ func runHandle(c echo.Context) error {
 			Access: cfg.HTTP.Access,
 		},
 	}
-	if src, err = GenSource(item); err != nil {
+	if src, err = GenSource(item, &header); err != nil {
 		return jsonError(c, err)
 	}
 	if storage.Settings.IncludeSrc {

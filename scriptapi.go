@@ -66,7 +66,7 @@ func getScriptHandle(c echo.Context) error {
 			name = `new`
 		}
 	}
-	idLang := GetIdLang(c.(*Auth).User)
+	idLang := GetLangId(c.(*Auth).User)
 	script := getScript(name)
 	if script == nil {
 		response.Error = Lang(idLang, `erropen`, name)

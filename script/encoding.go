@@ -22,7 +22,7 @@ type Header struct {
 	LogDir     string
 	Theme      string
 	SourceCode []byte
-	Lang       int
+	Lang       string
 	UserID     uint32
 	TaskID     uint32
 	ServerPort int

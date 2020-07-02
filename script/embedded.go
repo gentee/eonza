@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gentee/gentee"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -57,8 +58,11 @@ var (
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
+		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
+		// For gentee
+		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 	}
 )
 
@@ -111,6 +115,8 @@ func Form(data string) {
 		for i, item := range dataList {
 			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][fmt.Sprint(item["var"])])
 			dataList[i]["value"] = val
+			val, _ = Macro(fmt.Sprint(item["text"]))
+			dataList[i]["text"] = val
 		}
 		if out, err := json.Marshal(dataList); err == nil {
 			data = string(out)
@@ -225,6 +231,22 @@ func SetVar(name, value string) {
 	defer dataScript.Mutex.Unlock()
 	id := len(dataScript.Vars) - 1
 	dataScript.Vars[id][name] = value
+}
+
+func SetYamlVars(in string) error {
+	var (
+		err error
+		tmp map[string]string
+	)
+	if err = yaml.Unmarshal([]byte(in), &tmp); err != nil {
+		return err
+	}
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	for name, value := range tmp {
+		dataScript.Vars[len(dataScript.Vars)-1][name] = value
+	}
+	return nil
 }
 
 func InitData(chLogout chan string, chForm chan FormInfo) {
