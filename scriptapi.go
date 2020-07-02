@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"strings"
 
+	es "eonza/script"
+
 	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
 )
@@ -28,9 +30,10 @@ type ScriptItem struct {
 
 type ScriptResponse struct {
 	Script
-	Original string       `json:"original"`
-	History  []ScriptItem `json:"history,omitempty"`
-	Error    string       `json:"error,omitempty"`
+	LangTitle string       `json:"langtitle"`
+	Original  string       `json:"original"`
+	History   []ScriptItem `json:"history,omitempty"`
+	Error     string       `json:"error,omitempty"`
 }
 
 type ListResponse struct {
@@ -47,7 +50,7 @@ var (
 func deleteScriptHandle(c echo.Context) error {
 	var response Response
 
-	if err := DeleteScript(c.QueryParam(`name`)); err != nil {
+	if err := DeleteScript(c, c.QueryParam(`name`)); err != nil {
 		response.Error = fmt.Sprint(err)
 	} else {
 		response.Success = true
@@ -61,7 +64,7 @@ func getScriptHandle(c echo.Context) error {
 
 	name := c.QueryParam(`name`)
 	if len(name) == 0 {
-		name = LatestHistoryEditor(c.(*Auth).User.ID)
+		name = LatestHistoryEditor(c)
 		if len(name) == 0 {
 			name = `new`
 		}
@@ -78,8 +81,10 @@ func getScriptHandle(c echo.Context) error {
 		} else {
 			AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name)
 			response.Original = name
+			response.LangTitle = es.ReplaceVars(response.Script.Settings.Title,
+				script.Langs[c.(*Auth).Lang])
 		}
-		response.History = GetHistoryEditor(c.(*Auth).User.ID)
+		response.History = GetHistoryEditor(c)
 	}
 	return c.JSON(http.StatusOK, &response)
 }
@@ -103,22 +108,28 @@ func saveScriptHandle(c echo.Context) error {
 			return errResult()
 		}
 	}
-	if err = (&script.Script).SaveScript(script.Original); err != nil {
+	if err = (&script.Script).SaveScript(c, script.Original); err != nil {
 		return errResult()
 	}
 	hotVersion++
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
-func ScriptToItem(script *Script) ScriptItem {
+func ScriptToItem(c echo.Context, script *Script) ScriptItem {
+	lang := c.(*Auth).Lang
+	params := make([]scriptParam, len(script.Params))
+	for i, item := range script.Params {
+		params[i] = item
+		params[i].Title = es.ReplaceVars(params[i].Title, script.Langs[lang])
+	}
 	return ScriptItem{
 		Name:     script.Settings.Name,
-		Title:    script.Settings.Title,
-		Desc:     script.Settings.Desc,
+		Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang]),
+		Desc:     es.ReplaceVars(script.Settings.Desc, script.Langs[lang]),
 		Unrun:    script.Settings.Unrun,
 		Embedded: script.embedded,
 		Folder:   script.folder,
-		Params:   script.Params,
+		Params:   params,
 		Initial:  script.initial,
 	}
 
@@ -133,7 +144,7 @@ func listScriptHandle(c echo.Context) error {
 		list := make(map[string]ScriptItem)
 
 		for _, item := range scripts {
-			list[item.Settings.Name] = ScriptToItem(item)
+			list[item.Settings.Name] = ScriptToItem(c, item)
 		}
 		resp.Map = list
 	}
@@ -148,7 +159,7 @@ func listRunHandle(c echo.Context) error {
 	}
 	for _, name := range userSettings[userId].History.Run {
 		if item := getScript(name); item != nil {
-			list = append(list, ScriptToItem(item))
+			list = append(list, ScriptToItem(c, item))
 		}
 	}
 	return c.JSON(http.StatusOK, &ListResponse{
@@ -230,7 +241,7 @@ func importHandle(c echo.Context) error {
 		response.Script = *pscript
 		response.Original = pscript.Settings.Name
 		AddHistoryEditor(c.(*Auth).User.ID, pscript.Settings.Name)
-		response.History = GetHistoryEditor(c.(*Auth).User.ID)
+		response.History = GetHistoryEditor(c)
 	}
 	if len(errFormat) > 0 {
 		response.Error = fmt.Sprintf(`Invalid format: %s `, strings.Join(errFormat, `, `))

@@ -7,12 +7,14 @@ package main
 import (
 	"encoding/hex"
 	"eonza/lib"
+	es "eonza/script"
 	"fmt"
 	"hash/crc32"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
 )
 
@@ -122,7 +124,7 @@ func AddHistoryEditor(id uint32, name string) error {
 }
 
 // GetHistory returns the history list
-func GetHistory(list []string) []ScriptItem {
+func GetHistory(c echo.Context, list []string) []ScriptItem {
 	ret := make([]ScriptItem, 0, len(list))
 	for _, item := range list {
 		script := getScript(item)
@@ -131,20 +133,20 @@ func GetHistory(list []string) []ScriptItem {
 		}
 		ret = append(ret, ScriptItem{
 			Name:  item,
-			Title: script.Settings.Title,
+			Title: es.ReplaceVars(script.Settings.Title, script.Langs[c.(*Auth).Lang]),
 		})
 	}
 	return ret
 }
 
 // GetHistoryEditor returns the history list
-func GetHistoryEditor(id uint32) []ScriptItem {
-	return GetHistory(userSettings[id].History.Editor)
+func GetHistoryEditor(c echo.Context) []ScriptItem {
+	return GetHistory(c, userSettings[c.(*Auth).User.ID].History.Editor)
 }
 
 // LatestHistory returns the latest open project
-func LatestHistoryEditor(id uint32) (ret string) {
-	list := GetHistoryEditor(id)
+func LatestHistoryEditor(c echo.Context) (ret string) {
+	list := GetHistoryEditor(c)
 	if len(list) > 0 {
 		return list[0].Name
 	}
@@ -173,9 +175,9 @@ func AddHistoryRun(id uint32, name string) error {
 }
 
 // GetHistoryRun returns the launchedhistory list
-func GetHistoryRun(id uint32) []ScriptItem {
+/*func GetHistoryRun(id uint32) []ScriptItem {
 	return GetHistory(userSettings[id].History.Run)
-}
+}*/
 
 func SaveUser(id uint32) error {
 	data, err := yaml.Marshal(userSettings[id])

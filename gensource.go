@@ -137,11 +137,15 @@ func (src *Source) Predefined(script *Script) (ret string, err error) {
 		predef := make(map[string]string)
 
 		for name, value := range script.Langs[`en`] {
-			predef[name] = value
+			if !strings.HasPrefix(name, `_`) {
+				predef[name] = value
+			}
 		}
 		if src.Header.Lang != `en` {
 			for name, value := range script.Langs[src.Header.Lang] {
-				predef[name] = value
+				if !strings.HasPrefix(name, `_`) {
+					predef[name] = value
+				}
 			}
 		}
 		data, err = yaml.Marshal(predef)
@@ -200,13 +204,13 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				parNames += `,` + par.Name
 			}
 			if len(script.Tree) > 0 {
-				//				code += "\r\ninit()"
+				code += "\r\ninit()\r\n" + predef
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
 					return ``, err
 				}
 				code += "\r\n" + tmp
-				//				code += "\r\ndeinit()"
+				code += "\r\ndeinit()"
 			}
 		}
 		var prefix, suffix, initcmd string
@@ -215,10 +219,10 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			suffix = "\r\nSetLogLevel(prevLog)"
 		}
 		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", script.Settings.Name, parNames)
-		if len(script.Tree) > 0 || len(predef) > 0 {
-			initcmd += "init()\r\n" + predef
-			code += "\r\ndeinit()"
-		}
+		/*		if len(script.Tree) > 0 || len(predef) > 0 {
+				initcmd += "init()\r\n" + predef
+				code += "\r\ndeinit()"
+			}*/
 		code = initcmd + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"

@@ -42,6 +42,7 @@ type Response struct {
 type Auth struct {
 	echo.Context
 	User *User
+	Lang string
 }
 
 var (
@@ -75,9 +76,14 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		for _, user = range storage.Users {
 			break
 		}
+		lang := `en`
+		if u, ok := userSettings[user.ID]; ok {
+			lang = u.Lang
+		}
 		auth := &Auth{
 			Context: c,
 			User:    user,
+			Lang:    lang,
 		}
 		err = next(auth)
 		mutex.Unlock()

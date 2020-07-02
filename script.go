@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/kataras/golog"
+	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
 )
 
@@ -200,7 +201,7 @@ func scanTree(tree []scriptTree, name string) bool {
 	return false
 }
 
-func ScriptDependences(name string) []ScriptItem {
+func ScriptDependences(c echo.Context, name string) []ScriptItem {
 	var ret []ScriptItem
 
 	for _, item := range scripts {
@@ -208,14 +209,14 @@ func ScriptDependences(name string) []ScriptItem {
 			continue
 		}
 		if scanTree(item.Tree, name) {
-			ret = append(ret, ScriptToItem(item))
+			ret = append(ret, ScriptToItem(c, item))
 		}
 	}
 	return ret
 }
 
-func checkDep(name, title string) error {
-	if deps := ScriptDependences(name); len(deps) > 0 {
+func checkDep(c echo.Context, name, title string) error {
+	if deps := ScriptDependences(c, name); len(deps) > 0 {
 		ret := make([]string, len(deps))
 		for i, item := range deps {
 			ret[i] = item.Title
@@ -225,7 +226,7 @@ func checkDep(name, title string) error {
 	return nil
 }
 
-func (script *Script) SaveScript(original string) error {
+func (script *Script) SaveScript(c echo.Context, original string) error {
 	if curScript := getScript(original); curScript != nil && curScript.embedded {
 		return fmt.Errorf(Lang(DefLang, `errembed`))
 	}
@@ -233,7 +234,7 @@ func (script *Script) SaveScript(original string) error {
 		if getScript(script.Settings.Name) != nil {
 			return fmt.Errorf(Lang(DefLang, `errscriptname`), script.Settings.Name)
 		}
-		if err := checkDep(original, script.Settings.Title); err != nil {
+		if err := checkDep(c, original, script.Settings.Title); err != nil {
 			return err
 		}
 		delScript(original)
@@ -247,7 +248,7 @@ func (script *Script) SaveScript(original string) error {
 	return SaveStorage()
 }
 
-func DeleteScript(name string) error {
+func DeleteScript(c echo.Context, name string) error {
 	script := getScript(name)
 	if script == nil {
 		return fmt.Errorf(Lang(DefLang, `erropen`, name))
@@ -255,7 +256,7 @@ func DeleteScript(name string) error {
 	if script.embedded {
 		return fmt.Errorf(Lang(DefLang, `errembed`))
 	}
-	if err := checkDep(name, script.Settings.Title); err != nil {
+	if err := checkDep(c, name, script.Settings.Title); err != nil {
 		return err
 	}
 	delScript(name)
