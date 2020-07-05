@@ -76,7 +76,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		for _, user = range storage.Users {
 			break
 		}
-		lang := `en`
+		lang := LangDefCode
 		if IsScript {
 			lang = scriptTask.Header.Lang
 		} else {

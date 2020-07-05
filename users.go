@@ -132,8 +132,9 @@ func GetHistory(c echo.Context, list []string) []ScriptItem {
 			continue
 		}
 		ret = append(ret, ScriptItem{
-			Name:  item,
-			Title: es.ReplaceVars(script.Settings.Title, script.Langs[c.(*Auth).Lang]),
+			Name: item,
+			Title: es.ReplaceVars(script.Settings.Title, script.Langs[c.(*Auth).Lang],
+				&langRes[GetLangId(c.(*Auth).User)]),
 		})
 	}
 	return ret

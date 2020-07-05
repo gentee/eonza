@@ -12,23 +12,30 @@ import (
 )
 
 const (
-	LangChar = '%'
+	LangChar    = '%'
+	LangDefCode = `en`
 )
 
 var (
-	langs   = []string{`en`, `ru`}
-	langRes []map[string]string
+	langs   = []string{LangDefCode}
+	langRes = make([]map[string]string, 1)
 )
 
 // InitLang loads language resources
 func InitLang() {
-	langRes = make([]map[string]string, len(langs))
-	for i, lang := range langs {
+	for _, tpl := range _escDirs["../eonza-assets/languages"] {
+		lang := tpl.Name()
+		lang = lang[:len(lang)-5]
 		res := make(map[string]string, 32)
 		if err := yaml.Unmarshal(LanguageAsset(lang), &res); err != nil {
 			golog.Fatal(err)
 		}
-		langRes[i] = res
+		if lang == LangDefCode {
+			langRes[0] = res
+		} else {
+			langs = append(langs, lang)
+			langRes = append(langRes, res)
+		}
 	}
 }
 
@@ -39,7 +46,7 @@ func GetLangCode(user *User) (ret string) {
 	if u, ok := userSettings[user.ID]; ok {
 		return u.Lang
 	}
-	return `en`
+	return LangDefCode
 }
 
 func GetLangId(user *User) (ret int) {

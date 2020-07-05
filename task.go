@@ -315,8 +315,15 @@ func initTask() script.Settings {
 		}
 		chFinish <- true
 	}()
-
-	script.InitData(chLogout, chForm)
+	var langid int
+	for i, lang := range langs {
+		if lang == scriptTask.Header.Lang {
+			langid = i
+			break
+		}
+	}
+	glob := &langRes[langid]
+	script.InitData(chLogout, chForm, glob)
 	return script.Settings{
 		ChStdin:  chStdin,
 		ChStdout: chStdout,

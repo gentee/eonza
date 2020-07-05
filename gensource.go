@@ -132,16 +132,16 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 }
 
 func (src *Source) Predefined(script *Script) (ret string, err error) {
-	if len(script.Langs[`en`]) > 0 {
+	if len(script.Langs[LangDefCode]) > 0 {
 		var data []byte
 		predef := make(map[string]string)
 
-		for name, value := range script.Langs[`en`] {
+		for name, value := range script.Langs[LangDefCode] {
 			if !strings.HasPrefix(name, `_`) {
 				predef[name] = value
 			}
 		}
-		if src.Header.Lang != `en` {
+		if src.Header.Lang != LangDefCode {
 			for name, value := range script.Langs[src.Header.Lang] {
 				if !strings.HasPrefix(name, `_`) {
 					predef[name] = value

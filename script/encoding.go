@@ -75,12 +75,12 @@ func Decode() (script *Script, err error) {
 	return
 }
 
-func ReplaceVars(input string, values map[string]string) string {
+func ReplaceVars(input string, values map[string]string, glob *map[string]string) string {
 	if len(values) == 0 {
 		return input
 	}
 	stack := make([]string, 0)
-	ret, err := replace(values, []rune(input), &stack)
+	ret, err := replace(values, []rune(input), &stack, glob)
 	if err != nil {
 		return input
 	}

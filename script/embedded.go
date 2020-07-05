@@ -44,6 +44,7 @@ type Data struct {
 	Mutex    sync.Mutex
 	chLogout chan string
 	chForm   chan FormInfo
+	Global   *map[string]string
 }
 
 var (
@@ -148,7 +149,8 @@ func LogOutput(level int64, message string) {
 		mode[level], time.Now().Format(`2006/01/02 15:04:05`), message)
 }
 
-func replace(values map[string]string, input []rune, stack *[]string) ([]rune, error) {
+func replace(values map[string]string, input []rune, stack *[]string,
+	glob *map[string]string) ([]rune, error) {
 	if len(input) == 0 || strings.IndexRune(string(input), VarChar) == -1 {
 		return input, nil
 	}
@@ -177,19 +179,24 @@ func replace(values map[string]string, input []rune, stack *[]string) ([]rune, e
 			continue
 		}
 		if isName {
-			value, ok = values[string(name)]
+			key := string(name)
+			if key[0] == '.' {
+				value, ok = (*glob)[key[1:]]
+			} else {
+				value, ok = values[key]
+			}
 			if ok {
 				if len(*stack) < VarDeep {
 					for _, item := range *stack {
-						if item == string(name) {
+						if item == key {
 							return result, fmt.Errorf(ErrVarLoop, item)
 						}
 					}
 				} else {
 					return result, fmt.Errorf(ErrVarDeep)
 				}
-				*stack = append(*stack, string(name))
-				if tmp, err = replace(values, []rune(value), stack); err != nil {
+				*stack = append(*stack, key)
+				if tmp, err = replace(values, []rune(value), stack, glob); err != nil {
 					return result, err
 				}
 				*stack = (*stack)[:len(*stack)-1]
@@ -212,7 +219,7 @@ func Macro(in string) (string, error) {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	stack := make([]string, 0)
-	out, err := replace(dataScript.Vars[len(dataScript.Vars)-1], []rune(in), &stack)
+	out, err := replace(dataScript.Vars[len(dataScript.Vars)-1], []rune(in), &stack, dataScript.Global)
 	return string(out), err
 }
 
@@ -249,10 +256,11 @@ func SetYamlVars(in string) error {
 	return nil
 }
 
-func InitData(chLogout chan string, chForm chan FormInfo) {
+func InitData(chLogout chan string, chForm chan FormInfo, glob *map[string]string) {
 	dataScript.Vars = make([]map[string]string, 0, 8)
 	dataScript.chLogout = chLogout
 	dataScript.chForm = chForm
+	dataScript.Global = glob
 }
 
 func InitEngine() error {

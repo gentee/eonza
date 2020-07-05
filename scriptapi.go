@@ -82,7 +82,7 @@ func getScriptHandle(c echo.Context) error {
 			AddHistoryEditor(c.(*Auth).User.ID, script.Settings.Name)
 			response.Original = name
 			response.LangTitle = es.ReplaceVars(response.Script.Settings.Title,
-				script.Langs[c.(*Auth).Lang])
+				script.Langs[c.(*Auth).Lang], &langRes[idLang])
 		}
 		response.History = GetHistoryEditor(c)
 	}
@@ -118,14 +118,21 @@ func saveScriptHandle(c echo.Context) error {
 func ScriptToItem(c echo.Context, script *Script) ScriptItem {
 	lang := c.(*Auth).Lang
 	params := make([]scriptParam, len(script.Params))
+	glob := &langRes[GetLangId(c.(*Auth).User)]
 	for i, item := range script.Params {
+		for i, val := range item.Options.Items {
+			item.Options.Items[i].Title = es.ReplaceVars(val.Title, script.Langs[lang], glob)
+		}
+		for i, val := range item.Options.List {
+			item.Options.List[i].Title = es.ReplaceVars(val.Title, script.Langs[lang], glob)
+		}
 		params[i] = item
-		params[i].Title = es.ReplaceVars(params[i].Title, script.Langs[lang])
+		params[i].Title = es.ReplaceVars(params[i].Title, script.Langs[lang], glob)
 	}
 	return ScriptItem{
 		Name:     script.Settings.Name,
-		Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang]),
-		Desc:     es.ReplaceVars(script.Settings.Desc, script.Langs[lang]),
+		Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang], glob),
+		Desc:     es.ReplaceVars(script.Settings.Desc, script.Langs[lang], glob),
 		Unrun:    script.Settings.Unrun,
 		Embedded: script.embedded,
 		Folder:   script.folder,
