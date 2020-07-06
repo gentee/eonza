@@ -3,7 +3,6 @@ module eonza
 go 1.12
 
 require (
-	9fans.net/go v0.0.2
 	github.com/alecthomas/chroma v0.7.3
 	github.com/gentee/gentee v1.10.0
 	github.com/gorilla/websocket v1.4.2

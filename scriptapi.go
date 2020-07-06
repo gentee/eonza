@@ -115,20 +115,25 @@ func saveScriptHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
+func copyParams(src []scriptParam, values map[string]string, glob *map[string]string) []scriptParam {
+	params := make([]scriptParam, len(src))
+	for i, item := range src {
+		tmp := item
+		tmp.Options.Items = make([]scriptItem, len(tmp.Options.Items))
+		for i, val := range item.Options.Items {
+			tmp.Options.Items[i] = val
+			tmp.Options.Items[i].Title = es.ReplaceVars(val.Title, values, glob)
+		}
+		tmp.Options.List = copyParams(item.Options.List, values, glob)
+		params[i] = tmp
+		params[i].Title = es.ReplaceVars(params[i].Title, values, glob)
+	}
+	return params
+}
+
 func ScriptToItem(c echo.Context, script *Script) ScriptItem {
 	lang := c.(*Auth).Lang
-	params := make([]scriptParam, len(script.Params))
 	glob := &langRes[GetLangId(c.(*Auth).User)]
-	for i, item := range script.Params {
-		for i, val := range item.Options.Items {
-			item.Options.Items[i].Title = es.ReplaceVars(val.Title, script.Langs[lang], glob)
-		}
-		for i, val := range item.Options.List {
-			item.Options.List[i].Title = es.ReplaceVars(val.Title, script.Langs[lang], glob)
-		}
-		params[i] = item
-		params[i].Title = es.ReplaceVars(params[i].Title, script.Langs[lang], glob)
-	}
 	return ScriptItem{
 		Name:     script.Settings.Name,
 		Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang], glob),
@@ -136,7 +141,7 @@ func ScriptToItem(c echo.Context, script *Script) ScriptItem {
 		Unrun:    script.Settings.Unrun,
 		Embedded: script.embedded,
 		Folder:   script.folder,
-		Params:   params,
+		Params:   copyParams(script.Params, script.Langs[lang], glob),
 		Initial:  script.initial,
 	}
 
