@@ -241,188 +241,201 @@ Nvhiu30Mie06ub+k1ipSjt0dc4O9xM5zHnum+YjNJivxEwAA///CQZLfyAIAAA==
 	"/eonza-assets/languages/en.yaml": {
 		name:    "en.yaml",
 		local:   "../eonza-assets/languages/en.yaml",
-		size:    2777,
-		modtime: 1593768975,
+		size:    2923,
+		modtime: 1594052626,
 		compressed: `
-H4sIAAAAAAAC/4xWy24cuQ7d8yu4MZIsrrPXxvC1E8S4thO47QRZsiV2l26rqBo9+vH3A0pVbmcemFnx
-8IgqSZR4WLSOtRi8VgNki4+SDV530Ig9d3/PQM7Z0Rm8dg4JhQ9o4ziSOCwRy8CYbfJT0TivH6DQYmeM
-Ky7FyzbDOjHtDP5XDVgSy8HgTbNgB7a7dTwavJkR2BgCTZkpaNjs4HUIoMtHUVIt2Cg5Bla/ASWKl9qZ
-hsDG6aTudAKbKA/sDN50AI7XdWvwVg043uwp6Nxb3lANBb+rC46DjbLxaTR4nRhPsWKuMziQFE2G48CF
-e044sC3s0Bce3+cPV9AH9btq1e15+zff83lOsn5mWuY9D4zvLvK7eQx9xpp1ScFYBk4zn/H9Rf4AjrPV
-1Tvpo4DzmdaauNsOlGChV//jJ+l0nQze1il4S4WBnS8GPzlfGtQDdhfvCo+Ni6kzMQFL4aPGyzb4PKB6
-wCnxuNZL+BkrWpJ3Bcfo/Ob08U0OW4hjt5zjUueJtzuhkd8cv2ZOOFBGConJnZCPPhd2Gh4nlh56seSw
-hUosuGYW3MQqPVL3rEadHvmHdd5M/9NKx5aTo+bk6Ms/PxWNaoecUtwmGq/aPAqc5oud+bba/2ued2tD
-zG25icS1yvjUYKsLPk4xtW2ohQ35oCn+3CxsvPg8GPzc7Oy28RnBJuqWP8c0NuioUHfxlgrBwGEy+IXD
-BIPPJaaTwS8dgB/70nfNzm7xRV9X55ZLBC82VMc5WYN3HeMq1mQZb6Jj8LKJOqJboPZOvQycNL93HYAX
-X+YqvRNfPIW5Sr3sKXi38RxcT2MLw7jpN9gGtE7mwGXC/LHzhDchgWSbOBu8J9lW2jI+cW77bUPKnMdA
-a2SbmEeWYvDeWxZVrYWC4HPjc4EQtwbv41ZB4L2q4X3c4r1CGFmqwQeWCmPcs4sHMfgQ94y38SCN06ps
-zMsE/aU+0sgg1NV7LjgQPhh85IMCO/jwq5Irsei5RvRqfuRDL2bhw6I2yq260p9r8HFGINHgYwSp45qT
-wcdmIe4Mfv0fxD2nQ/Kqfl8X2Ctcy8fLFqNwhokSjVw4ZYPfXjFMlHXmNzUwccq9xXybESS2LCWcDD7N
-CO+pitUnnXiTWF/9UweQ+LfqE7fX4fP5QSw8JM5VT/bULKQqBp+qKMg+LAtVwdXsQSZN94r23CDllnH1
-8Tq3zCv9d6J9oIx2INmyu8QfsQbXdCL4HatO6FT05Qp6QzG4ahby3FXNub8uK8yXNNfb4i/jhbXIn1/b
-NvKRbdU6a1LTVEZjvJAKWw9qPfOXWRo7d1LITMkOuhO1r11nE9Pl5aVuvP0+3ARvdxjlzS+DHpCcm89W
-pxDJLSfEjQ+cNaLzf3liL1vtFtpfVg1j8MK9x/QatdHp5bzRl1xIlWqlRp1Sc/NKzZCL8zLpr1EuKrBJ
-m+lUNS6+tt3b+IuS69DbM73m8wpyXY+qW6tmIdepq+Qz20G81Z+jTkGueWLRw3ewEHym2EGhvBtJaKsl
-9kx5hw/dg/ON6ddfb6+n5lnToZASk8GHGor/zzlRs0w/q4GSSHJoumvw+exAOU0adJoY9pR69X+n5PUP
-oQvPnlNu0753AFV2Eg+i7dngS3d6s/YOL45QpVXXi5r2p7H8SS4v4aXf/IG83rfBHx3AgZLMRANwUn3+
-yRl+DwAA///CDYz72QoAAA==
+H4sIAAAAAAAC/4xWS3McuQ2+41fg4vLuIdp7X1SKZNeqImldGslbPmJITDczbLDDxzz+fQokWzPOo5IT
+PnwNNgkQD9I2lDzgnQogk12QNOBdA5U4cNMPDGStme2Ad9YiofARTZhnEos5YJ4Yk4luyWrn9Afkq23H
+uOGcnYwJtpFpP+BfVYAhMewHvK8SzMRmvw2nAe87AhO8pyUxeTXrCt55D7p9ECVVggmSgmfVK1AiOymN
+qQhMWM6qLmcwkdLEdsD7BsDytowDPqgAy7sDeV37wDsqPuN3VcGyN0F2Ls4D3kXGcyiYSgdHkqzBsOw5
+c4sJezaZLbrM8y/p11toH/W/KlVtcft//udSD7L+ZlnXvU2Mnz+lz/0buoQl6ZaCIU8cO5/wl0/pV7Cc
+jO7eSBcErEu01cA9NGCVYaEP4rcvogJsWQZ8KIt3hjIDW5cH/GJdrlA9bCo+Zp4rF2JjQgSWzCe1l9G7
+NKFqwDHyvNVb+BEKGpLPGedg3e7821UQq4lluzpyo+t2jr29cr7qGHZ1RWXW9HQJI/+juMi2rhRn9kIz
+Xy0uiSNOlJB8ZLJn5JNLma2ah4WlmX5aw19NJWTcMgvuQpFmqd6qUKVZ/ss+V8v/badTjeZJo3ly+X9n
+mVpVZ5cYxkjzbV1HnmPPic7X3f5eUj+t8SHV7RYSW4vqS4W1pPi0hFiPoRJ25LxeztcqYec8N4e+dgQ7
+Jy5NSqjsal3SEeyCevE1xLlCS5maig+UCSb2y4C/s19gcimHeB7w9wbAze00j1V2Nbusudq4NSPAifHF
+copmwMeGcRNKNIz3wTI42QX9okegmvVOJo4a8scGwInLveYfxWVHvte8kwN5Z68Srppprl1lnkvYDdcF
+/WeXBVcmnmSMnAZ8IhkLjYyvnOp56ydlLt9AC26MzDNLHvDJGRbtgSsF3qXKpww+jAM+hVGB54P21qcw
+4pNCmFnKgM8sBeZwYBuOMuBzODA+hKNUTku8Mu8LtLt+0XsWarOgVy8IHwd84aMCMzn/81xQYi0/tWit
+4YWPrTMIH9fepdymzY1LWb50BBIGfAkgZd5yHPClSgj7Af/4G4QDx2N02kv/WGFrF1pRTkYMwgkWijRz
+5pgG/PaBYaGkK7+pgIXypDhPsHBMbXZ96wgiG5bszwO+doRPVMRodkfeRdYCeG0A1k6j9+7SJTdWHiKn
+ok6+VgmxyICvRRQkraq2URHcdA0SaeQ3dOAKKdXgq453qV6C0v9tGhwpoZlIRrY3+Gco3tYu4t2etYvo
+UnT5FtqkGnBTJaQ+rofL4F536PfVS2/V1++Ztd7fPt4DyCc2RUuuNqLag9TGCWnba0Z1GP+0Sm37iIbE
+FM2kJ1H5Mc52Id7c3OjB67vk3juzxyBXbxF1kKztvpXFB7Krh6jdLKlF4/+jx05GnUI6tzYVo3fCbXa1
+cjXB6uVctZqUSZvWRoUquaSq5ZIgZetk0TdXytp+o07ppahd+JjnD+GnPq+frn36iOctpLKdtYVtqoRU
+ltYw39hM4oy+uhoFqaSFRZ1vYCX4QrGFTGk/k9Co1fZGaY/PTYPLjenfP26vheZNw6GQItOAz8Vn95dL
+oHrHflMBOZIkX1vwgG8XBfJ5UaPzwtAbZ+u+B4qtK3yn6PQZ0hrSgWOq//jeABTZSziKTvIB35vS5rqz
++OkERWqpvauoz5n1vbqmxXtLgyO5vE61P8llLJKdR1ras0fzuE+5VG2djM3QyQhHitKJCuCsPf4HJ/hn
+AAAA//+9f2zkawsAAA==
 `,
 	},
 
 	"/eonza-assets/languages/ru.yaml": {
 		name:    "ru.yaml",
 		local:   "../eonza-assets/languages/ru.yaml",
-		size:    4503,
-		modtime: 1593768965,
+		size:    4733,
+		modtime: 1594052666,
 		compressed: `
-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
+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
+MOgMfRIAAA==
 `,
 	},
 
 	"/eonza-assets/scripts/bash.yaml": {
 		name:    "bash.yaml",
 		local:   "../eonza-assets/scripts/bash.yaml",
-		size:    340,
-		modtime: 1592915486,
+		size:    411,
+		modtime: 1594036195,
 		compressed: `
-H4sIAAAAAAAC/3zPMU4DQQwF0H5O8TVVIoFEGgqXHIEUNNs4u97E0sQ7jD0gbo82CSAoKG19P+u7RKgd
-nRJgfBbCgf2UgNAoQni6TmU5FnmTQnhMQLfWjRCtS6rc+OyU7m/nvvQ2ym8A+7FpjXX5UYWwS8BSQxe7
-/AWavHZtMt3ML+udNX6kF9ZAt9ACrrXoyKuAWU39JP6tP/zV1TSUCyHvchqXSQhZ54sOAp67bYa81h7y
-HTwmNcKhz5trle12MCkua3Qf3OL/MHL6DAAA//8SRgQbVAEAAA==
+H4sIAAAAAAAC/3yQTU7DMBCF9z7Fk7toKwGiGxZecgS6jYTcZNKO5E6CPQaxA06F2HCF5EYoP4gICZbj
+ee/ze5NIleWYnAHEn8nh4NPJAMoayOF2mkJzDPRIweHGAFliFgeNmUzroz8nZy5ne2pyLOkHsF7dD8RU
+Rm51tR4Wzy057AzQtMqNjH8DkR4yR6pm7jfvybMuaVfDQ83C6bSgXf+msbCyDw52Z03wc0OSabuINFXE
+fhwMEPNfkv61++hfuvfus38zZVORg+V6DAgH3GXZFHZwFfYCSSsWh0OuN9NFtttCKCQapHv1Uf8Xw5qv
+AAAA///GiufMmwEAAA==
 `,
 	},
 
 	"/eonza-assets/scripts/chdir.yaml": {
 		name:    "chdir.yaml",
 		local:   "../eonza-assets/scripts/chdir.yaml",
-		size:    170,
-		modtime: 1592915532,
+		size:    298,
+		modtime: 1594036207,
 		compressed: `
-H4sIAAAAAAAC/0TNMarDMBCE4X5PMeV7RZoUKba1DxDICYQ92AJ5paxXgdw+xBhSDgPfvzMi27KrAJY2
-KqZ1zi5A5ChUPBgYujstMB5HqUvhi0VxE6Cbd1OEd0pLnrZd5XJSLcX6k+7nejcqrgLUFrnakQacz56d
-80lNdaZiWMfsf1/mXz4BAAD//8ctIsyqAAAA
+H4sIAAAAAAAC/2SOQUoDQRBF932KD1lEF7pw4aK3yQ08gDQzRaah0zPWVAvu4mQlSC7hBUQUBsGcoepG
+knFAwe2r4v3Xk0jMm947IIcteVRNHdkBEiWRx3Jx25NUhevIi6UDUrtJdE/J49oBJXPJHsKFXBc4bHvv
+LmZTF6T5K7o8gckhDx15XDmg7SS2eZoHmO5KZKpnXwpzGOWf+2+Jxw0JVoWZsmA9BXP5/6Uv9miDvuqX
+HvVNRxvsGTboh37a3p5sbwfou462m9CgR9vpaAdXtTV5rJp15LNT9rn7DgAA///y7vK7KgEAAA==
 `,
 	},
 
 	"/eonza-assets/scripts/curdir.yaml": {
 		name:    "curdir.yaml",
 		local:   "../eonza-assets/scripts/curdir.yaml",
-		size:    200,
-		modtime: 1592915814,
+		size:    318,
+		modtime: 1594036219,
 		compressed: `
-H4sIAAAAAAAC/0TOMQuDMBDF8T2f4o0K7dKhw60K3boU3FM9JBAT+7wI/fZFCXQ77sGP/6ZmIc2bOCD5
-RQVj4RToAAsWVfBQQ1dITYb+HGKeo+4aBXcHlMSSBMaibvX0yybuWq3d8zj+2OAZ/DsqnvX9XVVwc0Be
-LeR0dgDUTwnUqbJjnlTwUhs8m2pejrCusA9s2tb9AgAA//8lLQS2yAAAAA==
+H4sIAAAAAAAC/2SOQUrDUBCG9+8UP3TRFtSFCxdv24IHENzKoxnCg/QlTuYV3JVkIYL0Cl5CISj0DDM3
+kqYBhe6Gb4ZvvpZEYipb74AUtuSxyVxEdoBEqchjPnsqSc50NndAVZcV7ajyuHNATpyTh3Am1wQO29a7
+60m1C3wa/rtuJjaa5KUhj1sH1I3EOo0VANNzjkzFZK3C1EfpvP/r8bgnwSozUxKsx2zOl1f6oUf9sd5e
+dbDO3mGdfum39fZmvR2gnzrYfkSdHm2vgx3cpi7I44HkMfBiyr46PVxlXkdeLJfuNwAA//+sxL6LPgEA
+AA==
 `,
 	},
 
 	"/eonza-assets/scripts/eonza.error.yaml": {
 		name:    "eonza.error.yaml",
 		local:   "../eonza-assets/scripts/eonza.error.yaml",
-		size:    302,
-		modtime: 1592915494,
+		size:    462,
+		modtime: 1594036404,
 		compressed: `
-H4sIAAAAAAAC/1zQz0oDMRAG8Ps8xUeh0MJWqoiHuUrxUljYF7DBHZeFbLJOJqLWvrtkiZc95kvymz9J
-zMYwJCYguEkYEsOPuxPVqATYaF4Yp3r0cfDyKZ7xREAOmgPDNAvNTt2UmA6VMfmy1X9MkpIbpMTfszAe
-CIizjTEs9QGVjzyq9NX8t95iL2vruWYL9LiGenl32Rtjc388bqgAjN8DAec4tNnmbLtz+/J66rq2a3DZ
-XsuTW4PttTR+u+wJWHawKxfNMs6e/gIAAP//EGv5Oy4BAAA=
+H4sIAAAAAAAC/1zQ30oCQRQG8Pt5ig9FVNCwiC7mNqQbQfAFdMjTsjA7s82fqMz7eoXuegQhQYL2GY5v
+FOMq2F7u+fb85pzjKYTcZF4KwKiCJMiaV3VBzlkngJAHTRLddl1pdwWgbabpibTEjQCicdFIBBdJlMqp
+wksxPFqBnsM5MifnCp8dlPBSksSVAGwZcmsOIwCOHmPuaHkUT9K9XVJTSrUz6rpJLelBRR0kWpejUUto
+ddyTTJ2fDIlx2g239Rt1UPjsVC/Ie5WlyMVmJ39yxd/gav/OO97wD+/+E/zFFVe82X/wln95x1ukz/OO
+raitt6EAJjabxlDG0JtM7+bj2Ww6G2DRWaVf1gN0Vumm60U/7ZGm66VgcLh0X/wFAAD//06yrODOAQAA
 `,
 	},
 
 	"/eonza-assets/scripts/eonza.exit.yaml": {
 		name:    "eonza.exit.yaml",
 		local:   "../eonza-assets/scripts/eonza.exit.yaml",
-		size:    166,
-		modtime: 1592915502,
+		size:    258,
+		modtime: 1594036585,
 		compressed: `
-H4sIAAAAAAAC/1SOMa4CMRBD+zmFtdX/BYgCUUyLOEjEmlWk7CRKJgg4PQpsQ2dberYb3aMtTQWwsFLB
-bK+w5yO6AB49UXH5upSXxDuT4iRAt9pN4bVTSqhhbSq7reSaZ/7iOG/Rs1BxFCAXj9k+y8DMW+jJFdNh
-kkErxoW/If/lHQAA//9+EQGPpgAAAA==
+H4sIAAAAAAAC/2SOQUrEQBBF93WKz8xidKG4EBe1Fc8hjVOGhk536FRLdCUew1OEILjLGSo3kk6CCO6K
+/4r3fy+qPjY9ExBdKwxJ8c1dy+CVAPUahHE6rsHxREBITZAXCYw7AkrMJTI0F6HOZdf2TFe76Smd5a/j
+sTpquHr0tRPGLQGpU5/iOgE4y7MrQRmHmwMFt0+TuNFfBeNh8Ir7rSKXf9g+bbYv2GSzfdu0vNu4fNhI
+G61/F/W8pJ8AAAD//x8HSS4CAQAA
 `,
 	},
 
 	"/eonza-assets/scripts/eonza.run.yaml": {
 		name:    "eonza.run.yaml",
 		local:   "../eonza-assets/scripts/eonza.run.yaml",
-		size:    388,
-		modtime: 1592915526,
+		size:    566,
+		modtime: 1594036829,
 		compressed: `
-H4sIAAAAAAAC/1yQMUtEMRCE+/yKKU/wRC0sAhZyYGUhXmG9vLd3t5BsYrJRFH+85Pm8gO0M8+3MVjYT
-PVbvAKXIHpz0i65KUweYWGCPl6Z4yDnIRCapGyEdA79z8LhzQNPS1MNKY5epUKzebVdcJjsN0qME7npX
-PjN73Dog5U5dKgCF35oUnlfcH2aKcxDlQdqlGEnnbVfx3I+ycaln8M05+kFiI/dKYmhqEkBjEg6iUk88
-8tduSjN7fG8dQKXgdxjusc9BbBfnJ1HerL0uHCCH5RSWf2367ss11F0OleGxNyr2z/wJAAD//1+/bYaE
-AQAA
+H4sIAAAAAAAC/1yRsY4TMRRFe3/FlbbYRSIroKCwRIG2pUDsByAr85JY8niMxwaBKIZQQk/JL0xB0BCS
+yS88/xHyxKySlPPum3Pv9WspBG2XrRSAVTVJUGM/qVsfrQCCDoYkrq/e+miVc1fXAjDN0tB7MhLPBRCt
+j1Yi+EjCKa/qVopZQTkVVqeU24U2lKWJEz46kngmgMYF3dgpA+DpXdSeqsL8z5rXldGWzkKV2Qnt6cP+
+B6XDmXceLLTV7epk/4kwqrQne/QvVSXeRIuXzhk9VzneUSyWEndNXStbzfIXXufiFMi3AvDxAsQ/uOdD
++pq+pDUPaZ2+gw+p44H/8si/ecN7HnhzYcA/uU8d97zjTVqnLn0Db3nkHfe851+855H/IDNTxyNveRDz
+piKJzzMBKO9xPAde4N4ZHe7q6pW2dFMMHglAL6ZnwtT1Jl/rcfkpq2RagsR9UD5ciP8CAAD//3g/B6g2
+AgAA
 `,
 	},
 
 	"/eonza-assets/scripts/eonza.sleep.yaml": {
 		name:    "eonza.sleep.yaml",
 		local:   "../eonza-assets/scripts/eonza.sleep.yaml",
-		size:    187,
-		modtime: 1592468488,
+		size:    329,
+		modtime: 1594038697,
 		compressed: `
-H4sIAAAAAAAC/0SOS2rDQBBE932KQitpkaBAyKKvEV9gkArRMD/PtAz26Y2EwMt68HjV6W556ypADokK
-lvwK3z2SVQA3j1T8XzOWLfLBqPiTGlpIXeXrEt0Sy+4f6XYAx5g6l+nAz0rFrwClupV8RgHL5haiYviZ
-53k4WeN9t8ZV4W2nLGWl4vw0XplJ3gEAAP//PXLSUrsAAAA=
+H4sIAAAAAAAC/1zOTUoDQRAF4H2f4pEskiyUEcRFXUP30iRFaOjpHrtrBF0JHiDgBbzCLPzJQj1DzY2E
+ns5isisefPVeZhEX9pkMEGzLBI7h2V5mz9wZQJx4JqyW9yVZrgzg497zI3vCjelssm0mc1G1uJZjLzNZ
+s2LlqWPCtQFiJy6GUgy44MRZT1hcNU2zKFnih94l3hEk9Wy8rTM5TGZaRLitU4FTE+FuOrBuM283Bkj9
+HOm7DuOrfutwJvVtfNFP/RkP0D/90qN+6KC/ehwPp2/buGNCebSubmP+AwAA//8NpBarSQEAAA==
 `,
 	},
 
 	"/eonza-assets/scripts/form.yaml": {
 		name:    "form.yaml",
 		local:   "../eonza-assets/scripts/form.yaml",
-		size:    519,
-		modtime: 1592474034,
+		size:    752,
+		modtime: 1594035577,
 		compressed: `
-H4sIAAAAAAAC/3SRsU7DMBCGdz/Fr0wwRIIiGLxWYoOFit0tRzhxsSPnHJW3R0ncJoZ2y93933e6uCdV
-9k1vDeBdSxafIbYGUFYhi+e5ktAIDSQWTwZIPiZvoTGR6Vx0bW9NnXHhXksc2+A1BunH9k9HFo8GCJ1y
-8NNeTND8ddKMwalxVmULdqvJZHvIVWFcxuz13GGldhWoT+439o0QdnRcssDgJJFFtan+E9svOnzvw/FC
-/O5C/CWJci3sry65r8r7l1RWrLj5sE0BDC6W+XcX2e2F8Opa+gMewkd+nJvx19+a3wAAAP//QFYjPgcC
-AAA=
+H4sIAAAAAAAC/2ySvU7DMBDHdz/FqR0KQysogsErEk/Ajkw4ioVjV/YlKhtCbBUvgViRWCohUeAVnDdC
+tpM2IcmU+/j/7nx3DomkXjjOALTIkcOtsTkDIEkKOUzGV8ExnjAAZRYKS1QczhhAoW2hOZAtkC2FFbnj
+bFozlHTUY2RGkzXKRRY9LJHDKQMwS5JGxwYgCtNfgwqJ0dHG1agQi7QYjcST2upQ92GpaeeRhHkrYbrn
+z5zUC4WEK9rhw1cKVSCH0Xw0qMruMLu/NqtBzdGwJtQQFsWg5njUHQWu6P8oZp0m0yPnHVUpbE9UChuC
+PZ0S9SmgToNpT5rDeTLgstlJ3CuHi3Qytd3sOfkbkWMAthii+lf/6X+hevFffuO3fuO/qyf/0S7g3/xP
+9ei3be++jH9vK6s1VM8pvVqzzNxgauQg3NbhXwAAAP//+FN02fACAAA=
 `,
 	},
 
 	"/eonza-assets/scripts/log-output.yaml": {
 		name:    "log-output.yaml",
 		local:   "../eonza-assets/scripts/log-output.yaml",
-		size:    465,
-		modtime: 1592468516,
+		size:    580,
+		modtime: 1594038952,
 		compressed: `
-H4sIAAAAAAAC/2yRQUv0MBCG7/kVc/w+sBcFD7kp2y4L6xaKskeJdgyBJFOnk0X/vTS7EWM9zjvPTIYn
-M4q4aGetAKIJqMGTbSjJlEQBiBOPGvZkoS+ZJ+vxhF7DrZoMmzBr1ZThpVHP7Uv0OaGGGwVAkziK+ckS
-uyi5coLh0mjKkpaZOEcAJ+PTsrffPrfD0A81eTQcXbRr9ng3HGq0Iw4wGjFruOuHhxrexTfiYJar1/ju
-0PU1vsGX9McRm/b+afttSvDjh+DHS5VlXP92xPieHOOoQTiheqXx7Pb8Jf+y9Ku88b/6CgAA///srmeD
-0QEAAA==
+H4sIAAAAAAAC/2yRwUrDQBCG7/sUAz1UwfSg4GFvim0RagMB8VhWMw0Lm924ma169O7d1xC9CIK+wvaN
+JJtGo5vcMvN9s8P8NRJJXdScAWhRIgdlisQ4qhwxAJKkkMN4tFKmaKujMYMGUrhBxeGYVcKKsuYs6QY0
+jb476eig0kOFHI4YgKlIGh2e7spSU/iThOWukfQGobXGhinNtxHKIYdFOl9NsyzNIvxOWC11MSRcnWTL
+iF8bW+aCxJAwS7OLSJB6bYbg8+UsjeAcr93gLmfT08v5z/kI7/9cftIUepc7/H85i7dOWsw5kHXIlNjF
+ibrt/0bHYWEKSLtwrYsB/+xf/Jd/3z5un8C/gv/wn/6N3Zgcg93KeyHOg7DrPvsOAAD//1BUMUxEAgAA
 `,
 	},
 
@@ -439,75 +452,82 @@ H4sIAAAAAAAC/ypOLSnJzEsvtuJSUMhLzE21UshLLedSUMjJT89JLUvNsVIwAwQAAP//6Xbu/SMAAAA=
 	"/eonza-assets/scripts/open.yaml": {
 		name:    "open.yaml",
 		local:   "../eonza-assets/scripts/open.yaml",
-		size:    161,
-		modtime: 1592915519,
+		size:    245,
+		modtime: 1594039487,
 		compressed: `
-H4sIAAAAAAAC/0SNMQ4CMQwEe79iSyhoKCj8AFreEHGrI1LOCT4Hid+jQCTKXWlmdkZkW3cVwNJGRW00
-ASJHoeL2W6WuhS8WxUWAbt5NEd4pLXnadpXTxFuKxx+/5sLxj+fdqDgLUFvkat8k4Hz27Fym7l6XWT0M
-01E+AQAA//8dqyJJoQAAAA==
+H4sIAAAAAAAC/1SOPU7FMBAG+z3FJ6UIFFBQUOwBaDkCssgSLDlr46yR6FBEB2fgHsAl7Buh/BTvtTva
++WYWM6/jzASom4QRkygB5i0Io+8e1kPXExDiGORVAuOWgKK5KMNyEUouu2lmujocydnzqeP6yQdZ0eax
+tySMGwJiMh91GweyvBSfZTicwR1ZojvfQhj3SRR3PggBuZyh+t2W+tve22db2hfah6s/9Y8e4yD738Ua
+dkn/AQAA//8XjqKY9QAAAA==
 `,
 	},
 
 	"/eonza-assets/scripts/set-log-level.yaml": {
 		name:    "set-log-level.yaml",
 		local:   "../eonza-assets/scripts/set-log-level.yaml",
-		size:    468,
-		modtime: 1592468640,
+		size:    611,
+		modtime: 1594039753,
 		compressed: `
-H4sIAAAAAAAC/2zRv2rDMBAG8F1PcWM7eCp00JYQOxjUGBRKxnJprkIg6Yx0CfTtS2X3j+uux+8++zsV
-EvHJFa0AEkbSUEiawK4JdKOgAMRLIA1HEjDswMzjwK4KDY9qxIyxaNXMEX9Wf6/J+0gaHhQAj+I51Q8D
-+OTFY9Bghv1Lf+iGOp2wTzIZoTjz5it65wueA9UhwA3DlaaMXX/cbE271G3OnNe2tXawS3nCnHxya3va
-2MOSdpwjXFBwjbvBPi1xn944R/xsvubfvX/q0fn6z0/s2u3zXr3yZXoXw66e967e/V59BAAA//+PI+lO
-1AEAAA==
+H4sIAAAAAAAC/2yRz0oDMRCH73mKgR6qh/UieMitpX8orF3YIh5LaqdLIJuU7GzFm9Zr38IXKIogSPsM
+yRuJ2VVadnOb4fd9SWYKJJI6KzgD0CJHDgVSpEwWKdygYgAkSSGHbmdeICmThX6nywD+Cg43bC2syAvO
+otrSoK/OUHpaI4drBmDWJI0O9wNILUkKxSFOxvPJdJSEbhWWmqoMYV7HoxP9UhZioTDYf89GqBIr0WAy
+6/XjYQNBa41tA4ZpmqSN+KOwWuqsDbjvpdNGfmVsvhQk2oBRkt42AKlXpi38P4iz/+KibH3LYNi/GzMl
+6qWirmZ1uj0OMySITQZxvSZbtqXcm3/xW7d3B3d07+7Lb/0O/Kt/DuWnO/gduG93dB9uzx7MEoM4NlnQ
+XgTLJfsJAAD//wgq95pjAgAA
 `,
 	},
 
 	"/eonza-assets/scripts/set-variable.yaml": {
 		name:    "set-variable.yaml",
 		local:   "../eonza-assets/scripts/set-variable.yaml",
-		size:    230,
-		modtime: 1592911587,
+		size:    333,
+		modtime: 1594040028,
 		compressed: `
-H4sIAAAAAAAC/1TOsYrDQAwE0F5fMeUdnItLkUIfkSbgXomFWVjvOlqtIX8fbK8xaQQamMcUdQ9pLExA
-kkkZRb1bxII8ohLgwaMy7urozzTmMeqikXEloCarieFWlWYxmQpT17j1nsxB4Nbi96yMCwF59pDTtgMw
-fdVgOjTzsBaJ9Qtr74b80zMP+9Je7Gdt/O2NX/oEAAD//6jySfHmAAAA
+H4sIAAAAAAAC/1zPsUoDQRDG8X6e4oMUUTCCFhb7GkJaGc0QDjZ7cW72wE5jK76ELyDCgYWnrzD7RnKX
+E0OaLXbgx/9rxKxK6yYQkHgjAY3YomWt+DYKAVZZlID57KYRa1lncwJivY7SSgy4IiAnzSnANAttWXnT
+BFpM2vAeKuct6/A3MvawlYBLAuqtVXUaKwCV+1yprCbyj2o55mMr5kPpgiJPWyTtrak64FoMy/9Zmo/u
+/laeys7fvfdv//DPsisv8B/vyqN3/uWd996X5/JKd/VKRm/JejKkne3TTuk3AAD//yvZ0BdNAQAA
 `,
 	},
 
 	"/eonza-assets/scripts/set-variables.yaml": {
 		name:    "set-variables.yaml",
 		local:   "../eonza-assets/scripts/set-variables.yaml",
-		size:    396,
-		modtime: 1592911587,
+		size:    555,
+		modtime: 1594040173,
 		compressed: `
-H4sIAAAAAAAC/2SOwUoDMRCG73mKnz3tQiso6CHgC3jQQ6WnXLI6lpTsZJlMAiK+u2xqdWkvITPf/B9/
-JtXAh2wNwH4ii0y6rV6CHyNlA2jQSBY7UuxX65gOkSpFiwcDFJbCFiqFzOzFT9ma7a8whqz/nrVDP2ey
-uDdAmjUkbi3QAqffWVG9tPnKgmc/0Rk1291FMBa6jK5WLXJr3tI7WXRpPKIuzyOecuLX9DIe+6XNAMcf
-SVCD0oTAp6svx4tkR7r30i+obwcbA7iuenHdcJNV+mGDFW0sFvqjg+Nvx535CQAA///ZdjxtjAEAAA==
+H4sIAAAAAAAC/2yQwUrDMBzG73mKj+6wFraBgh4CvoAXD5OdCiPTv6MjS0aSBkQE3VXfwYMvIELBg9NX
+SN9Imm6jjl1Kk9//+yX5LDlXqLnlDFBiSRyW3NALU4iZJMsAVzhJHP3e1JLzwthenwFSzyV5khznDCiV
+KRWHMyWxlTBiaTkbbn2ysO6fZu9w9yviOGOAXrlCq3gJxED7t1N4YeK6Yxl5YRoYRZFE2elBTpZ0JCnL
+w9wJk2LbAqn28N1zOcbkMOk0Akxb0N005WEsvNfP9Tp8hE34CZ/hq17Xrwi/oaqfQhW+QxU2YVO/hKqr
+DG9H+I2+JY5EzxbwzecCl1ara301W6RNWxlydacNfOFoiUK1Uw+5asRjchNh0galcWDAgDzxwuRJNrLO
+pNkAHRqZLGlPs1w95iphfwEAAP//e/BaBSsCAAA=
 `,
 	},
 
 	"/eonza-assets/scripts/source-code.yaml": {
 		name:    "source-code.yaml",
 		local:   "../eonza-assets/scripts/source-code.yaml",
-		size:    244,
-		modtime: 1592468549,
+		size:    358,
+		modtime: 1594040353,
 		compressed: `
-H4sIAAAAAAAC/3zNTQrCQAzF8X1O8Sh0WdCNi2zFE3iCsY1lIM2UmYzY2wtt/Vi5/ZG8fxH3aGNhAixM
-wiip5l66Pg1CgEdXYVxXxHlDTaPKQ5RxIqBarsbwXIXmkMNUmLp9TJ4u2YJ+ly677B28O8ssjMPn8V9+
-uz0SkGaPyQqDACBa9BiU0bS3NCxts+og91DVf/QVAAD//4lgyP70AAAA
+H4sIAAAAAAAC/4SQQUoDQRBF93WKT0LIKqIbF7X3HNJmytDQ6R66q8UsXQiCO8+iEIXxDDU3kplMQsBF
+dt2P/3/9qiKqPm4KExDdVhgl1byW1To1QoB6DcJYzq8OfMDzJQEhbYI8SWDcElBjrpGhuQq1LrttYVpN
+gfKskqML52n3Rzhm6a4VxvXJcWn2QX9DQGrVp1gYBAA+evUuMGaLh9TsFrORNvLoatAzGty0sUQeJac6
+jLvpNd3h2CXXf0r7sM6++jfrbG/fsH3/0r/ar31a178P4Gf4DC76CwAA//80LzCaZgEAAA==
 `,
 	},
 
 	"/eonza-assets/scripts/write-console.yaml": {
 		name:    "write-console.yaml",
 		local:   "../eonza-assets/scripts/write-console.yaml",
-		size:    194,
-		modtime: 1592468554,
+		size:    309,
+		modtime: 1594040401,
 		compressed: `
-H4sIAAAAAAAC/zzMPYrDQAzF8X5O8crdwsU2W6jNBVIYUhv7YQbGkqPR5OP2IYNxp78e/Cojsq5VEqDT
-RsHTc3CYTasVJiByFApu3zdGw+Vciq2FDxbBfwKaelNBeGPaJ5+2bg6HGnxFAk5uPPu9U/DXb9sjm1ZB
-L8B5b9m5HOpsCwVXzxpFfzqJ3/QJAAD//8fKmPDCAAAA
+H4sIAAAAAAAC/2yPv0qDQRDE+3uKgRTRIoKNxba+gIVgKR/JEg4ue5/77fmnjHV6XyNYiWJ8hb03khyH
+KNjt7Aw/ZiY2i7KeKAAybJjwoNF4scwy5cQBsGiJCfPZbXO6MZsHIOV14ntOhIsAFNEiBNPCYRx02DTo
+omONHy0Av3hnx1fjAPY0MuG83Xm0mGUiNAUo35WovOroNPS6LNQSf3oRbo4K1xmXPxO0/Jv0F9/7l7/V
+re/rc93BX+HvfvDPuvWDf9RdWOYVE640iiU5aSNwGr4DAAD//4QUO601AQAA
 `,
 	},
 

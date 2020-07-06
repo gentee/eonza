@@ -65,6 +65,12 @@ func (src *Source) FindStrConst(value string) string {
 
 func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error) {
 	values := make([]Param, 0, len(script.Params))
+	errField := func(field string) error {
+		glob := langRes[langsId[src.Header.Lang]]
+		return fmt.Errorf(langRes[langsId[src.Header.Lang]][`errfield`],
+			es.ReplaceVars(field, script.Langs[src.Header.Lang], &glob),
+			es.ReplaceVars(script.Settings.Title, script.Langs[src.Header.Lang], &glob))
+	}
 	for _, par := range script.Params {
 		var (
 			ptype, value string
@@ -86,8 +92,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			ptype = `str`
 			if len(value) == 0 {
 				if par.Options.Required {
-					return nil, fmt.Errorf("The '%s' field is required in the '%s' command", par.Title,
-						script.Settings.Title)
+					return nil, errField(par.Title)
 				}
 				value = par.Options.Default
 			}
@@ -109,8 +114,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			ptype = `int`
 			if len(value) == 0 {
 				if par.Options.Required {
-					return nil, fmt.Errorf("The '%s' field is required in the '%s' command", par.Title,
-						script.Settings.Title)
+					return nil, errField(par.Title)
 				}
 				value = par.Options.Default
 			}

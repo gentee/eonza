@@ -181,9 +181,13 @@ func replace(values map[string]string, input []rune, stack *[]string,
 		if isName {
 			key := string(name)
 			if key[0] == '.' {
-				value, ok = (*glob)[key[1:]]
+				if glob != nil {
+					value, ok = (*glob)[key[1:]]
+				}
 			} else {
-				value, ok = values[key]
+				if values != nil {
+					value, ok = values[key]
+				}
 			}
 			if ok {
 				if len(*stack) < VarDeep {

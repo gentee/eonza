@@ -18,6 +18,7 @@ const (
 
 var (
 	langs   = []string{LangDefCode}
+	langsId = map[string]int{LangDefCode: 0}
 	langRes = make([]map[string]string, 1)
 )
 
@@ -33,6 +34,7 @@ func InitLang() {
 		if lang == LangDefCode {
 			langRes[0] = res
 		} else {
+			langsId[lang] = len(langs)
 			langs = append(langs, lang)
 			langRes = append(langRes, res)
 		}
@@ -50,19 +52,11 @@ func GetLangCode(user *User) (ret string) {
 }
 
 func GetLangId(user *User) (ret int) {
-	find := func(code string) int {
-		for i, lang := range langs {
-			if lang == code {
-				return i
-			}
-		}
-		return 0
-	}
 	if user == nil && IsScript {
-		return find(scriptTask.Header.Lang)
+		return langsId[scriptTask.Header.Lang]
 	}
 	if u, ok := userSettings[user.ID]; ok {
-		return find(u.Lang)
+		return langsId[u.Lang]
 	}
 	return
 }
