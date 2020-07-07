@@ -137,9 +137,9 @@ func Install() {
 		if err := setScript(&script); err != nil {
 			golog.Fatal(err)
 		}
-		for _, item := range script.Tree {
-			retypeValues(item.Values)
-		}
+		/*		for _, item := range script.Tree {
+				retypeValues(item.Values)
+			}*/
 		storage.Scripts[lib.IdName(script.Settings.Name)] = &script
 	}
 	if err = SaveConfig(); err != nil {

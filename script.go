@@ -110,6 +110,13 @@ func retypeValues(value interface{}) interface{} {
 	return nil
 }
 
+func retypeTree(tree []scriptTree) {
+	for _, item := range tree {
+		retypeValues(item.Values)
+		retypeTree(item.Children)
+	}
+}
+
 func setScript(script *Script) error {
 	var ivalues map[string]interface{} //string
 
@@ -121,14 +128,7 @@ func setScript(script *Script) error {
 		if par.Type == PList {
 			ivalues[par.Name] = []interface{}{}
 		} else if len(par.Options.Initial) > 0 {
-			/*			var options scriptOptions
-						if err := yaml.Unmarshal([]byte(par.Options), &options); err != nil {
-							return err
-						}
-						script.Params[i].Options = options
-						if len(options.Initial) > 0 {*/
 			ivalues[par.Name] = par.Options.Initial
-			//			}
 		}
 	}
 	if len(ivalues) > 0 {
@@ -138,6 +138,7 @@ func setScript(script *Script) error {
 		}
 		script.initial = string(initial)
 	}
+	retypeTree(script.Tree)
 	return nil
 }
 
