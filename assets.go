@@ -354,59 +354,31 @@ AA==
 `,
 	},
 
-	"/eonza-assets/scripts/eonza.error.yaml": {
-		name:    "eonza.error.yaml",
-		local:   "../eonza-assets/scripts/eonza.error.yaml",
+	"/eonza-assets/scripts/error.eonza.yaml": {
+		name:    "error.eonza.yaml",
+		local:   "../eonza-assets/scripts/error.eonza.yaml",
 		size:    462,
-		modtime: 1594036404,
+		modtime: 1594090103,
 		compressed: `
-H4sIAAAAAAAC/1zQ30oCQRQG8Pt5ig9FVNCwiC7mNqQbQfAFdMjTsjA7s82fqMz7eoXuegQhQYL2GY5v
-FOMq2F7u+fb85pzjKYTcZF4KwKiCJMiaV3VBzlkngJAHTRLddl1pdwWgbabpibTEjQCicdFIBBdJlMqp
-wksxPFqBnsM5MifnCp8dlPBSksSVAGwZcmsOIwCOHmPuaHkUT9K9XVJTSrUz6rpJLelBRR0kWpejUUto
-ddyTTJ2fDIlx2g239Rt1UPjsVC/Ie5WlyMVmJ39yxd/gav/OO97wD+/+E/zFFVe82X/wln95x1ukz/OO
-raitt6EAJjabxlDG0JtM7+bj2Ww6G2DRWaVf1gN0Vumm60U/7ZGm66VgcLh0X/wFAAD//06yrODOAQAA
+H4sIAAAAAAAC/1zQT2oqQRAG8H2f4kMRFVR8j5BFb4NkIwheQJtYGQZ6uif9JyQx7pMrZJcjCBEkkDlD
+eaPQMwrG5dQ39euq8hRCbjIvBWBUQRLknHUjsuZFCSDkQZNEtz2q6+2uALTNND2SlrgWQDQuGongIolS
+OVV4KYZHK9BTOEcW5Fzhs1oJzyVJ/BeALUNuTT0C4Ogh5o5WR/Ek3dkVXUqpdkZdXVIruldRB4nWv/G4
+JbQ67kmmyU+GxCTthpvmjSYofHaqF+S9ylLk4mUnf3DFX+Dq8MZ73vI37/8S/MkVV7w9vPOOf3jPO6TP
+846daKzXoQCmNpvFUMbQm85uF5P5fDYfYNlZp182A3TW6aabZT/tkabrpWBQX7ovfgMAAP//x50Kn84B
+AAA=
 `,
 	},
 
-	"/eonza-assets/scripts/eonza.exit.yaml": {
-		name:    "eonza.exit.yaml",
-		local:   "../eonza-assets/scripts/eonza.exit.yaml",
+	"/eonza-assets/scripts/exit.eonza.yaml": {
+		name:    "exit.eonza.yaml",
+		local:   "../eonza-assets/scripts/exit.eonza.yaml",
 		size:    258,
-		modtime: 1594036585,
+		modtime: 1594090162,
 		compressed: `
-H4sIAAAAAAAC/2SOQUrEQBBF93WKz8xidKG4EBe1Fc8hjVOGhk536FRLdCUew1OEILjLGSo3kk6CCO6K
-/4r3fy+qPjY9ExBdKwxJ8c1dy+CVAPUahHE6rsHxREBITZAXCYw7AkrMJTI0F6HOZdf2TFe76Smd5a/j
-sTpquHr0tRPGLQGpU5/iOgE4y7MrQRmHmwMFt0+TuNFfBeNh8Ir7rSKXf9g+bbYv2GSzfdu0vNu4fNhI
-G61/F/W8pJ8AAAD//x8HSS4CAQAA
-`,
-	},
-
-	"/eonza-assets/scripts/eonza.run.yaml": {
-		name:    "eonza.run.yaml",
-		local:   "../eonza-assets/scripts/eonza.run.yaml",
-		size:    566,
-		modtime: 1594036829,
-		compressed: `
-H4sIAAAAAAAC/1yRsY4TMRRFe3/FlbbYRSIroKCwRIG2pUDsByAr85JY8niMxwaBKIZQQk/JL0xB0BCS
-yS88/xHyxKySlPPum3Pv9WspBG2XrRSAVTVJUGM/qVsfrQCCDoYkrq/e+miVc1fXAjDN0tB7MhLPBRCt
-j1Yi+EjCKa/qVopZQTkVVqeU24U2lKWJEz46kngmgMYF3dgpA+DpXdSeqsL8z5rXldGWzkKV2Qnt6cP+
-B6XDmXceLLTV7epk/4kwqrQne/QvVSXeRIuXzhk9VzneUSyWEndNXStbzfIXXufiFMi3AvDxAsQ/uOdD
-+pq+pDUPaZ2+gw+p44H/8si/ecN7HnhzYcA/uU8d97zjTVqnLn0Db3nkHfe851+855H/IDNTxyNveRDz
-piKJzzMBKO9xPAde4N4ZHe7q6pW2dFMMHglAL6ZnwtT1Jl/rcfkpq2RagsR9UD5ciP8CAAD//3g/B6g2
-AgAA
-`,
-	},
-
-	"/eonza-assets/scripts/eonza.sleep.yaml": {
-		name:    "eonza.sleep.yaml",
-		local:   "../eonza-assets/scripts/eonza.sleep.yaml",
-		size:    329,
-		modtime: 1594038697,
-		compressed: `
-H4sIAAAAAAAC/1zOTUoDQRAF4H2f4pEskiyUEcRFXUP30iRFaOjpHrtrBF0JHiDgBbzCLPzJQj1DzY2E
-ns5isisefPVeZhEX9pkMEGzLBI7h2V5mz9wZQJx4JqyW9yVZrgzg497zI3vCjelssm0mc1G1uJZjLzNZ
-s2LlqWPCtQFiJy6GUgy44MRZT1hcNU2zKFnih94l3hEk9Wy8rTM5TGZaRLitU4FTE+FuOrBuM283Bkj9
-HOm7DuOrfutwJvVtfNFP/RkP0D/90qN+6KC/ehwPp2/buGNCebSubmP+AwAA//8NpBarSQEAAA==
+H4sIAAAAAAAC/2SOQUrEQBBF93WKz8xidOHgQlzUVjyHNE45NHS6Q6daoivxGJ4iBMFdzlC5kXQSRJhd
+8V/x/u9E1cdzxwRE1whDeq9HSfHdEaBegzAO+2ON9wcCQjoHeZXAuCegxFwiQ3MRal12Tcd0s5me00n+
+O56qo4aLR99aYdwRkFr1KS4TgJO8uBKUsbvdUXDbNIkr/VMwHnuveFgrcrnA9mWTfcNGm+zHxvnDhvnT
+Blpp/buq5zX9BgAA//+2RFFWAgEAAA==
 `,
 	},
 
@@ -462,6 +434,22 @@ dkn/AQAA//8XjqKY9QAAAA==
 `,
 	},
 
+	"/eonza-assets/scripts/run.eonza.yaml": {
+		name:    "run.eonza.yaml",
+		local:   "../eonza-assets/scripts/run.eonza.yaml",
+		size:    566,
+		modtime: 1594090170,
+		compressed: `
+H4sIAAAAAAAC/1yRsY4TMRRFe3/FlbbYRSIroKCwRIG2pUDsByAr85JY8niMxwaBKIZQQk/JL0xB0BCS
+yS88/xHyxKySlPPum3Pv9WspBG2XrRSAVTVJ+GhvqbGflACCDoYkrq/e+miVc1fXAjDN0tB7MhLPBRCt
+j1Yi+EjCKa/qVopZQTkVVqeU24U2lKWJEz46kngmgMYF3dgpA+DpXdSeqsL8z5rXldGWzkKV2Qnt6cP+
+B6XDmXceLLTV7epk/4kwqrQne/QvVSXeRIuXzhk9VzneUSyWEndNXStbzfIXXufiFMi3AvDxAsQ/uOdD
++pq+pDUPaZ2+gw+p44H/8si/ecN7HnhzYcA/uU8d97zjTVqnLn0Db3nkHfe851+855H/IDNTxyNveRDz
+piKJzzMBKO9xPAde4N4ZHe7q6pW2dFMMHglAL6ZnwtT1Jl/rcfkpq2RagsR9UD5ciP8CAAD//9h1b4k2
+AgAA
+`,
+	},
+
 	"/eonza-assets/scripts/set-log-level.yaml": {
 		name:    "set-log-level.yaml",
 		local:   "../eonza-assets/scripts/set-log-level.yaml",
@@ -502,6 +490,19 @@ KRWHMyWxlTBiaTkbbn2ysO6fZu9w9yviOGOAXrlCq3gJxED7t1N4YeK6Yxl5YRoYRZFE2elBTpZ0JCnL
 w9wJk2LbAqn28N1zOcbkMOk0Akxb0N005WEsvNfP9Tp8hE34CZ/hq17Xrwi/oaqfQhW+QxU2YVO/hKqr
 DG9H+I2+JY5EzxbwzecCl1ara301W6RNWxlydacNfOFoiUK1Uw+5asRjchNh0galcWDAgDzxwuRJNrLO
 pNkAHRqZLGlPs1w95iphfwEAAP//e/BaBSsCAAA=
+`,
+	},
+
+	"/eonza-assets/scripts/sleep.eonza.yaml": {
+		name:    "sleep.eonza.yaml",
+		local:   "../eonza-assets/scripts/sleep.eonza.yaml",
+		size:    329,
+		modtime: 1594090179,
+		compressed: `
+H4sIAAAAAAAC/1yQTUoDQRCF93WKR7JIslAiiIu6hu6lSYrQ0NM9dtcIuhI8QMALeIVZ+JOFeoaaG4kz
+nUVcVfHBV+9RRVR93BUmILpGGCWItOeS4qMjQL0GYSzmtyOfLwgIaRfkXgLjilqXXVOYzqqtvpHU6YlZ
+2ejqQyuMSwJSqz7FMRjw0at3gTG7WK/Xs5Fluet8li1DcycUXK0pcXKmRozrvzGRmsS4mRYsmyKbFQG5
+O5Xs1frh2T6t/2fay/Bk7/Y17GE/9mEHe7Pevu0w7I/XNml7/NOyeiv6DQAA//9jFhYfSQEAAA==
 `,
 	},
 
@@ -9708,17 +9709,17 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/bash.yaml"],
 		_escData["/eonza-assets/scripts/chdir.yaml"],
 		_escData["/eonza-assets/scripts/curdir.yaml"],
-		_escData["/eonza-assets/scripts/eonza.error.yaml"],
-		_escData["/eonza-assets/scripts/eonza.exit.yaml"],
-		_escData["/eonza-assets/scripts/eonza.run.yaml"],
-		_escData["/eonza-assets/scripts/eonza.sleep.yaml"],
+		_escData["/eonza-assets/scripts/error.eonza.yaml"],
+		_escData["/eonza-assets/scripts/exit.eonza.yaml"],
 		_escData["/eonza-assets/scripts/form.yaml"],
 		_escData["/eonza-assets/scripts/log-output.yaml"],
 		_escData["/eonza-assets/scripts/new.yaml"],
 		_escData["/eonza-assets/scripts/open.yaml"],
+		_escData["/eonza-assets/scripts/run.eonza.yaml"],
 		_escData["/eonza-assets/scripts/set-log-level.yaml"],
 		_escData["/eonza-assets/scripts/set-variable.yaml"],
 		_escData["/eonza-assets/scripts/set-variables.yaml"],
+		_escData["/eonza-assets/scripts/sleep.eonza.yaml"],
 		_escData["/eonza-assets/scripts/source-code.yaml"],
 		_escData["/eonza-assets/scripts/write-console.yaml"],
 	},

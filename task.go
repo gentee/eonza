@@ -104,7 +104,7 @@ func closeTask() {
 	outFile.Close()
 	logScript.Close()
 	for i, item := range TaskExt {
-		if i == TExtSrc && !storage.Settings.IncludeSrc {
+		if i == TExtSrc && len(scriptTask.Header.SourceCode) == 0 {
 			continue
 		}
 		files = append(files, filepath.Join(scriptTask.Header.LogDir,
