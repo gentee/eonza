@@ -9,6 +9,7 @@ import (
 	"eonza/lib"
 	"fmt"
 	"hash/crc64"
+	"reflect"
 	"strings"
 
 	es "eonza/script"
@@ -120,11 +121,18 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			}
 		case PList:
 			ptype = `str`
-			out, err := json.Marshal(val)
-			if err != nil {
-				return nil, err
+			if reflect.TypeOf(val).Kind() == reflect.Slice && reflect.ValueOf(val).Len() > 0 {
+				out, err := json.Marshal(val)
+				if err != nil {
+					return nil, err
+				}
+				value = src.FindStrConst(string(out))
+			} else {
+				if par.Options.Required {
+					return nil, errField(par.Title)
+				}
+				value = src.FindStrConst(`[]`)
 			}
-			value = src.FindStrConst(string(out))
 		}
 		values = append(values, Param{
 			Value: value,
