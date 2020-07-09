@@ -22,8 +22,9 @@ const (
 
 // Setting contains settings of the application
 type Settings struct {
-	LogLevel   int  `json:"loglevel"`
-	IncludeSrc bool `json:"includesrc"`
+	LogLevel   int               `json:"loglevel"`
+	IncludeSrc bool              `json:"includesrc"`
+	Constants  map[string]string `json:"constants"`
 }
 
 // Storage contains all application data
@@ -36,7 +37,8 @@ type Storage struct {
 var (
 	storage = Storage{
 		Settings: Settings{
-			LogLevel: script.LOG_INFO,
+			LogLevel:  script.LOG_INFO,
+			Constants: make(map[string]string),
 		},
 		Users:   make(map[uint32]*User),
 		Scripts: make(map[string]*Script),

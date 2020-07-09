@@ -28,8 +28,9 @@ const (
 	VarLength = 32
 	VarDeep   = 16
 
-	ErrVarLoop = `%s variable refers to itself`
-	ErrVarDeep = `maximum depth reached`
+	ErrVarLoop  = `%s variable refers to itself`
+	ErrVarDeep  = `maximum depth reached`
+	ErrVarConst = `the '%s' constant cannot be modified`
 )
 
 type FormInfo struct {
@@ -237,11 +238,15 @@ func SetLogLevel(level int64) int64 {
 	return ret
 }
 
-func SetVar(name, value string) {
+func SetVar(name, value string) error {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	id := len(dataScript.Vars) - 1
+	if strings.HasPrefix(name, `.`) {
+		return fmt.Errorf(ErrVarConst, name)
+	}
 	dataScript.Vars[id][name] = value
+	return nil
 }
 
 func SetYamlVars(in string) error {

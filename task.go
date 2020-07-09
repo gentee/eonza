@@ -323,6 +323,9 @@ func initTask() script.Settings {
 		}
 	}
 	glob := &langRes[langid]
+	for name, val := range scriptTask.Header.Constants {
+		(*glob)[name] = val
+	}
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{
 		ChStdin:  chStdin,

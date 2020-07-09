@@ -73,6 +73,7 @@ func runHandle(c echo.Context) error {
 		AssetsDir:  cfg.AssetsDir,
 		LogDir:     cfg.Log.Dir,
 		UserID:     c.(*Auth).User.ID,
+		Constants:  storage.Settings.Constants,
 		Lang:       GetLangCode(c.(*Auth).User),
 		TaskID:     lib.RndNum(),
 		ServerPort: cfg.HTTP.Port,

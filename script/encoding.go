@@ -22,6 +22,7 @@ type Header struct {
 	LogDir     string
 	Theme      string
 	SourceCode []byte
+	Constants  map[string]string
 	Lang       string
 	UserID     uint32
 	TaskID     uint32
