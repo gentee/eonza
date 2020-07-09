@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "0.0.0+1 (alpha)"
+	Version = "0.1.0+1 (alpha)"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
