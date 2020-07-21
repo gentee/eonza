@@ -39,5 +39,5 @@ type AppInfo struct {
 	Homepage  string
 	Email     string
 	Lang      string
-	License   string
+	Issue     string
 }
