@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"eonza/lib"
@@ -67,14 +68,23 @@ func runHandle(c echo.Context) error {
 	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
 		return jsonError(c, err)
 	}
+	langCode := GetLangCode(c.(*Auth).User)
+	title := item.Settings.Title
+	if langTitle := strings.Trim(title, `#`); langTitle != title {
+		if val, ok := item.Langs[langCode][langTitle]; ok {
+			title = val
+		} else if val, ok := item.Langs[LangDefCode][langTitle]; ok {
+			title = val
+		}
+	}
 	header := script.Header{
 		Name:       name,
-		Title:      item.Settings.Title,
+		Title:      title,
 		AssetsDir:  cfg.AssetsDir,
 		LogDir:     cfg.Log.Dir,
 		UserID:     c.(*Auth).User.ID,
 		Constants:  storage.Settings.Constants,
-		Lang:       GetLangCode(c.(*Auth).User),
+		Lang:       langCode,
 		TaskID:     lib.RndNum(),
 		ServerPort: cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
