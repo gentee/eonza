@@ -211,12 +211,14 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		code = strings.TrimRight(code, "\r\n")
 		var parNames string
 		if script.Settings.Name != SourceCode {
+			var vars []string
 			for _, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
 				parNames += `,` + par.Name
+				vars = append(vars, fmt.Sprintf(`"%s", %[1]s`, par.Name))
 			}
 			if len(script.Tree) > 0 {
-				code += "\r\ninit()\r\n" + predef
+				code += "\r\ninit(" + strings.Join(vars, `,`) + ")\r\n" + predef
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
 					return ``, err

@@ -82,10 +82,14 @@ func GetVar(name string) (ret string, err error) {
 	return
 }
 
-func Init() {
+func Init(pars ...interface{}) {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
+	ind := len(dataScript.Vars)
 	dataScript.Vars = append(dataScript.Vars, make(map[string]string))
+	for i := 0; i < len(pars); i += 2 {
+		dataScript.Vars[ind][pars[i].(string)] = fmt.Sprint(pars[i+1])
+	}
 }
 
 func InitCmd(name string, pars ...interface{}) bool {
