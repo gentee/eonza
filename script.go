@@ -37,6 +37,8 @@ type scriptSettings struct {
 	Desc     string `json:"desc,omitempty" yaml:"desc,omitempty"`
 	LogLevel int    `json:"loglevel" yaml:"loglevel"`
 	Unrun    bool   `json:"unrun,omitempty" yaml:"unrun,omitempty"`
+	Help     string `json:"help,omitempty" yaml:"help,omitempty"`
+	HelpLang string `json:"helplang,omitempty" yaml:"helplang,omitempty"`
 }
 
 type scriptItem struct {

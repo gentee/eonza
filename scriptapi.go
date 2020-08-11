@@ -21,6 +21,8 @@ type ScriptItem struct {
 	Name     string        `json:"name"`
 	Title    string        `json:"title"`
 	Desc     string        `json:"desc,omitempty"`
+	Help     string        `json:"help,omitempty"`
+	HelpLang string        `json:"helplang,omitempty"`
 	Unrun    bool          `json:"unrun,omitempty"`
 	Embedded bool          `json:"embedded,omitempty"`
 	Folder   bool          `json:"folder,omitempty"`
@@ -139,6 +141,8 @@ func ScriptToItem(c echo.Context, script *Script) ScriptItem {
 		Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang], glob),
 		Desc:     es.ReplaceVars(script.Settings.Desc, script.Langs[lang], glob),
 		Unrun:    script.Settings.Unrun,
+		Help:     script.Settings.Help,
+		HelpLang: script.Settings.HelpLang,
 		Embedded: script.embedded,
 		Folder:   script.folder,
 		Params:   copyParams(script.Params, script.Langs[lang], glob),

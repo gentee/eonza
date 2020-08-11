@@ -21,6 +21,7 @@ type Render struct {
 	Version string
 	Develop bool
 	Langs   map[string]string
+	Lang    string
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -114,6 +115,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.App = appInfo
 		render.Version = Version
 		render.Develop = cfg.Develop
+		render.Lang = GetLangCode(c.(*Auth).User)
 		render.Langs = make(map[string]string)
 		for i, lang := range langs {
 			render.Langs[lang] = Lang(i, `native`)
