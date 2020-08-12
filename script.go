@@ -53,6 +53,7 @@ type scriptOptions struct {
 	Type     string        `json:"type,omitempty" yaml:"type,omitempty"`
 	Items    []scriptItem  `json:"items,omitempty" yaml:"items,omitempty"`
 	List     []scriptParam `json:"list,omitempty" yaml:"list,omitempty"`
+	Output   []string      `json:"output,omitempty" yaml:"output,omitempty"`
 }
 
 type scriptParam struct {
