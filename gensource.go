@@ -180,7 +180,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		return ``, err
 	}
 	var params []string
-	if !src.Linked[idname] || script.Settings.Name == SourceCode {
+	if !src.Linked[idname] || script.Settings.Name == SourceCode || len(node.Children) > 0 {
 		src.Linked[idname] = true
 
 		tmp, err := src.Tree(node.Children)
@@ -203,10 +203,11 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			if values[0].Value == `true` {
 				src.Funcs += code + "\r\n"
 				return ``, nil
-			} else {
-				idname = fmt.Sprintf("%s%d", idname, src.Counter)
-				src.Counter++
 			}
+		}
+		if script.Settings.Name == SourceCode || len(node.Children) > 0 {
+			idname = fmt.Sprintf("%s%d", idname, src.Counter)
+			src.Counter++
 		}
 		code = strings.TrimRight(code, "\r\n")
 		var parNames string

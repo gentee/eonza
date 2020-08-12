@@ -33,6 +33,16 @@ const (
 	ErrVarConst = `the '%s' constant cannot be modified`
 )
 
+type ConditionItem struct {
+	Var   string `json:"var,omitempty"`
+	Not   bool   `json:"not,omitempty"`
+	Cmp   string `json:"cmp,omitempty"`
+	Value string `json:"value,omitempty"`
+	Next  string `json:"next,omitempty"`
+
+	result bool
+}
+
 type FormInfo struct {
 	ChResponse chan bool
 	Data       string
@@ -55,6 +65,7 @@ var (
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
+		{Prototype: `Condition(str,str) bool`, Object: Condition},
 		{Prototype: `Form(str)`, Object: Form},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
@@ -62,11 +73,109 @@ var (
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
+		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
+		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 	}
 )
+
+func IsCond(item *ConditionItem) (err error) {
+	var (
+		i      int64
+		val, s string
+	)
+	if len(item.Var) == 0 {
+		return fmt.Errorf(`empty variable in If Statement`)
+	}
+	if val, err = Macro(item.Value); err != nil {
+		return
+	}
+	switch item.Cmp {
+	case `equal`:
+		if len(item.Value) == 0 {
+			if i, err = GetVarBool(item.Var); err != nil {
+				return
+			}
+			item.result = i == 0
+		} else {
+			if s, err = GetVar(item.Var); err != nil {
+				return
+			}
+			item.result = s == val
+		}
+	default:
+		return fmt.Errorf(`Unknown comparison type: %s`, item.Cmp)
+	}
+	if item.Not {
+		item.result = !item.result
+	}
+	return
+}
+
+func Condition(casevar, list string) (ret int64, err error) {
+	if len(casevar) > 0 {
+		var used int64
+		if used, err = GetVarBool(casevar); err != nil || used != 0 {
+			return
+		}
+	}
+	var cond []ConditionItem
+	if err = json.Unmarshal([]byte(list), &cond); err != nil {
+		return
+	}
+	count := len(cond)
+	if count == 0 {
+		ret = 1
+	} else {
+		if err = IsCond(&cond[0]); err != nil {
+			return
+		}
+		// collect OR
+		var (
+			startOr int
+			modeOr  = cond[0].Next == `1`
+		)
+		for i := 1; i < count; i++ {
+			if cond[i-1].Next == `0` {
+				off := i - 1
+				if modeOr {
+					off = startOr
+				}
+				if !cond[off].result {
+					cond[0].result = false
+					break
+				}
+				if err = IsCond(&cond[i]); err != nil {
+					return
+				}
+				if cond[i].Next == `0` {
+					startOr = i
+					modeOr = true
+				}
+			} else {
+				if cond[startOr].result {
+					continue
+				}
+				if err = IsCond(&cond[i]); err != nil {
+					return
+				}
+				cond[startOr].result = cond[i].result
+			}
+		}
+		if cond[0].result {
+			ret = 1
+		}
+	}
+
+	if ret != 0 && len(casevar) > 0 {
+		if err = SetVarInt(casevar, 1); err != nil {
+			return
+		}
+	}
+	return
+}
 
 func Deinit() {
 	dataScript.Mutex.Lock()
@@ -78,6 +187,16 @@ func GetVar(name string) (ret string, err error) {
 	if IsVar(name) {
 		id := len(dataScript.Vars) - 1
 		ret, err = Macro(dataScript.Vars[id][name])
+	}
+	return
+}
+
+func GetVarBool(name string) (ret int64, err error) {
+	var tmp string
+	if tmp, err = GetVar(name); err == nil {
+		if len(tmp) > 0 && tmp != `0` && tmp != `false` {
+			ret = 1
+		}
 	}
 	return
 }
@@ -251,6 +370,10 @@ func SetVar(name, value string) error {
 	}
 	dataScript.Vars[id][name] = value
 	return nil
+}
+
+func SetVarInt(name string, value int64) error {
+	return SetVar(name, fmt.Sprint(value))
 }
 
 func SetYamlVars(in string) error {
