@@ -127,6 +127,9 @@ func copyParams(src []scriptParam, values map[string]string, glob *map[string]st
 			tmp.Options.Items[i].Title = es.ReplaceVars(val.Title, values, glob)
 		}
 		tmp.Options.List = copyParams(item.Options.List, values, glob)
+		for i, out := range tmp.Options.Output {
+			tmp.Options.Output[i] = es.ReplaceVars(out, values, glob)
+		}
 		params[i] = tmp
 		params[i].Title = es.ReplaceVars(params[i].Title, values, glob)
 	}

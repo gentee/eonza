@@ -134,35 +134,22 @@ func Condition(casevar, list string) (ret int64, err error) {
 		}
 		// collect OR
 		var (
-			startOr int
-			modeOr  = cond[0].Next == `1`
+			modeOr bool // = cond[0].Next == `1`
 		)
 		for i := 1; i < count; i++ {
-			if cond[i-1].Next == `0` {
-				off := i - 1
-				if modeOr {
-					off = startOr
-				}
-				if !cond[off].result {
-					cond[0].result = false
-					break
-				}
-				if err = IsCond(&cond[i]); err != nil {
-					return
-				}
-				if cond[i].Next == `0` {
-					startOr = i
-					modeOr = true
-				}
-			} else {
-				if cond[startOr].result {
+			modeOr = cond[i-1].Next == `1`
+			if !cond[0].result && !modeOr {
+				break
+			}
+			if modeOr {
+				if cond[0].result {
 					continue
 				}
-				if err = IsCond(&cond[i]); err != nil {
-					return
-				}
-				cond[startOr].result = cond[i].result
 			}
+			if err = IsCond(&cond[i]); err != nil {
+				return
+			}
+			cond[0].result = cond[i].result
 		}
 		if cond[0].result {
 			ret = 1
