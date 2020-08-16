@@ -7,6 +7,7 @@ package script
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -76,6 +77,7 @@ var (
 		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
+		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 	}
@@ -184,6 +186,14 @@ func GetVarBool(name string) (ret int64, err error) {
 		if len(tmp) > 0 && tmp != `0` && tmp != `false` {
 			ret = 1
 		}
+	}
+	return
+}
+
+func GetVarInt(name string) (ret int64, err error) {
+	var tmp string
+	if tmp, err = GetVar(name); err == nil {
+		ret, _ = strconv.ParseInt(tmp, 10, 64)
 	}
 	return
 }
