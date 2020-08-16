@@ -212,15 +212,15 @@ var _escData = map[string]*_escFile{
 	"/eonza-assets/init/demo.url.yaml": {
 		name:    "demo.url.yaml",
 		local:   "../eonza-assets/init/demo.url.yaml",
-		size:    715,
-		modtime: 1593007794,
+		size:    737,
+		modtime: 1597585268,
 		compressed: `
-H4sIAAAAAAAC/3xSS2vjMBC+61d8OITsHpwse9iDLnspDYHQQKG9FsWe2ALZY6Rx3PTx34ufTdpQncSn
-me8xo0AitsyCVkBpCtJIqeBl7Z0CxIojjRsqGA/3WwWkFBKNXUUlJCeEihJ7sJSi9g62B/eem0BeAY4z
-R0dyGv+UeCKt4kEkkMRH463ZOwoKOBpXU2cCcDZIf4t7XCMSX1PUYW2t17CBKyovq3KRKujVqmmaJXH5
-Ypbss/Om4tTmGj0c2Bc/SAs9ix5it0dOVevkb/Sd8bxhg8aUAmFwPyUbMNaMJH+uJJkmw7VPKE44JYWO
-Q6NN/8Vp+67xFg9M9oA1yaPxv6KeL/r9H6/DY3fme05P8wF5V0CSW5d6Klu+UdxxFnMtVS2q9/cpCAyr
-3O7WT5u7292YqEu96L7ErBvHbHHGOG3pkqsykmsspoarBi42c0W8l55+50cAAAD//1jsi7vLAgAA
+H4sIAAAAAAAC/3ySMYvjMBSEe/2KwSlSOQlXXKH6uCMQLnBw9aLYL7ZAlrTSc7zZX7/YskzCmrgy4r2Z
+b0aKxKxtE6UArOpIoqbO7fpgBMCaDUn8os7h/7+TAGqKlcTZkwW3hOip0ldNNfpgoNPhJbghUhCAcY2h
+GxmJn4IDkRTlbBKJy5sKWl0MRQHclOlpggCMjpz+ynQuUXDoqZjOxtkgoaPzZJ+nWmYf5X4/DMOOnP1U
+Oxeax6XuPubKDFcXuhfWTB8s59jjx3c/kvwovis+LhwxKMtgB5da0hF5JoscVpJkKn1N7AKTgMQY/QVm
+1XkJeu9VtrATRnHInNbxIpJMU6XrdVatNnUgO8pnJOOa0vXsexaLwEwCzBd8Ov95O/79fc45J4jt9FA2
+U0mb7YPicnfPWl5xK7FdFlYBnopYMU/Wy5v9CgAA//9UaRG24QIAAA==
 `,
 	},
 
