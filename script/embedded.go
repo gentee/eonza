@@ -73,6 +73,7 @@ var (
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
+		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
 		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
@@ -378,6 +379,14 @@ func SetVar(name, value string) error {
 
 func SetVarInt(name string, value int64) error {
 	return SetVar(name, fmt.Sprint(value))
+}
+
+func SetVarBool(name string, value int64) error {
+	val := `false`
+	if value != 0 {
+		val = `true`
+	}
+	return SetVar(name, val)
 }
 
 func SetYamlVars(in string) error {
