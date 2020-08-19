@@ -386,6 +386,20 @@ OsSz7mOnpz+Uf4XkdUEWDySPGc/Gt7nqCy8CLx3P5nPzHQAA//+AZ2Fh0wEAAA==
 `,
 	},
 
+	"/eonza-assets/scripts/delete-dir.yaml": {
+		name:    "delete-dir.yaml",
+		local:   "../eonza-assets/scripts/delete-dir.yaml",
+		size:    481,
+		modtime: 1597836240,
+		compressed: `
+H4sIAAAAAAAC/4xQTUoDMRTe5xQfdFFd1IW4yron8AJlbJ5tIM2M+al0V4tL0UN4gS4qjFbqFV5uJMlM
+oYoLIYvw/fM8haDtzEsB2GpBEooMBRop7QQQdDAkMRxMMjkYCkCRnxYkfwoyJ9P88mXIVHYm4aIATD0z
+tCQjcSWAaF20EsFFEk3lqoWXYtS3N1WYn/ZeZKC0hFVDEpcCqJuga1smA47uonak+rxcWhiyHT/p9o7L
+OijtaBpqt8K9DnPcakMelVXw8ebIafKds1vUO8dHpwBc/JHNr7zjLe+5TZv0BN5xm9b8xh9pw4e05jY9
+nwb+Q470gPTIW37nPW/5k1vk98UH3v2hf8kKMa0VSVzTol7SWLuzfLlz8R0AAP//kGHbGOEBAAA=
+`,
+	},
+
 	"/eonza-assets/scripts/delete-file.yml": {
 		name:    "delete-file.yml",
 		local:   "../eonza-assets/scripts/delete-file.yml",
@@ -9932,6 +9946,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/chdir.yaml"],
 		_escData["/eonza-assets/scripts/copy-file.yaml"],
 		_escData["/eonza-assets/scripts/curdir.yaml"],
+		_escData["/eonza-assets/scripts/delete-dir.yaml"],
 		_escData["/eonza-assets/scripts/delete-file.yml"],
 		_escData["/eonza-assets/scripts/error.eonza.yaml"],
 		_escData["/eonza-assets/scripts/exit.eonza.yaml"],
