@@ -13,5 +13,5 @@
 
 # Eonza files
 
-app*.go
+app-*.go
 business.go
