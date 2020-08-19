@@ -233,7 +233,11 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			prefix = fmt.Sprintf("int prevLog = SetLogLevel(%d)\r\n", script.Settings.LogLevel)
 			suffix = "\r\nSetLogLevel(prevLog)"
 		}
-		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", script.Settings.Name, parNames)
+		name := script.Settings.Name
+		if script.Settings.LogLevel == es.LOG_INFO {
+			name = `*` + name
+		}
+		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", name, parNames)
 		/*		if len(script.Tree) > 0 || len(predef) > 0 {
 				initcmd += "init()\r\n" + predef
 				code += "\r\ndeinit()"

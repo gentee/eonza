@@ -218,7 +218,14 @@ func InitCmd(name string, pars ...interface{}) bool {
 			params[i] = fmt.Sprint(par)
 		}
 	}
-	LogOutput(LOG_DEBUG, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+	level := int64(LOG_DEBUG)
+	info := name[0] == '*'
+	if info {
+		name = name[1:]
+		level = LOG_INFO
+	}
+	msg := fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `))
+	LogOutput(level, msg)
 	return true
 }
 
