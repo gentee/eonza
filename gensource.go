@@ -109,6 +109,8 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				ptype = par.Options.Type
 			} else {
 				ptype = `str`
+			}
+			if ptype == `str` {
 				value = src.FindStrConst(value)
 			}
 		case PNumber:

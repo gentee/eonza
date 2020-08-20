@@ -29,6 +29,7 @@ const (
 	PSelect
 	PNumber
 	PList
+	PHTMLText
 )
 
 type scriptSettings struct {

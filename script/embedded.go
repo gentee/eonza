@@ -308,14 +308,17 @@ func replace(values map[string]string, input []rune, stack *[]string,
 			continue
 		}
 		if isName {
+			ok = false
 			key := string(name)
-			if key[0] == '.' {
-				if glob != nil {
-					value, ok = (*glob)[key[1:]]
-				}
-			} else {
-				if values != nil {
-					value, ok = values[key]
+			if len(key) > 0 {
+				if key[0] == '.' {
+					if glob != nil {
+						value, ok = (*glob)[key[1:]]
+					}
+				} else {
+					if values != nil {
+						value, ok = values[key]
+					}
 				}
 			}
 			if ok {
