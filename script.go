@@ -30,6 +30,7 @@ const (
 	PNumber
 	PList
 	PHTMLText
+	PButton
 )
 
 type scriptSettings struct {
