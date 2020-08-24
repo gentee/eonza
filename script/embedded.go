@@ -27,7 +27,32 @@ const (
 	PList
 	PHTMLText
 	PButton
+	PDynamic
 )
+
+type ScriptItem struct {
+	Title string `json:"title" yaml:"title"`
+	Value string `json:"value,omitempty" yaml:"value,omitempty"`
+}
+
+type ScriptParam struct {
+	Name    string        `json:"name" yaml:"name"`
+	Title   string        `json:"title" yaml:"title"`
+	Type    ParamType     `json:"type" yaml:"type"`
+	Options ScriptOptions `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+type ScriptOptions struct {
+	Initial  string        `json:"initial,omitempty" yaml:"initial,omitempty"`
+	Default  string        `json:"default,omitempty" yaml:"default,omitempty"`
+	Required bool          `json:"required,omitempty" yaml:"required,omitempty"`
+	Type     string        `json:"type,omitempty" yaml:"type,omitempty"`
+	Items    []ScriptItem  `json:"items,omitempty" yaml:"items,omitempty"`
+	List     []ScriptParam `json:"list,omitempty" yaml:"list,omitempty"`
+	Output   []string      `json:"output,omitempty" yaml:"output,omitempty"`
+	// for Form command
+	If string `json:"if,omitempty" yaml:"if,omitempty"`
+}
 
 const (
 	LOG_DISABLE = iota
@@ -84,6 +109,7 @@ var (
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
+		{Prototype: `ResultVar(str,str)`, Object: ResultVar},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
@@ -250,23 +276,79 @@ func IsVar(key string) bool {
 	return ret
 }
 
-func Form(data string) {
-	ch := make(chan bool)
+func loadForm(data string, form *[]map[string]interface{}) error {
+
 	var dataList []map[string]interface{}
 
+	ifcond := func(ifval string) (ret bool, err error) {
+		var (
+			not  bool
+			iret int64
+		)
+		if len(ifval) == 0 {
+			return true, nil
+		}
+		if ifval[0] == '!' {
+			not = true
+			ifval = ifval[1:]
+		}
+		if iret, err = GetVarBool(ifval); err != nil {
+			return
+		}
+		ret = iret != 0
+		if not {
+			ret = !ret
+		}
+		return
+	}
 	pbutton := fmt.Sprint(PButton)
+	pdynamic := fmt.Sprint(PDynamic)
 	if json.Unmarshal([]byte(data), &dataList) == nil {
 		for i, item := range dataList {
+			if opt, optok := item["options"]; optok {
+				var ifval string
+				switch v := opt.(type) {
+				case string:
+					var options ScriptOptions
+					if json.Unmarshal([]byte(v), &options) == nil {
+						ifval = options.If
+					}
+				case map[string]interface{}:
+					if ifdata, ok := v["if"]; ok {
+						ifval = fmt.Sprint(ifdata)
+					}
+				}
+				if ifok, err := ifcond(ifval); err != nil {
+					return err
+				} else if !ifok {
+					continue
+				}
+			}
 			varname := fmt.Sprint(item["var"])
 			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])
+			if item["type"] == pdynamic {
+				loadForm(val, form)
+				continue
+			}
 			dataList[i]["value"] = val
 			val, _ = Macro(fmt.Sprint(item["text"]))
 			dataList[i]["text"] = val
 			if item["type"] == pbutton {
 				SetVar(varname, ``)
 			}
+			*form = append(*form, dataList[i])
 		}
-		if out, err := json.Marshal(dataList); err == nil {
+	}
+	return nil
+}
+
+func Form(data string) error {
+	ch := make(chan bool)
+	formList := make([]map[string]interface{}, 0, 32)
+
+	loadForm(data, &formList)
+	if len(formList) > 0 {
+		if out, err := json.Marshal(formList); err == nil {
 			data = string(out)
 		}
 	}
@@ -280,6 +362,7 @@ func Form(data string) {
 	dataScript.Mutex.Unlock()
 	dataScript.chForm <- form
 	<-ch
+	return nil
 }
 
 func LogOutput(level int64, message string) {
@@ -387,15 +470,26 @@ func SetLogLevel(level int64) int64 {
 	return ret
 }
 
-func SetVar(name, value string) error {
+func setRawVar(shift int, name, value string) error {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
-	id := len(dataScript.Vars) - 1
+	off := len(dataScript.Vars) - 1 - shift
 	if strings.HasPrefix(name, `.`) {
 		return fmt.Errorf(ErrVarConst, name)
 	}
-	dataScript.Vars[id][name] = value
+	if off < 0 {
+		return fmt.Errorf(`set shift var %s error`, name)
+	}
+	dataScript.Vars[off][name] = value
 	return nil
+}
+
+func ResultVar(name, value string) error {
+	return setRawVar(1, name, value)
+}
+
+func SetVar(name, value string) error {
+	return setRawVar(0, name, value)
 }
 
 func SetVarInt(name string, value int64) error {

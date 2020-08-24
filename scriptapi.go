@@ -18,16 +18,16 @@ import (
 )
 
 type ScriptItem struct {
-	Name     string        `json:"name"`
-	Title    string        `json:"title"`
-	Desc     string        `json:"desc,omitempty"`
-	Help     string        `json:"help,omitempty"`
-	HelpLang string        `json:"helplang,omitempty"`
-	Unrun    bool          `json:"unrun,omitempty"`
-	Embedded bool          `json:"embedded,omitempty"`
-	Folder   bool          `json:"folder,omitempty"`
-	Params   []scriptParam `json:"params,omitempty"`
-	Initial  string        `json:"initial,omitempty"`
+	Name     string           `json:"name"`
+	Title    string           `json:"title"`
+	Desc     string           `json:"desc,omitempty"`
+	Help     string           `json:"help,omitempty"`
+	HelpLang string           `json:"helplang,omitempty"`
+	Unrun    bool             `json:"unrun,omitempty"`
+	Embedded bool             `json:"embedded,omitempty"`
+	Folder   bool             `json:"folder,omitempty"`
+	Params   []es.ScriptParam `json:"params,omitempty"`
+	Initial  string           `json:"initial,omitempty"`
 }
 
 type ScriptResponse struct {
@@ -117,11 +117,12 @@ func saveScriptHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
-func copyParams(src []scriptParam, values map[string]string, glob *map[string]string) []scriptParam {
-	params := make([]scriptParam, len(src))
+func copyParams(src []es.ScriptParam, values map[string]string,
+	glob *map[string]string) []es.ScriptParam {
+	params := make([]es.ScriptParam, len(src))
 	for i, item := range src {
 		tmp := item
-		tmp.Options.Items = make([]scriptItem, len(tmp.Options.Items))
+		tmp.Options.Items = make([]es.ScriptItem, len(tmp.Options.Items))
 		for i, val := range item.Options.Items {
 			tmp.Options.Items[i] = val
 			tmp.Options.Items[i].Title = es.ReplaceVars(val.Title, values, glob)

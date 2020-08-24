@@ -32,28 +32,6 @@ type scriptSettings struct {
 	HelpLang string `json:"helplang,omitempty" yaml:"helplang,omitempty"`
 }
 
-type scriptItem struct {
-	Title string `json:"title" yaml:"title"`
-	Value string `json:"value,omitempty" yaml:"value,omitempty"`
-}
-
-type scriptOptions struct {
-	Initial  string        `json:"initial,omitempty" yaml:"initial,omitempty"`
-	Default  string        `json:"default,omitempty" yaml:"default,omitempty"`
-	Required bool          `json:"required,omitempty" yaml:"required,omitempty"`
-	Type     string        `json:"type,omitempty" yaml:"type,omitempty"`
-	Items    []scriptItem  `json:"items,omitempty" yaml:"items,omitempty"`
-	List     []scriptParam `json:"list,omitempty" yaml:"list,omitempty"`
-	Output   []string      `json:"output,omitempty" yaml:"output,omitempty"`
-}
-
-type scriptParam struct {
-	Name    string        `json:"name" yaml:"name"`
-	Title   string        `json:"title" yaml:"title"`
-	Type    es.ParamType  `json:"type" yaml:"type"`
-	Options scriptOptions `json:"options,omitempty" yaml:"options,omitempty"`
-}
-
 type scriptTree struct {
 	Name     string                 `json:"name" yaml:"name"`
 	Open     bool                   `json:"open,omitempty" yaml:"open,omitempty"`
@@ -64,7 +42,7 @@ type scriptTree struct {
 
 type Script struct {
 	Settings scriptSettings               `json:"settings" yaml:"settings"`
-	Params   []scriptParam                `json:"params,omitempty" yaml:"params,omitempty"`
+	Params   []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
 	Tree     []scriptTree                 `json:"tree,omitempty" yaml:"tree,omitempty"`
 	Langs    map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
 	Code     string                       `json:"code,omitempty" yaml:"code,omitempty"`
