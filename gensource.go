@@ -82,14 +82,14 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			value = strings.TrimSpace(fmt.Sprint(val))
 		}
 		switch par.Type {
-		case PCheckbox:
+		case es.PCheckbox:
 			ptype = `bool`
 			if value == `false` || value == `0` || len(value) == 0 {
 				value = `false`
 			} else {
 				value = `true`
 			}
-		case PTextarea, PSingleText:
+		case es.PTextarea, es.PSingleText:
 			ptype = `str`
 			if len(value) == 0 {
 				if par.Options.Required {
@@ -104,7 +104,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 					value = fmt.Sprintf("Macro(%s)", value)
 				}
 			}
-		case PSelect:
+		case es.PSelect:
 			if len(par.Options.Type) > 0 {
 				ptype = par.Options.Type
 			} else {
@@ -113,7 +113,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			if ptype == `str` {
 				value = src.FindStrConst(value)
 			}
-		case PNumber:
+		case es.PNumber:
 			ptype = `int`
 			if len(value) == 0 {
 				if par.Options.Required {
@@ -121,7 +121,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 				}
 				value = par.Options.Default
 			}
-		case PList:
+		case es.PList:
 			ptype = `str`
 			if reflect.TypeOf(val).Kind() == reflect.Slice && reflect.ValueOf(val).Len() > 0 {
 				out, err := json.Marshal(val)

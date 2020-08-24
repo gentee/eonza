@@ -16,6 +16,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type ParamType int
+
+const (
+	PCheckbox ParamType = iota
+	PTextarea
+	PSingleText
+	PSelect
+	PNumber
+	PList
+	PHTMLText
+	PButton
+)
+
 const (
 	LOG_DISABLE = iota
 	LOG_ERROR
@@ -241,12 +254,17 @@ func Form(data string) {
 	ch := make(chan bool)
 	var dataList []map[string]interface{}
 
+	pbutton := fmt.Sprint(PButton)
 	if json.Unmarshal([]byte(data), &dataList) == nil {
 		for i, item := range dataList {
-			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][fmt.Sprint(item["var"])])
+			varname := fmt.Sprint(item["var"])
+			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])
 			dataList[i]["value"] = val
 			val, _ = Macro(fmt.Sprint(item["text"]))
 			dataList[i]["text"] = val
+			if item["type"] == pbutton {
+				SetVar(varname, ``)
+			}
 		}
 		if out, err := json.Marshal(dataList); err == nil {
 			data = string(out)

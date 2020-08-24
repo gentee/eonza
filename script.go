@@ -11,6 +11,8 @@ import (
 	"path"
 	"strings"
 
+	es "eonza/script"
+
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
@@ -18,19 +20,6 @@ import (
 
 var (
 	scripts map[string]*Script
-)
-
-type ParamType int
-
-const (
-	PCheckbox ParamType = iota
-	PTextarea
-	PSingleText
-	PSelect
-	PNumber
-	PList
-	PHTMLText
-	PButton
 )
 
 type scriptSettings struct {
@@ -61,7 +50,7 @@ type scriptOptions struct {
 type scriptParam struct {
 	Name    string        `json:"name" yaml:"name"`
 	Title   string        `json:"title" yaml:"title"`
-	Type    ParamType     `json:"type" yaml:"type"`
+	Type    es.ParamType  `json:"type" yaml:"type"`
 	Options scriptOptions `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
@@ -130,7 +119,7 @@ func setScript(script *Script) error {
 		ivalues = make(map[string]interface{}) //string)
 	}
 	for _, par := range script.Params {
-		if par.Type == PList {
+		if par.Type == es.PList {
 			ivalues[par.Name] = []interface{}{}
 		} else if len(par.Options.Initial) > 0 {
 			ivalues[par.Name] = par.Options.Initial
