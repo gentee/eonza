@@ -123,7 +123,8 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error
 			}
 		case es.PList:
 			ptype = `str`
-			if reflect.TypeOf(val).Kind() == reflect.Slice && reflect.ValueOf(val).Len() > 0 {
+			if val != nil && reflect.TypeOf(val).Kind() == reflect.Slice &&
+				reflect.ValueOf(val).Len() > 0 {
 				out, err := json.Marshal(val)
 				if err != nil {
 					return nil, err
