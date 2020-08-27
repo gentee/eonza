@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -326,6 +327,14 @@ func initTask() script.Settings {
 	for name, val := range scriptTask.Header.Constants {
 		(*glob)[name] = val
 	}
+	if exfile, err := os.Executable(); err != nil {
+		golog.Fatal(err)
+	} else {
+		(*glob)[`apppath`] = filepath.Dir(exfile)
+	}
+	(*glob)[`temppath`] = os.TempDir()
+	(*glob)[`os`] = runtime.GOOS
+
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{
 		ChStdin:  chStdin,
