@@ -70,6 +70,9 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		if !isAccess {
 			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 		}
+		if len(storage.Settings.PasswordHash) > 0 && c.Request().URL.String() == `/` {
+			c.Request().URL.Path = `login`
+		}
 		mutex.Lock()
 		// TODO: JWT user
 		var user *User

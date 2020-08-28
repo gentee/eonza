@@ -91,5 +91,8 @@ func LoadStorage(psw string) {
 			}
 		}
 		storage.Settings.PasswordHash = hash
+		if err = SaveStorage(); err != nil {
+			golog.Fatal(err)
+		}
 	}
 }
