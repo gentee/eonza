@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"github.com/kataras/golog"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -22,9 +23,10 @@ const (
 
 // Setting contains settings of the application
 type Settings struct {
-	LogLevel   int               `json:"loglevel"`
-	IncludeSrc bool              `json:"includesrc"`
-	Constants  map[string]string `json:"constants"`
+	LogLevel     int               `json:"loglevel"`
+	IncludeSrc   bool              `json:"includesrc"`
+	Constants    map[string]string `json:"constants"`
+	PasswordHash []byte            `json:"passwordhash"`
 }
 
 // Storage contains all application data
@@ -63,7 +65,7 @@ func SaveStorage() error {
 	return ioutil.WriteFile(lib.ChangeExt(cfg.path, StorageExt), out, 0777 /*os.ModePerm*/)
 }
 
-func LoadStorage() {
+func LoadStorage(psw string) {
 	data, err := ioutil.ReadFile(lib.ChangeExt(cfg.path, StorageExt))
 	if err != nil {
 		golog.Fatal(err)
@@ -79,5 +81,15 @@ func LoadStorage() {
 	}
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
+	}
+	if len(psw) > 0 {
+		var hash []byte
+		if psw != `reset` {
+			hash, err = bcrypt.GenerateFromPassword([]byte(psw), 15)
+			if err != nil {
+				golog.Fatal(err)
+			}
+		}
+		storage.Settings.PasswordHash = hash
 	}
 }
