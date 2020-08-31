@@ -56,6 +56,7 @@ var (
 			Open:   true,
 			Theme:  `default`,
 			Access: AccessLocalhost,
+			JWTKey: lib.UniqueName(12),
 		},
 	}
 )

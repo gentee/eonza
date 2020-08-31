@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/alecthomas/chroma v0.7.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gentee/gentee v1.11.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/kataras/golog v0.1.2

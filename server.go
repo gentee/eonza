@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"eonza/lib"
@@ -49,54 +48,6 @@ var (
 	ErrNotFound = errors.New(`Not found`)
 	IsScript    bool // true, if web-server for the script
 )
-
-func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) (err error) {
-		var (
-			access   string
-			isAccess bool
-		)
-		host := c.Request().Host[:strings.LastIndex(c.Request().Host, `:`)]
-		if IsScript {
-			access = scriptTask.Header.HTTP.Access
-		} else {
-			access = cfg.HTTP.Access
-		}
-		if access == AccessPrivate {
-			isAccess = lib.IsPrivate(host, c.RealIP())
-		} else {
-			isAccess = lib.IsLocalhost(host, c.RealIP())
-		}
-		if !isAccess {
-			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-		}
-		if len(storage.Settings.PasswordHash) > 0 && c.Request().URL.String() == `/` {
-			c.Request().URL.Path = `login`
-		}
-		mutex.Lock()
-		// TODO: JWT user
-		var user *User
-		for _, user = range storage.Users {
-			break
-		}
-		lang := LangDefCode
-		if IsScript {
-			lang = scriptTask.Header.Lang
-		} else {
-			if u, ok := userSettings[user.ID]; ok {
-				lang = u.Lang
-			}
-		}
-		auth := &Auth{
-			Context: c,
-			User:    user,
-			Lang:    lang,
-		}
-		err = next(auth)
-		mutex.Unlock()
-		return
-	}
-}
 
 func Logger(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -285,6 +236,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/remove/:id", removeTaskHandle)
 		e.GET("/api/sys", sysTaskHandle)
 		e.GET("/api/settings", settingsHandle)
+		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)

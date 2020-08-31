@@ -85,7 +85,7 @@ func LoadStorage(psw string) {
 	if len(psw) > 0 {
 		var hash []byte
 		if psw != `reset` {
-			hash, err = bcrypt.GenerateFromPassword([]byte(psw), 15)
+			hash, err = bcrypt.GenerateFromPassword([]byte(psw), 11)
 			if err != nil {
 				golog.Fatal(err)
 			}
