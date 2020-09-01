@@ -181,6 +181,14 @@ func fileHandle(c echo.Context) error {
 	return nil //c.HTML(http.StatusOK, Success)
 }
 
+func logoutHandle(c echo.Context) error {
+	storage.PassCounter++
+	if err := SaveStorage(); err != nil {
+		return jsonError(c, err)
+	}
+	return c.JSON(http.StatusOK, Response{Success: true})
+}
+
 func reloadHandle(c echo.Context) error {
 	ClearAsset()
 	InitTemplates()
@@ -228,6 +236,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/export", exportHandle)
 		e.GET("/api/reload", reloadHandle)
+		e.GET("/api/logout", logoutHandle)
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)
 		e.GET("/api/list", listScriptHandle)

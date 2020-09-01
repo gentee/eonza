@@ -22,6 +22,7 @@ type Render struct {
 	Develop bool
 	Langs   map[string]string
 	Lang    string
+	Login   bool
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -120,6 +121,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		for i, lang := range langs {
 			render.Langs[lang] = Lang(i, `native`)
 		}
+		render.Login = len(storage.Settings.PasswordHash) > 0
 		data = render
 	}
 
