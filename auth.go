@@ -6,7 +6,6 @@ package main
 
 import (
 	"eonza/lib"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -17,7 +16,8 @@ import (
 )
 
 type Claims struct {
-	Username string `json:"username"`
+	Counter  int64
+	Username string
 	jwt.StandardClaims
 }
 
@@ -69,6 +69,8 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 		}
 		mutex.Lock()
+		defer mutex.Unlock()
+
 		url := c.Request().URL.String()
 		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
 			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
@@ -95,13 +97,18 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			var valid bool
 			if len(jwtData) > 0 {
 				claims := &Claims{}
-				token, _ := jwt.ParseWithClaims(jwtData, claims, func(token *jwt.Token) (interface{}, error) {
-					if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-						return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				token, err := jwt.ParseWithClaims(jwtData, claims,
+					func(token *jwt.Token) (interface{}, error) {
+						/*	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+							return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+						*/
+						return []byte(cfg.HTTP.JWTKey + sessionKey), nil
+					})
+				if err == nil {
+					if claims.Counter == storage.PassCounter {
+						valid = token.Valid
 					}
-					return []byte(cfg.HTTP.JWTKey + sessionKey), nil
-				})
-				valid = token.Valid
+				}
 			}
 			if !valid {
 				if url == `/` {
@@ -130,7 +137,6 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			Lang:    lang,
 		}
 		err = next(auth)
-		mutex.Unlock()
 		return
 	}
 }
@@ -150,6 +156,7 @@ func loginHandle(c echo.Context) error {
 	if err == nil {
 		expirationTime := time.Now().Add(30 * 24 * time.Hour)
 		claims := &Claims{
+			Counter:  storage.PassCounter,
 			Username: `root`,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: expirationTime.Unix(),

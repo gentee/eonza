@@ -242,6 +242,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/taskstatus", taskStatusHandle)
 		e.POST("/api/import", importHandle)
 		e.POST("/api/settings", saveSettingsHandle)
+		e.POST("/api/setpsw", setPasswordHandle)
 	}
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {

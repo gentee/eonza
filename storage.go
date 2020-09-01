@@ -23,17 +23,19 @@ const (
 
 // Setting contains settings of the application
 type Settings struct {
-	LogLevel     int               `json:"loglevel"`
-	IncludeSrc   bool              `json:"includesrc"`
-	Constants    map[string]string `json:"constants"`
-	PasswordHash []byte            `json:"passwordhash"`
+	LogLevel       int               `json:"loglevel"`
+	IncludeSrc     bool              `json:"includesrc"`
+	Constants      map[string]string `json:"constants"`
+	PasswordHash   []byte            `json:"passwordhash"`
+	NotAskPassword bool              `json:"notaskpassword"`
 }
 
 // Storage contains all application data
 type Storage struct {
-	Settings Settings
-	Users    map[uint32]*User
-	Scripts  map[string]*Script
+	Settings    Settings
+	PassCounter int64
+	Users       map[uint32]*User
+	Scripts     map[string]*Script
 }
 
 var (
@@ -82,6 +84,9 @@ func LoadStorage(psw string) {
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
 	}
+	if !storage.Settings.NotAskPassword {
+		sessionKey = lib.UniqueName(5)
+	}
 	if len(psw) > 0 {
 		var hash []byte
 		if psw != `reset` {
@@ -91,6 +96,7 @@ func LoadStorage(psw string) {
 			}
 		}
 		storage.Settings.PasswordHash = hash
+		storage.PassCounter++
 		if err = SaveStorage(); err != nil {
 			golog.Fatal(err)
 		}
