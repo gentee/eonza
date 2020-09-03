@@ -172,7 +172,47 @@ func (src *Source) Predefined(script *Script) (ret string, err error) {
 	return
 }
 
+func processIf(input string) string {
+	var (
+		out    []rune
+		isName bool
+		off    int
+	)
+	in := []rune(input)
+	for i := 0; i < len(in); i++ {
+		ch := in[i]
+		if isName {
+			if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') ||
+				ch == '_' || ch == '.' {
+				continue
+			}
+			name := fmt.Sprintf(`GetVarBool("%s")`, string(in[off:i]))
+			out = append(out, []rune(name)...)
+			isName = false
+		}
+		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') {
+			off = i
+			isName = true
+			continue
+		}
+		switch ch {
+		case ' ', '!', '&', '|', '\t':
+			out = append(out, ch)
+		default:
+			return input
+		}
+	}
+	if isName {
+		name := fmt.Sprintf(`GetVarBool("%s")`, string(in[off:]))
+		out = append(out, []rune(name)...)
+	}
+	return string(out)
+}
+
 func (src *Source) Script(node scriptTree) (string, error) {
+	var (
+		ifcond string
+	)
 	script := getScript(node.Name)
 	if script == nil {
 		return ``, fmt.Errorf(Lang(DefLang, `erropen`), node.Name)
@@ -181,6 +221,10 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	values, err := src.ScriptValues(script, node)
 	if err != nil {
 		return ``, err
+	}
+	if ifraw, ok := node.Values[`_ifcond`]; ok {
+		ifcond, _ = ifraw.(string)
+		ifcond = processIf(ifcond)
 	}
 	var params []string
 	if !src.Linked[idname] || script.Settings.Name == SourceCode || len(node.Children) > 0 {
@@ -255,7 +299,12 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			params = append(params, par.Value)
 		}
 	}
-	return fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`)), nil
+	out := fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
+	if len(ifcond) > 0 {
+		out = fmt.Sprintf(`   if %s {
+        %s   }`, ifcond, out)
+	}
+	return out, nil
 }
 
 func ValToStr(input string) string {
