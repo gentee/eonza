@@ -28,6 +28,7 @@ type ScriptItem struct {
 	Folder   bool             `json:"folder,omitempty"`
 	Params   []es.ScriptParam `json:"params,omitempty"`
 	Initial  string           `json:"initial,omitempty"`
+	Optional bool             `json:"optional,omitempty"`
 }
 
 type ScriptResponse struct {
@@ -119,9 +120,12 @@ func saveScriptHandle(c echo.Context) error {
 
 func copyParams(src []es.ScriptParam, values map[string]string,
 	glob *map[string]string) []es.ScriptParam {
-	params := make([]es.ScriptParam, len(src))
-	for i, item := range src {
+	params := make([]es.ScriptParam, 0, len(src))
+	for _, item := range src {
 		tmp := item
+		if tmp.Options.Optional {
+			continue
+		}
 		tmp.Options.Items = make([]es.ScriptItem, len(tmp.Options.Items))
 		for i, val := range item.Options.Items {
 			tmp.Options.Items[i] = val
@@ -131,15 +135,22 @@ func copyParams(src []es.ScriptParam, values map[string]string,
 		for i, out := range tmp.Options.Output {
 			tmp.Options.Output[i] = es.ReplaceVars(out, values, glob)
 		}
-		params[i] = tmp
-		params[i].Title = es.ReplaceVars(params[i].Title, values, glob)
+		tmp.Title = es.ReplaceVars(tmp.Title, values, glob)
+		params = append(params, tmp)
 	}
 	return params
 }
 
 func ScriptToItem(c echo.Context, script *Script) ScriptItem {
+	var optional bool
 	lang := c.(*Auth).Lang
 	glob := &langRes[GetLangId(c.(*Auth).User)]
+	for _, par := range script.Params {
+		if par.Options.Optional {
+			optional = true
+			break
+		}
+	}
 	return ScriptItem{
 		Name:     script.Settings.Name,
 		Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang], glob),
@@ -151,6 +162,7 @@ func ScriptToItem(c echo.Context, script *Script) ScriptItem {
 		Folder:   script.folder,
 		Params:   copyParams(script.Params, script.Langs[lang], glob),
 		Initial:  script.initial,
+		Optional: optional,
 	}
 
 }

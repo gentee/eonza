@@ -64,86 +64,112 @@ func (src *Source) FindStrConst(value string) string {
 	return fmt.Sprintf(`STR%d`, id)
 }
 
-func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, error) {
+func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string) (string, string) {
+	var isMacro bool
+
+	ptype := `str`
+	switch par.Type {
+	case es.PCheckbox:
+		ptype = `bool`
+		if value == `false` || value == `0` || len(value) == 0 {
+			value = `false`
+		} else {
+			value = `true`
+		}
+	case es.PTextarea, es.PSingleText:
+		if script.Settings.Name != SourceCode {
+			isMacro = strings.ContainsRune(value, es.VarChar)
+			value = src.FindStrConst(value)
+			if isMacro {
+				value = fmt.Sprintf("Macro(%s)", value)
+			}
+		}
+	case es.PSelect:
+		if len(par.Options.Type) > 0 {
+			ptype = par.Options.Type
+		} else {
+			ptype = `str`
+		}
+		if ptype == `str` {
+			value = src.FindStrConst(value)
+		}
+	case es.PNumber:
+		ptype = `int`
+	}
+	return ptype, value
+}
+
+func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Param, error) {
 	values := make([]Param, 0, len(script.Params))
+	var optvalues []Param
+
 	errField := func(field string) error {
 		glob := langRes[langsId[src.Header.Lang]]
 		return fmt.Errorf(langRes[langsId[src.Header.Lang]][`errfield`],
 			es.ReplaceVars(field, script.Langs[src.Header.Lang], &glob),
 			es.ReplaceVars(script.Settings.Title, script.Langs[src.Header.Lang], &glob))
 	}
+	var opt map[string]interface{}
+	if optional, ok := node.Values[`_optional`]; ok {
+		if v, ok := optional.(string); ok {
+			if err := yaml.Unmarshal([]byte(v), &opt); err != nil {
+				return nil, nil, err
+			}
+		}
+	}
 	for _, par := range script.Params {
 		var (
 			ptype, value string
-			isMacro      bool
+			val          interface{}
 		)
-		val := node.Values[par.Name]
+		if par.Options.Optional {
+			val = opt[par.Name]
+			if val == nil {
+				continue
+			}
+		} else {
+			val = node.Values[par.Name]
+		}
 		if val != nil {
 			value = strings.TrimSpace(fmt.Sprint(val))
+		} else {
+			value = par.Options.Default
 		}
+		ptype, value = src.getTypeValue(script, par, value)
 		switch par.Type {
-		case es.PCheckbox:
-			ptype = `bool`
-			if value == `false` || value == `0` || len(value) == 0 {
-				value = `false`
-			} else {
-				value = `true`
-			}
-		case es.PTextarea, es.PSingleText:
-			ptype = `str`
+		case es.PTextarea, es.PSingleText, es.PNumber:
 			if len(value) == 0 {
 				if par.Options.Required {
-					return nil, errField(par.Title)
+					return nil, nil, errField(par.Title)
 				}
-				value = par.Options.Default
-			}
-			if script.Settings.Name != SourceCode {
-				isMacro = strings.ContainsRune(value, es.VarChar)
-				value = src.FindStrConst(value)
-				if isMacro {
-					value = fmt.Sprintf("Macro(%s)", value)
-				}
-			}
-		case es.PSelect:
-			if len(par.Options.Type) > 0 {
-				ptype = par.Options.Type
-			} else {
-				ptype = `str`
-			}
-			if ptype == `str` {
-				value = src.FindStrConst(value)
-			}
-		case es.PNumber:
-			ptype = `int`
-			if len(value) == 0 {
-				if par.Options.Required {
-					return nil, errField(par.Title)
-				}
-				value = par.Options.Default
 			}
 		case es.PList:
-			ptype = `str`
 			if val != nil && reflect.TypeOf(val).Kind() == reflect.Slice &&
 				reflect.ValueOf(val).Len() > 0 {
 				out, err := json.Marshal(val)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				value = src.FindStrConst(string(out))
 			} else {
 				if par.Options.Required {
-					return nil, errField(par.Title)
+					return nil, nil, errField(par.Title)
 				}
 				value = src.FindStrConst(`[]`)
 			}
 		}
-		values = append(values, Param{
+		param := Param{
 			Value: value,
 			Type:  ptype,
 			Name:  par.Name,
-		})
+		}
+		if par.Options.Optional {
+			optvalues = append(optvalues, param)
+		} else {
+			values = append(values, param)
+		}
 	}
-	return values, nil
+	return values, optvalues, nil
 }
 
 func (src *Source) Predefined(script *Script) (ret string, err error) {
@@ -218,7 +244,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		return ``, fmt.Errorf(Lang(DefLang, `erropen`), node.Name)
 	}
 	idname := lib.IdName(script.Settings.Name)
-	values, err := src.ScriptValues(script, node)
+	values, optvalues, err := src.ScriptValues(script, node)
 	if err != nil {
 		return ``, err
 	}
@@ -257,13 +283,28 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			src.Counter++
 		}
 		code = strings.TrimRight(code, "\r\n")
-		var parNames string
+		var parNames, prefix, suffix, initcmd string
 		if script.Settings.Name != SourceCode {
 			var vars []string
 			for _, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
 				parNames += `,` + par.Name
 				vars = append(vars, fmt.Sprintf(`"%s", %[1]s`, par.Name))
+			}
+			/*			// Now log info is without optional parameters
+						for _, par := range optvalues {
+							parNames += `,` + par.Name
+						}*/
+			for _, par := range script.Params {
+				if !par.Options.Optional {
+					continue
+				}
+				ptype, def := src.getTypeValue(script, par, par.Options.Default)
+				if len(def) > 0 {
+					def = ` = ` + def
+				}
+				vars = append(vars, fmt.Sprintf(`"%s", %[1]s`, par.Name))
+				prefix += fmt.Sprintf("%s ?%s%s\r\n", ptype, par.Name, def)
 			}
 			if len(script.Tree) > 0 {
 				code += "\r\ninit(" + strings.Join(vars, `,`) + ")\r\n" + predef
@@ -275,9 +316,8 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				code += "\r\ndeinit()"
 			}
 		}
-		var prefix, suffix, initcmd string
 		if script.Settings.LogLevel < es.LOG_INHERIT {
-			prefix = fmt.Sprintf("int prevLog = SetLogLevel(%d)\r\n", script.Settings.LogLevel)
+			prefix += fmt.Sprintf("int prevLog = SetLogLevel(%d)\r\n", script.Settings.LogLevel)
 			suffix = "\r\nSetLogLevel(prevLog)"
 		}
 		name := script.Settings.Name
@@ -297,6 +337,9 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	if script.Settings.Name != SourceCode {
 		for _, par := range values {
 			params = append(params, par.Value)
+		}
+		for _, par := range optvalues {
+			params = append(params, fmt.Sprintf("%s: %s", par.Name, par.Value))
 		}
 	}
 	out := fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
@@ -327,11 +370,11 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		HashStrings: make(map[uint64]int),
 		Header:      header,
 	}
-	values, err := src.ScriptValues(script, scriptTree{})
+	values, optvalues, err := src.ScriptValues(script, scriptTree{})
 	if err != nil {
 		return ``, err
 	}
-	for _, par := range values {
+	for _, par := range append(values, optvalues...) {
 		val := par.Value
 		if par.Type == `str` {
 			val = ValToStr(val)

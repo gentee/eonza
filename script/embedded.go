@@ -46,6 +46,7 @@ type ScriptOptions struct {
 	Initial  string        `json:"initial,omitempty" yaml:"initial,omitempty"`
 	Default  string        `json:"default,omitempty" yaml:"default,omitempty"`
 	Required bool          `json:"required,omitempty" yaml:"required,omitempty"`
+	Optional bool          `json:"optional,omitempty" yaml:"optional,omitempty"`
 	Type     string        `json:"type,omitempty" yaml:"type,omitempty"`
 	Items    []ScriptItem  `json:"items,omitempty" yaml:"items,omitempty"`
 	List     []ScriptParam `json:"list,omitempty" yaml:"list,omitempty"`
