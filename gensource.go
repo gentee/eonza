@@ -71,11 +71,6 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 	switch par.Type {
 	case es.PCheckbox:
 		ptype = `bool`
-		if value == `false` || value == `0` || len(value) == 0 {
-			value = `false`
-		} else {
-			value = `true`
-		}
 	case es.PTextarea, es.PSingleText:
 		if script.Settings.Name != SourceCode {
 			isMacro = strings.ContainsRune(value, es.VarChar)
@@ -126,6 +121,35 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 			val = opt[par.Name]
 			if val == nil {
 				continue
+			}
+			switch v := val.(type) {
+			case int, int64:
+				if par.Type != es.PNumber {
+					val = fmt.Sprintf(`"%d"`, v)
+				}
+			case bool:
+				if par.Type != es.PCheckbox {
+					if v {
+						val = `"true"`
+					} else {
+						val = `"false"`
+					}
+				}
+			case string:
+				if par.Type == es.PNumber || par.Type == es.PCheckbox {
+					isMacro := strings.ContainsRune(v, es.VarChar)
+					val = src.FindStrConst(v)
+					if isMacro {
+						val = fmt.Sprintf("Macro(%s)", val)
+					}
+					if par.Type == es.PNumber {
+						val = fmt.Sprintf(`int(%s)`, val)
+					} else if par.Type == es.PCheckbox {
+						val = fmt.Sprintf(`bool(%s)`, val)
+					}
+				}
+			default:
+				val = fmt.Sprintf(value)
 			}
 		} else {
 			val = node.Values[par.Name]
