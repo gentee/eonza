@@ -21,6 +21,7 @@ type Header struct {
 	AssetsDir  string
 	LogDir     string
 	Theme      string
+	Console    bool
 	SourceCode []byte
 	Constants  map[string]string
 	Lang       string

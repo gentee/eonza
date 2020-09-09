@@ -71,6 +71,11 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 	switch par.Type {
 	case es.PCheckbox:
 		ptype = `bool`
+		if value == `0` {
+			value = `false`
+		} else if value == `1` {
+			value = `true`
+		}
 	case es.PTextarea, es.PSingleText:
 		if script.Settings.Name != SourceCode {
 			isMacro = strings.ContainsRune(value, es.VarChar)

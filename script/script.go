@@ -54,7 +54,7 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 			buf = <-options.ChStdin
 			_, err := wIn.Write(buf)
 			if err != nil {
-
+				break
 			}
 		}
 	}()

@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "0.3.0+1 (beta)"
+	Version = "0.3.1+1 (beta)"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
@@ -30,6 +30,8 @@ const (
 	TimeoutOpen = 3000
 	SourceCode  = `source-code`
 	DefLang     = 0
+	// ConsolePrefix is the prefix of eonza console version
+	ConsolePrefix = `ez`
 )
 
 // AppInfo contains information about the application

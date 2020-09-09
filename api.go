@@ -50,13 +50,17 @@ func jsonSuccess(c echo.Context) error {
 
 func runHandle(c echo.Context) error {
 	var (
-		item *Script
-		src  string
+		item    *Script
+		src     string
+		console bool
 	)
 	open := true
 	name := c.QueryParam(`name`)
 	if len(c.QueryParam(`silent`)) > 0 {
 		open = false
+	}
+	if len(c.QueryParam(`console`)) > 0 {
+		console = true
 	}
 	port, err := getPort()
 	if err != nil {
@@ -82,6 +86,7 @@ func runHandle(c echo.Context) error {
 		Title:      title,
 		AssetsDir:  cfg.AssetsDir,
 		LogDir:     cfg.Log.Dir,
+		Console:    console,
 		UserID:     c.(*Auth).User.ID,
 		Constants:  storage.Settings.Constants,
 		Lang:       langCode,

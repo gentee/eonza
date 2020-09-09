@@ -29,7 +29,9 @@ func main() {
 		e   *echo.Echo
 		psw string
 	)
-
+	if IsConsole() {
+		return
+	}
 	golog.SetTimeFormat("2006/01/02 15:04:05")
 	flag.StringVar(&cfg.path, "cfg", "", "The path of the `config file`")
 	flag.StringVar(&psw, "psw", "", "The login password")
