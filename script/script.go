@@ -26,18 +26,35 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 		settings   gentee.Settings
 		rIn, wIn   *os.File
 		rOut, wOut *os.File
+		conOut     *os.File
 	)
 	settings.SysChan = options.ChSystem
-	rIn, wIn, _ = os.Pipe()
-	settings.Stdin = rIn
 	rOut, wOut, _ = os.Pipe()
 	settings.Stdout = wOut
+	settings.Stderr = wOut
 	defer func() {
-		wIn.Close()
 		wOut.Close()
 	}()
-
-	go func() {
+	if script.Header.Console {
+		conOut = os.Stdout
+	} else {
+		rIn, wIn, _ = os.Pipe()
+		settings.Stdin = rIn
+		defer func() {
+			wIn.Close()
+		}()
+		go func() {
+			var buf []byte
+			for {
+				buf = <-options.ChStdin
+				_, err := wIn.Write(buf)
+				if err != nil {
+					break
+				}
+			}
+		}()
+	}
+	go func(con bool) {
 		for {
 			buf := make([]byte, 1024)
 			n, err := rOut.Read(buf)
@@ -45,18 +62,12 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 			if err != nil {
 				break
 			}
+			if con {
+				conOut.Write(buf)
+			}
 			options.ChStdout <- buf
 		}
-	}()
-	go func() {
-		var buf []byte
-		for {
-			buf = <-options.ChStdin
-			_, err := wIn.Write(buf)
-			if err != nil {
-				break
-			}
-		}
-	}()
+	}(script.Header.Console)
+
 	return script.Exec.Run(settings)
 }

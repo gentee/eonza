@@ -20,16 +20,18 @@ import (
 )
 
 var (
-	stopchan   = make(chan os.Signal)
-	scriptTask *script.Script
+	stopchan    = make(chan os.Signal)
+	scriptTask  *script.Script
+	consoleData []byte
 )
 
 func main() {
 	var (
-		e   *echo.Echo
-		psw string
+		e     *echo.Echo
+		psw   string
+		isRun bool
 	)
-	if IsConsole() {
+	if isRun = CheckConsole(); isRun && len(consoleData) == 0 {
 		return
 	}
 	golog.SetTimeFormat("2006/01/02 15:04:05")
@@ -43,14 +45,17 @@ func main() {
 	gob.Register([]interface{}{})
 	gob.Register(map[string]interface{}{})
 
-	fi, err := os.Stdin.Stat()
-	if err != nil {
-		golog.Fatal(err)
+	if !isRun {
+		fi, err := os.Stdin.Stat()
+		if err != nil {
+			golog.Fatal(err)
+		}
+		isRun = fi.Mode()&os.ModeNamedPipe != 0
 	}
-	if fi.Mode()&os.ModeNamedPipe != 0 {
+	if isRun {
 		var err error
 		IsScript = true
-		scriptTask, err = script.Decode()
+		scriptTask, err = script.Decode(consoleData)
 		if err != nil {
 			golog.Fatal(err)
 		}
@@ -88,7 +93,7 @@ func main() {
 		LoadStorage(psw)
 		LoadUsers()
 		defer CloseLog()
-		if err = LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
+		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
 		InitScripts()

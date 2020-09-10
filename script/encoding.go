@@ -31,7 +31,7 @@ type Header struct {
 	HTTP       *lib.HTTPConfig
 }
 
-func Encode(header Header, source string) error {
+func Encode(header Header, source string) (*bytes.Buffer, error) {
 	var (
 		data bytes.Buffer
 	)
@@ -39,14 +39,17 @@ func Encode(header Header, source string) error {
 	workspace := gentee.New()
 	bcode, _, err := workspace.Compile(source, header.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	enc := gob.NewEncoder(&data)
 	if err = enc.Encode(header); err != nil {
-		return err
+		return nil, err
 	}
 	if err = enc.Encode(bcode); err != nil {
-		return err
+		return nil, err
+	}
+	if header.Console {
+		return &data, nil
 	}
 	command := exec.Command(lib.AppPath())
 	command.Stdin = &data
@@ -58,18 +61,18 @@ func Encode(header Header, source string) error {
 			_ = command.Wait()
 		}
 	}()
-	return err
+	return nil, err
 }
 
-func Decode() (script *Script, err error) {
-	var (
-		data bytes.Buffer
-	)
+func Decode(scriptData []byte) (script *Script, err error) {
 	script = &Script{}
-	if _, err = data.ReadFrom(os.Stdin); err != nil {
-		return
+	data := bytes.NewBuffer(scriptData)
+	if scriptData == nil {
+		if _, err = data.ReadFrom(os.Stdin); err != nil {
+			return
+		}
 	}
-	dec := gob.NewDecoder(&data)
+	dec := gob.NewDecoder(data)
 
 	if err = dec.Decode(&script.Header); err == nil {
 		err = dec.Decode(&script.Exec)

@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 	"github.com/gentee/gentee/core"
 )
 
-func request(url string) (string, error) {
+func request(url string) ([]byte, error) {
 	var (
 		res *http.Response
 		err error
@@ -26,10 +27,10 @@ func request(url string) (string, error) {
 		buf.Data, err = ioutil.ReadAll(res.Body)
 		res.Body.Close()
 	}
-	return string(buf.Data), err
+	return buf.Data, err
 }
 
-func IsConsole() bool {
+func CheckConsole() bool {
 	port := fmt.Sprint(DefPort)
 	appname, err := os.Executable()
 	if err != nil {
@@ -46,26 +47,27 @@ func IsConsole() bool {
 			return true
 		}
 		answer, _ := request(fmt.Sprintf("%s/ping", port))
-		if answer != Success {
+		if string(answer) != Success {
 			if port = os.Getenv(`EZPORT`); len(port) > 0 {
 				answer, _ = request(fmt.Sprintf("%s/ping", port))
 			}
 		}
-		if answer != Success {
+		if string(answer) != Success {
 			return output("eonza has not been run or listens to custom port")
 		}
-		/*		answer, err = request(fmt.Sprintf("%s/api/run?name=%s&silent=true&console=true",
-					port, os.Args[1]))
-				if err != nil {
-					return output(err)
-				}
-				var response Response
-				if err = json.Unmarshal([]byte(answer), &response); err != nil {
-					return output(err)
-				}
-				if !response.Success {
-					return output(response.Error)
-				}*/
+		answer, err = request(fmt.Sprintf("%s/api/run?name=%s&silent=true&console=true",
+			port, os.Args[1]))
+		if err != nil {
+			return output(err)
+		}
+		if answer[0] == '{' {
+			var response Response
+			if err = json.Unmarshal(answer, &response); err != nil {
+				return output(err)
+			}
+			return output(response.Error)
+		}
+		consoleData = answer
 		return true
 	}
 	return false

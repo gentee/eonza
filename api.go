@@ -107,11 +107,15 @@ func runHandle(c echo.Context) error {
 			return jsonError(c, err)
 		}
 	}
-	if err := script.Encode(header, src); err != nil {
+	data, err := script.Encode(header, src)
+	if err != nil {
 		return jsonError(c, err)
 	}
 	if err = NewTask(header); err != nil {
 		return jsonError(c, err)
+	}
+	if console {
+		return c.Blob(http.StatusOK, ``, data.Bytes())
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
 }

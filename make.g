@@ -11,11 +11,11 @@ run {
 //    $ go install -ldflags "-s -w" -tags "eonza standard"
     $ go install -ldflags "-s -w"
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/eonza
-    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
-    $ /home/ak/app/eonza-dev/eonza
+//    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
+//    $ /home/ak/app/eonza-dev/eonza
 //    $ /home/ak/app/eonza/eonza
     
-//    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/ez
+    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/ez
 //    $ /home/ak/app/eonza-dev/ez con
 
 //    $ /home/ak/app/eonza/eonza -cfg /home/ak/app/eonza/config
