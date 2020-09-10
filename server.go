@@ -254,6 +254,9 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/setpsw", setPasswordHandle)
 	}
 	go func() {
+		if IsScript {
+			e.Logger.SetOutput(ioutil.Discard)
+		}
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
 			if IsScript {
 				setStatus(TaskFailed, err)

@@ -608,6 +608,20 @@ AAA=
 `,
 	},
 
+	"/eonza-assets/scripts/read-console.yaml": {
+		name:    "read-console.yaml",
+		local:   "../eonza-assets/scripts/read-console.yaml",
+		size:    476,
+		modtime: 1599739826,
+		compressed: `
+H4sIAAAAAAAC/2xQPU7DMBTefYpP7dBWUAYGBq/cgEqsldU8hUiuE5yXCjbowkDvwBVQhUQANWd4vhGK
+E1WNYLO+3/e5JObMpaVWgDNr0vBkkvkqd2VuSQGcsSWNyXjZ0uOJAhIqVxFpHxG5I1v8cbagNS7V8JUC
+bJ5a2pDVuFKF8WZdajXvO5ke+LTrogViMj8WpHF5VG6Mbx8DcY8N9EBecJa7OAzwdF9lnhIN9hWp9qzI
+kOv4ZbfphkyCfgEyV1TcsV13ZK+P+3w18MpbeJImvEgdtvIetmEH+ZZGDuFZGvkJOzmEV/mC7GUvjXyc
+Jv/nreVzECC1WuUJaSyIb42f9qvP41kL9plLp/EjcYYRRrOZ+g0AAP//Mh3gbNwBAAA=
+`,
+	},
+
 	"/eonza-assets/scripts/read-file.yml": {
 		name:    "read-file.yml",
 		local:   "../eonza-assets/scripts/read-file.yml",
@@ -10055,6 +10069,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/move-file.yaml"],
 		_escData["/eonza-assets/scripts/new.yaml"],
 		_escData["/eonza-assets/scripts/open.yaml"],
+		_escData["/eonza-assets/scripts/read-console.yaml"],
 		_escData["/eonza-assets/scripts/read-file.yml"],
 		_escData["/eonza-assets/scripts/rename-file.yaml"],
 		_escData["/eonza-assets/scripts/run.eonza.yaml"],
