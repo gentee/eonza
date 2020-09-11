@@ -69,6 +69,9 @@ func runHandle(c echo.Context) error {
 	if item = getScript(name); item == nil {
 		return jsonError(c, Lang(DefLang, `erropen`, name))
 	}
+	if item.Settings.Unrun {
+		return jsonError(c, Lang(DefLang, `errnorun`, name))
+	}
 	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
 		return jsonError(c, err)
 	}

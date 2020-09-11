@@ -6,6 +6,7 @@ package script
 
 import (
 	"encoding/json"
+	"eonza/lib"
 	"fmt"
 	"strconv"
 	"strings"
@@ -354,6 +355,12 @@ func Form(data string) error {
 		}
 	}
 	dataScript.Mutex.Lock()
+	if (*dataScript.Global)[`isconsole`] == `true` {
+		url := fmt.Sprintf(`http://localhost:%s`, (*dataScript.Global)[`port`])
+		fmt.Println(fmt.Sprintf((*dataScript.Global)["formopen"], url))
+		lib.Open(url)
+	}
+
 	form := FormInfo{
 		ChResponse: ch,
 		Data:       data,
