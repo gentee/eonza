@@ -381,6 +381,21 @@ jlDI/wIJZW+TXwEAAP//M90lAMgDAAA=
 `,
 	},
 
+	"/eonza-assets/scripts/create-file.yaml": {
+		name:    "create-file.yaml",
+		local:   "../eonza-assets/scripts/create-file.yaml",
+		size:    575,
+		modtime: 1599820065,
+		compressed: `
+H4sIAAAAAAAC/1yRwUozMRSF93mKA130/8GKiKtsRcG9+zJMb9uBNDNmEtGdbd0IPoPgG1SxtFLoM9y8
+kSSTKe3sLifnnu/cmZqsLfSklgLQ2YwkckOZpcG4UCQAW1hFEv3eMLz2+gIYUZ1HJQxRUeVE0SMpiSsB
+OG2clrDGhYApqaobGjSV6YmEcaLKTDarpRgkfvCE6Rh+3ooRZ58rkrgUQFnZotSxPGDowRWGRgnd5lnj
+dH5ySVSOki5EKBNTSDdZw+bI61gbpWlSwmynhHQGMGwQyXZ7kKNb4r5duhvHR9w8FbWtBWDcCYc/ec8b
+/uGVX/h38JZ3vAXv+cu/8Jo3SfevvOJf3h2zO6unltSDPzpBvPbziGjt8HO/9G9B9wv+9kte+4XIy9Hh
+utD/X/sbzprv8V/8BQAA//8tvLsEPwIAAA==
+`,
+	},
+
 	"/eonza-assets/scripts/curdir.yaml": {
 		name:    "curdir.yaml",
 		local:   "../eonza-assets/scripts/curdir.yaml",
@@ -10056,6 +10071,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/bash.yaml"],
 		_escData["/eonza-assets/scripts/chdir.yaml"],
 		_escData["/eonza-assets/scripts/copy-file.yaml"],
+		_escData["/eonza-assets/scripts/create-file.yaml"],
 		_escData["/eonza-assets/scripts/curdir.yaml"],
 		_escData["/eonza-assets/scripts/delete-dir.yaml"],
 		_escData["/eonza-assets/scripts/delete-file.yml"],

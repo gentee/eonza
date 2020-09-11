@@ -71,7 +71,7 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 	switch par.Type {
 	case es.PCheckbox:
 		ptype = `bool`
-		if value == `0` {
+		if value == `0` || len(value) == 0 {
 			value = `false`
 		} else if value == `1` {
 			value = `true`
