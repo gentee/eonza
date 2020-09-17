@@ -440,26 +440,6 @@ func setStatus(status int, pars ...interface{}) {
 		task.Message = message
 	}
 	sendCmdStatus(status, time.Now().Unix(), message)
-
-	/*	taskTrace(task.FinishTime, status, task.Message)
-
-		jsonValue, err := json.Marshal(TaskStatus{
-			TaskID:  task.ID,
-			Status:  task.Status,
-			Message: task.Message,
-			Time:    task.FinishTime,
-		})
-		if err == nil {
-			resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
-				scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
-			if err != nil {
-				golog.Error(err)
-			} else {
-				resp.Body.Close()
-			}
-		}
-
-	 	wsChan <- cmd */
 }
 
 func debug(pars ...interface{}) {

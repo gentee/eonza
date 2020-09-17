@@ -113,7 +113,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			if !valid {
 				if url == `/` {
 					c.Request().URL.Path = `login`
-				} else if url != `/api/login` {
+				} else if url != `/api/login` && url != `/api/taskstatus` && url != `/api/sys` {
 					return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 				}
 			}
