@@ -233,6 +233,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	} else {
 		e.GET("/ws", wsMainHandle)
 		e.GET("/task/:id", showTaskHandle)
+		e.GET("/api/compile", compileHandle)
 		e.GET("/api/exit", exitHandle)
 		e.GET("/api/export", exportHandle)
 		e.GET("/api/reload", reloadHandle)

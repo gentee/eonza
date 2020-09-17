@@ -14,8 +14,15 @@ import (
 	"eonza/lib"
 	"eonza/script"
 
+	"github.com/gentee/gentee"
 	"github.com/labstack/echo/v4"
 )
+
+type CompileResponse struct {
+	Success bool   `json:"success"`
+	Source  string `json:"source,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
 
 type TaskStatus struct {
 	TaskID  uint32 `json:"taskid"`
@@ -46,6 +53,41 @@ func jsonError(c echo.Context, err interface{}) error {
 
 func jsonSuccess(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
+}
+
+func compileHandle(c echo.Context) error {
+	var (
+		item *Script
+		src  string
+		err  error
+	)
+	name := c.QueryParam(`name`)
+	if item = getScript(name); item == nil {
+		return jsonError(c, Lang(DefLang, `erropen`, name))
+	}
+	langCode := GetLangCode(c.(*Auth).User)
+	title := item.Settings.Title
+	if langTitle := strings.Trim(title, `#`); langTitle != title {
+		if val, ok := item.Langs[langCode][langTitle]; ok {
+			title = val
+		} else if val, ok := item.Langs[LangDefCode][langTitle]; ok {
+			title = val
+		}
+	}
+	header := script.Header{
+		Name: name,
+		Lang: langCode,
+	}
+	if src, err = GenSource(item, &header); err != nil {
+		return jsonError(c, err)
+	}
+	workspace := gentee.New()
+	_, _, err = workspace.Compile(src, header.Name)
+	src, _ = lib.Markdown("```go\r\n" + src + "\r\n```")
+	if err != nil {
+		return c.JSON(http.StatusOK, CompileResponse{Error: err.Error(), Source: src})
+	}
+	return c.JSON(http.StatusOK, CompileResponse{Success: true, Source: src})
 }
 
 func runHandle(c echo.Context) error {
