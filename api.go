@@ -24,6 +24,12 @@ type CompileResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
+type RunResponse struct {
+	Success bool   `json:"success"`
+	ID      uint32 `json:"id"`
+	Error   string `json:"error,omitempty"`
+}
+
 type TaskStatus struct {
 	TaskID  uint32 `json:"taskid"`
 	Status  int    `json:"status"`
@@ -163,7 +169,7 @@ func runHandle(c echo.Context) error {
 	if console {
 		return c.Blob(http.StatusOK, ``, data.Bytes())
 	}
-	return c.JSON(http.StatusOK, Response{Success: true})
+	return c.JSON(http.StatusOK, RunResponse{Success: true, ID: header.TaskID})
 }
 
 func pingHandle(c echo.Context) error {
@@ -189,6 +195,19 @@ func taskStatusHandle(c echo.Context) error {
 		Message: taskStatus.Message,
 		Time:    finish,
 	}
+	if taskStatus.Status == TaskActive {
+		task := tasks[taskStatus.TaskID]
+		cmd.Task = &Task{
+			ID:         task.ID,
+			Status:     task.Status,
+			Name:       task.Name,
+			StartTime:  task.StartTime,
+			FinishTime: task.FinishTime,
+			UserID:     task.UserID,
+			Port:       task.Port,
+		}
+	}
+
 	for id, client := range clients {
 		err := client.Conn.WriteJSON(cmd)
 		if err != nil {

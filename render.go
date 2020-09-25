@@ -17,12 +17,13 @@ import (
 )
 
 type Render struct {
-	App     AppInfo
-	Version string
-	Develop bool
-	Langs   map[string]string
-	Lang    string
-	Login   bool
+	App       AppInfo
+	Version   string
+	Develop   bool
+	Langs     map[string]string
+	Lang      string
+	Login     bool
+	Localhost bool
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -122,6 +123,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			render.Langs[lang] = Lang(i, `native`)
 		}
 		render.Login = len(storage.Settings.PasswordHash) > 0
+		render.Localhost = cfg.HTTP.Host == Localhost
 		data = render
 	}
 

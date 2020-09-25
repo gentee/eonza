@@ -80,7 +80,7 @@ func main() {
 				setStatus(TaskFailed, err)
 			}
 			<-chFinish
-			if scriptTask.Header.HTTP.Open {
+			if scriptTask.Header.HTTP.Open || scriptTask.Header.HTTP.Host != Localhost {
 				if duration := time.Since(start).Milliseconds(); duration < TimeoutOpen {
 					time.Sleep(time.Duration(TimeoutOpen-duration) * time.Millisecond)
 				}

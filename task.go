@@ -57,6 +57,7 @@ type WsCmd struct {
 	Status  int    `json:"status,omitempty"`
 	Message string `json:"message,omitempty"`
 	Time    string `json:"finish,omitempty"`
+	Task    *Task  `json:"task,omitempty"`
 }
 
 type StdinForm struct {
@@ -434,7 +435,6 @@ func sysHandle(c echo.Context) error {
 
 func setStatus(status int, pars ...interface{}) {
 	var message string
-	//	cmd := WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status}
 	if len(pars) > 0 {
 		message = fmt.Sprint(pars...)
 		task.Message = message
