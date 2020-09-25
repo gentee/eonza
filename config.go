@@ -40,7 +40,7 @@ type Config struct {
 }
 
 const (
-	AccessLocalhost = `localhost`
+	AccessLocalhost = Localhost
 	AccessPrivate   = `private`
 )
 
@@ -52,6 +52,7 @@ var (
 			Level: logLevelInfo,
 		},
 		HTTP: lib.HTTPConfig{
+			Host:   Localhost,
 			Port:   DefPort,
 			Open:   true,
 			Theme:  `default`,
@@ -106,7 +107,11 @@ func LoadConfig() {
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
 	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	//	dataFile := defDir(cfg.DataDir)
-
+	if len(cfg.HTTP.Host) == 0 {
+		cfg.HTTP.Host = Localhost
+	} else if cfg.HTTP.Host != Localhost {
+		cfg.HTTP.Open = false
+	}
 	if cfg.HTTP.Port == 0 {
 		cfg.HTTP.Port = DefPort
 	}

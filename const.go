@@ -32,6 +32,7 @@ const (
 	DefLang     = 0
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
+	Localhost     = `localhost`
 )
 
 // AppInfo contains information about the application

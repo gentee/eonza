@@ -388,7 +388,7 @@ func sendCmdStatus(status int, timeStamp int64, message string) {
 		Time:    timeStamp,
 	})
 	if err == nil {
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
+		resp, err := http.Post(fmt.Sprintf("http://%s:%d/api/taskstatus", Localhost,
 			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			golog.Error(err)

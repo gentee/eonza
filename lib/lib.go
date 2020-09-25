@@ -23,6 +23,7 @@ import (
 
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
+	Host   string `yaml:"host"`   // if empty, then localhost
 	Port   int    `yaml:"port"`   // if empty, then DefPort
 	Open   bool   `yaml:"open"`   // if true then host is opened
 	Theme  string `yaml:"theme"`  // theme of web interface. if it is empty - DefTheme

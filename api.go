@@ -98,7 +98,7 @@ func runHandle(c echo.Context) error {
 	)
 	open := true
 	name := c.QueryParam(`name`)
-	if len(c.QueryParam(`silent`)) > 0 {
+	if len(c.QueryParam(`silent`)) > 0 || cfg.HTTP.Host != Localhost {
 		open = false
 	}
 	if len(c.QueryParam(`console`)) > 0 {
@@ -138,6 +138,7 @@ func runHandle(c echo.Context) error {
 		TaskID:     lib.RndNum(),
 		ServerPort: cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
+			Host:   cfg.HTTP.Host,
 			Port:   port,
 			Open:   open,
 			Theme:  cfg.HTTP.Theme,
@@ -220,7 +221,7 @@ func sysTaskHandle(c echo.Context) error {
 
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
-			url := fmt.Sprintf("http://localhost:%d/sys?cmd=%s&taskid=%d", item.Port, cmd, taskid)
+			url := fmt.Sprintf("http://%s:%d/sys?cmd=%s&taskid=%d", Localhost, item.Port, cmd, taskid)
 			go func() {
 				resp, err := http.Get(url)
 				if err == nil {
