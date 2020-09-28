@@ -57,6 +57,7 @@ type WsCmd struct {
 	Status  int    `json:"status,omitempty"`
 	Message string `json:"message,omitempty"`
 	Time    string `json:"finish,omitempty"`
+	Task    *Task  `json:"task,omitempty"`
 }
 
 type StdinForm struct {
@@ -388,7 +389,7 @@ func sendCmdStatus(status int, timeStamp int64, message string) {
 		Time:    timeStamp,
 	})
 	if err == nil {
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/taskstatus",
+		resp, err := http.Post(fmt.Sprintf("http://%s:%d/api/taskstatus", Localhost,
 			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			golog.Error(err)
@@ -434,7 +435,6 @@ func sysHandle(c echo.Context) error {
 
 func setStatus(status int, pars ...interface{}) {
 	var message string
-	//	cmd := WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status}
 	if len(pars) > 0 {
 		message = fmt.Sprint(pars...)
 		task.Message = message

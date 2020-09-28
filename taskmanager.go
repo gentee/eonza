@@ -213,7 +213,7 @@ func InitTaskManager() (err error) {
 	}
 	for key, item := range tasks {
 		if item.Status < TaskFinished {
-			url := fmt.Sprintf("http://localhost:%d", item.Port)
+			url := fmt.Sprintf("http://%s:%d", Localhost, item.Port)
 			resp, err := http.Get(url + `/info`)
 			active := false
 			if err == nil {

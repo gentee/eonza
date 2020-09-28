@@ -16,19 +16,21 @@ import (
 )
 
 type Header struct {
-	Name       string
-	Title      string
-	AssetsDir  string
-	LogDir     string
-	Theme      string
-	Console    bool
-	SourceCode []byte
-	Constants  map[string]string
-	Lang       string
-	UserID     uint32
-	TaskID     uint32
-	ServerPort int
-	HTTP       *lib.HTTPConfig
+	Name         string
+	Title        string
+	AssetsDir    string
+	LogDir       string
+	Theme        string
+	Console      bool
+	IsPlayground bool
+	SourceCode   []byte
+	Constants    map[string]string
+	Lang         string
+	UserID       uint32
+	TaskID       uint32
+	ServerPort   int
+	HTTP         *lib.HTTPConfig
+	Playground   *lib.PlaygroundConfig
 }
 
 func Encode(header Header, source string) (*bytes.Buffer, error) {

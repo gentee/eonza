@@ -27,9 +27,8 @@ const (
 
 // WebSettings contains web-server parameters
 type WebSettings struct {
-	Domain string // Domain, localhost if it sempty
-	Port   int
-	Open   bool // if true then webpage is opened
+	Port int
+	Open bool // if true then webpage is opened
 }
 
 type Response struct {
@@ -200,9 +199,6 @@ func reloadHandle(c echo.Context) error {
 func RunServer(options WebSettings) *echo.Echo {
 	InitLang()
 	InitTemplates()
-	if len(options.Domain) == 0 {
-		options.Domain = `localhost`
-	}
 	e := echo.New()
 
 	e.HideBanner = true
@@ -270,7 +266,7 @@ func RunServer(options WebSettings) *echo.Echo {
 			var (
 				body []byte
 			)
-			url := fmt.Sprintf("http://%s:%d", options.Domain, options.Port)
+			url := fmt.Sprintf("http://%s:%d", Localhost, options.Port)
 			for string(body) != Success {
 				time.Sleep(100 * time.Millisecond)
 				resp, err := http.Get(url + `/ping`)

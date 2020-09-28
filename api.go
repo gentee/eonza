@@ -24,6 +24,12 @@ type CompileResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
+type RunResponse struct {
+	Success bool   `json:"success"`
+	ID      uint32 `json:"id"`
+	Error   string `json:"error,omitempty"`
+}
+
 type TaskStatus struct {
 	TaskID  uint32 `json:"taskid"`
 	Status  int    `json:"status"`
@@ -98,7 +104,7 @@ func runHandle(c echo.Context) error {
 	)
 	open := true
 	name := c.QueryParam(`name`)
-	if len(c.QueryParam(`silent`)) > 0 {
+	if len(c.QueryParam(`silent`)) > 0 || cfg.HTTP.Host != Localhost {
 		open = false
 	}
 	if len(c.QueryParam(`console`)) > 0 {
@@ -127,22 +133,27 @@ func runHandle(c echo.Context) error {
 		}
 	}
 	header := script.Header{
-		Name:       name,
-		Title:      title,
-		AssetsDir:  cfg.AssetsDir,
-		LogDir:     cfg.Log.Dir,
-		Console:    console,
-		UserID:     c.(*Auth).User.ID,
-		Constants:  storage.Settings.Constants,
-		Lang:       langCode,
-		TaskID:     lib.RndNum(),
-		ServerPort: cfg.HTTP.Port,
+		Name:         name,
+		Title:        title,
+		AssetsDir:    cfg.AssetsDir,
+		LogDir:       cfg.Log.Dir,
+		Console:      console,
+		IsPlayground: cfg.playground,
+		UserID:       c.(*Auth).User.ID,
+		Constants:    storage.Settings.Constants,
+		Lang:         langCode,
+		TaskID:       lib.RndNum(),
+		ServerPort:   cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
+			Host:   cfg.HTTP.Host,
 			Port:   port,
 			Open:   open,
 			Theme:  cfg.HTTP.Theme,
 			Access: cfg.HTTP.Access,
 		},
+	}
+	if header.IsPlayground {
+		header.Playground = &cfg.Playground
 	}
 	if src, err = GenSource(item, &header); err != nil {
 		return jsonError(c, err)
@@ -162,7 +173,7 @@ func runHandle(c echo.Context) error {
 	if console {
 		return c.Blob(http.StatusOK, ``, data.Bytes())
 	}
-	return c.JSON(http.StatusOK, Response{Success: true})
+	return c.JSON(http.StatusOK, RunResponse{Success: true, ID: header.TaskID})
 }
 
 func pingHandle(c echo.Context) error {
@@ -188,6 +199,19 @@ func taskStatusHandle(c echo.Context) error {
 		Message: taskStatus.Message,
 		Time:    finish,
 	}
+	if taskStatus.Status == TaskActive {
+		task := tasks[taskStatus.TaskID]
+		cmd.Task = &Task{
+			ID:         task.ID,
+			Status:     task.Status,
+			Name:       task.Name,
+			StartTime:  task.StartTime,
+			FinishTime: task.FinishTime,
+			UserID:     task.UserID,
+			Port:       task.Port,
+		}
+	}
+
 	for id, client := range clients {
 		err := client.Conn.WriteJSON(cmd)
 		if err != nil {
@@ -220,7 +244,7 @@ func sysTaskHandle(c echo.Context) error {
 
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
-			url := fmt.Sprintf("http://localhost:%d/sys?cmd=%s&taskid=%d", item.Port, cmd, taskid)
+			url := fmt.Sprintf("http://%s:%d/sys?cmd=%s&taskid=%d", Localhost, item.Port, cmd, taskid)
 			go func() {
 				resp, err := http.Get(url)
 				if err == nil {
