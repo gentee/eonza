@@ -133,16 +133,17 @@ func runHandle(c echo.Context) error {
 		}
 	}
 	header := script.Header{
-		Name:       name,
-		Title:      title,
-		AssetsDir:  cfg.AssetsDir,
-		LogDir:     cfg.Log.Dir,
-		Console:    console,
-		UserID:     c.(*Auth).User.ID,
-		Constants:  storage.Settings.Constants,
-		Lang:       langCode,
-		TaskID:     lib.RndNum(),
-		ServerPort: cfg.HTTP.Port,
+		Name:         name,
+		Title:        title,
+		AssetsDir:    cfg.AssetsDir,
+		LogDir:       cfg.Log.Dir,
+		Console:      console,
+		IsPlayground: cfg.playground,
+		UserID:       c.(*Auth).User.ID,
+		Constants:    storage.Settings.Constants,
+		Lang:         langCode,
+		TaskID:       lib.RndNum(),
+		ServerPort:   cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
 			Host:   cfg.HTTP.Host,
 			Port:   port,
@@ -150,6 +151,9 @@ func runHandle(c echo.Context) error {
 			Theme:  cfg.HTTP.Theme,
 			Access: cfg.HTTP.Access,
 		},
+	}
+	if header.IsPlayground {
+		header.Playground = &cfg.Playground
 	}
 	if src, err = GenSource(item, &header); err != nil {
 		return jsonError(c, err)

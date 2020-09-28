@@ -15,6 +15,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	ModeDefault    = `default`
+	ModeDevelop    = `develop`
+	ModePlayground = `playground`
+)
+
 // LogConfig stores config  settings
 type LogConfig struct {
 	Dir   string `yaml:"dir"`   // Directory for log files. If it is empty - dir of cfg file
@@ -29,14 +35,17 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version   string         `yaml:"version"`   // Version of the application
-	Develop   bool           `yaml:"develop"`   // Developer's mode
-	AssetsDir string         `yaml:"assetsdir"` // Directory for assets file. empty - dir of cfg file
-	Log       LogConfig      `yaml:"log"`       // Log settings
-	Users     UsersConfig    `yaml:"users"`     // Users settings
-	HTTP      lib.HTTPConfig `yaml:"http"`      // Web-server settings
+	Version    string               `yaml:"version"`    // Version of the application
+	Mode       string               `yaml:"mode"`       // Mode: default, develop, playground
+	AssetsDir  string               `yaml:"assetsdir"`  // Directory for assets file. empty - dir of cfg file
+	Log        LogConfig            `yaml:"log"`        // Log settings
+	Users      UsersConfig          `yaml:"users"`      // Users settings
+	HTTP       lib.HTTPConfig       `yaml:"http"`       // Web-server settings
+	Playground lib.PlaygroundConfig `yaml:"playground"` // Playground settings
 
-	path string // path to cfg file
+	path       string // path to cfg file
+	develop    bool
+	playground bool
 }
 
 const (
@@ -47,6 +56,7 @@ const (
 var (
 	cfg = Config{
 		Version: Version,
+		Mode:    ModeDefault,
 		Log: LogConfig{
 			Mode:  logModeFile,
 			Level: logLevelInfo,
@@ -123,6 +133,8 @@ func LoadConfig() {
 	default:
 		cfg.HTTP.Access = AccessLocalhost
 	}
+	cfg.develop = cfg.Mode == ModeDevelop
+	cfg.playground = cfg.Mode == ModePlayground
 	SetLogging(basename)
 	if err = InitTaskManager(); err != nil {
 		golog.Fatal(err)
