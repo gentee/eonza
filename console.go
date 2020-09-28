@@ -22,7 +22,7 @@ func request(url string) ([]byte, error) {
 		err error
 	)
 	buf := core.NewBuffer()
-	res, err = http.Get(`http://localhost:` + url)
+	res, err = http.Get(fmt.Sprintf(`http://%s:%s`, Localhost, url))
 	if err == nil {
 		buf.Data, err = ioutil.ReadAll(res.Body)
 		res.Body.Close()

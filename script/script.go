@@ -68,6 +68,12 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 			options.ChStdout <- buf
 		}
 	}(script.Header.Console)
-
+	if script.Header.IsPlayground {
+		settings.IsPlayground = true
+		settings.Playground.Path = script.Header.Playground.Dir
+		settings.Playground.AllSizeLimit = script.Header.Playground.Summary
+		settings.Playground.FilesLimit = int(script.Header.Playground.Files)
+		settings.Playground.SizeLimit = script.Header.Playground.Size
+	}
 	return script.Exec.Run(settings)
 }

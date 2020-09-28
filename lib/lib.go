@@ -23,11 +23,20 @@ import (
 
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
+	Host   string `yaml:"host"`   // if empty, then localhost
 	Port   int    `yaml:"port"`   // if empty, then DefPort
 	Open   bool   `yaml:"open"`   // if true then host is opened
 	Theme  string `yaml:"theme"`  // theme of web interface. if it is empty - DefTheme
 	Access string `yaml:"access"` // Access level - localhost, private - DefAccess == localhost
 	JWTKey string `yaml:"jwtkey"` // Secret key for JWT token
+}
+
+// PlaygroundConfig stores the config of playgroundmode
+type PlaygroundConfig struct {
+	Dir     string `yaml:"dir"`     // path to the temporary folder if it's empty then TempDir is used.
+	Summary int64  `yaml:"summary"` // all files size limit. By default, 10MB
+	Files   int64  `yaml:"files"`   // count of files limit. By default, 100
+	Size    int64  `yaml:"size"`    // file size limit. By default, 5MB
 }
 
 var (

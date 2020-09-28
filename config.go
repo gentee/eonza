@@ -15,6 +15,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	ModeDefault    = `default`
+	ModeDevelop    = `develop`
+	ModePlayground = `playground`
+)
+
 // LogConfig stores config  settings
 type LogConfig struct {
 	Dir   string `yaml:"dir"`   // Directory for log files. If it is empty - dir of cfg file
@@ -29,29 +35,34 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version   string         `yaml:"version"`   // Version of the application
-	Develop   bool           `yaml:"develop"`   // Developer's mode
-	AssetsDir string         `yaml:"assetsdir"` // Directory for assets file. empty - dir of cfg file
-	Log       LogConfig      `yaml:"log"`       // Log settings
-	Users     UsersConfig    `yaml:"users"`     // Users settings
-	HTTP      lib.HTTPConfig `yaml:"http"`      // Web-server settings
+	Version    string               `yaml:"version"`    // Version of the application
+	Mode       string               `yaml:"mode"`       // Mode: default, develop, playground
+	AssetsDir  string               `yaml:"assetsdir"`  // Directory for assets file. empty - dir of cfg file
+	Log        LogConfig            `yaml:"log"`        // Log settings
+	Users      UsersConfig          `yaml:"users"`      // Users settings
+	HTTP       lib.HTTPConfig       `yaml:"http"`       // Web-server settings
+	Playground lib.PlaygroundConfig `yaml:"playground"` // Playground settings
 
-	path string // path to cfg file
+	path       string // path to cfg file
+	develop    bool
+	playground bool
 }
 
 const (
-	AccessLocalhost = `localhost`
+	AccessLocalhost = Localhost
 	AccessPrivate   = `private`
 )
 
 var (
 	cfg = Config{
 		Version: Version,
+		Mode:    ModeDefault,
 		Log: LogConfig{
 			Mode:  logModeFile,
 			Level: logLevelInfo,
 		},
 		HTTP: lib.HTTPConfig{
+			Host:   Localhost,
 			Port:   DefPort,
 			Open:   true,
 			Theme:  `default`,
@@ -106,7 +117,11 @@ func LoadConfig() {
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
 	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	//	dataFile := defDir(cfg.DataDir)
-
+	if len(cfg.HTTP.Host) == 0 {
+		cfg.HTTP.Host = Localhost
+	} else if cfg.HTTP.Host != Localhost {
+		cfg.HTTP.Open = false
+	}
 	if cfg.HTTP.Port == 0 {
 		cfg.HTTP.Port = DefPort
 	}
@@ -118,6 +133,8 @@ func LoadConfig() {
 	default:
 		cfg.HTTP.Access = AccessLocalhost
 	}
+	cfg.develop = cfg.Mode == ModeDevelop
+	cfg.playground = cfg.Mode == ModePlayground
 	SetLogging(basename)
 	if err = InitTaskManager(); err != nil {
 		golog.Fatal(err)
