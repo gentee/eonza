@@ -60,8 +60,8 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			var matched bool
 			clientip := net.ParseIP(ip)
 			for _, item := range cfg.Whitelist {
-				_, network, _ := net.ParseCIDR(item)
-				if network.Contains(clientip) {
+				_, network, err := net.ParseCIDR(item)
+				if err == nil && network.Contains(clientip) {
 					matched = true
 					break
 				}
