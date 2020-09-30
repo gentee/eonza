@@ -78,6 +78,12 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		if access == AccessPrivate {
 			isAccess = lib.IsPrivate(host, ip)
+		} else if access == AccessHost {
+			if IsScript {
+				isAccess = host == scriptTask.Header.HTTP.Host || host == Localhost
+			} else {
+				isAccess = host == cfg.HTTP.Host || host == Localhost
+			}
 		} else {
 			isAccess = lib.IsLocalhost(host, ip)
 		}

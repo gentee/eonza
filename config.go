@@ -52,6 +52,7 @@ type Config struct {
 const (
 	AccessLocalhost = Localhost
 	AccessPrivate   = `private`
+	AccessHost      = `host`
 )
 
 var (
@@ -130,6 +131,7 @@ func LoadConfig() {
 		cfg.HTTP.Theme = DefTheme
 	}
 	switch cfg.HTTP.Access {
+	case AccessHost:
 	case AccessPrivate:
 	default:
 		cfg.HTTP.Access = AccessLocalhost
