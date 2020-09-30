@@ -154,6 +154,15 @@ func runHandle(c echo.Context) error {
 	}
 	if header.IsPlayground {
 		header.Playground = &cfg.Playground
+		tasksLimit := cfg.Playground.Tasks
+		for _, item := range tasks {
+			if item.Status < TaskFinished {
+				tasksLimit--
+			}
+		}
+		if tasksLimit <= 0 {
+			return jsonError(c, Lang(GetLangId(c.(*Auth).User), `errtasklimit`, cfg.Playground.Tasks))
+		}
 	}
 	if src, err = GenSource(item, &header); err != nil {
 		return jsonError(c, err)

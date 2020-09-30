@@ -37,6 +37,7 @@ type PlaygroundConfig struct {
 	Summary int64  `yaml:"summary"` // all files size limit. By default, 10MB
 	Files   int64  `yaml:"files"`   // count of files limit. By default, 100
 	Size    int64  `yaml:"size"`    // file size limit. By default, 5MB
+	Tasks   int64  `yaml:"tasks"`   // running task limit. By default, 1
 }
 
 var (

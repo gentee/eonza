@@ -33,6 +33,8 @@ const (
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
 	Localhost     = `localhost`
+	// DefTaskLimit is the maximum running scripts in playground mode
+	DefTaskLimit = 2
 )
 
 // AppInfo contains information about the application

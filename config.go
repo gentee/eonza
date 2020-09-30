@@ -136,6 +136,12 @@ func LoadConfig() {
 	}
 	cfg.develop = cfg.Mode == ModeDevelop
 	cfg.playground = cfg.Mode == ModePlayground
+	if cfg.playground {
+		if cfg.Playground.Tasks == 0 {
+			cfg.Playground.Tasks = DefTaskLimit
+		}
+	}
+
 	SetLogging(basename)
 	if err = InitTaskManager(); err != nil {
 		golog.Fatal(err)
