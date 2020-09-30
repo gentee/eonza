@@ -6,6 +6,7 @@ package main
 
 import (
 	"eonza/lib"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -54,6 +55,21 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			access   string
 			isAccess bool
 		)
+		ip := c.RealIP()
+		if len(cfg.Whitelist) > 0 {
+			var matched bool
+			clientip := net.ParseIP(ip)
+			for _, item := range cfg.Whitelist {
+				_, network, _ := net.ParseCIDR(item)
+				if network.Contains(clientip) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+			}
+		}
 		host := c.Request().Host[:strings.LastIndex(c.Request().Host, `:`)]
 		if IsScript {
 			access = scriptTask.Header.HTTP.Access
@@ -61,9 +77,9 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			access = cfg.HTTP.Access
 		}
 		if access == AccessPrivate {
-			isAccess = lib.IsPrivate(host, c.RealIP())
+			isAccess = lib.IsPrivate(host, ip)
 		} else {
-			isAccess = lib.IsLocalhost(host, c.RealIP())
+			isAccess = lib.IsLocalhost(host, ip)
 		}
 		if !isAccess {
 			return echo.NewHTTPError(http.StatusForbidden, "Access denied")

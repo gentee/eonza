@@ -42,6 +42,7 @@ type Config struct {
 	Users      UsersConfig          `yaml:"users"`      // Users settings
 	HTTP       lib.HTTPConfig       `yaml:"http"`       // Web-server settings
 	Playground lib.PlaygroundConfig `yaml:"playground"` // Playground settings
+	Whitelist  []string             `yaml:"whitelist"`  // Whitelist of IP-addresses
 
 	path       string // path to cfg file
 	develop    bool
