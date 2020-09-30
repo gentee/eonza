@@ -27,9 +27,10 @@ var (
 
 func main() {
 	var (
-		e     *echo.Echo
-		psw   string
-		isRun bool
+		e       *echo.Echo
+		psw     string
+		isRun   bool
+		install bool
 	)
 	if isRun = CheckConsole(); isRun && len(consoleData) == 0 {
 		return
@@ -37,6 +38,7 @@ func main() {
 	golog.SetTimeFormat("2006/01/02 15:04:05")
 	flag.StringVar(&cfg.path, "cfg", "", "The path of the `config file`")
 	flag.StringVar(&psw, "psw", "", "The login password")
+	flag.BoolVar(&install, "install", false, "only install")
 	flag.Parse()
 	if err := script.InitEngine(); err != nil {
 		golog.Fatal(err)
@@ -91,6 +93,9 @@ func main() {
 	} else {
 		LoadConfig()
 		LoadStorage(psw)
+		if install {
+			return
+		}
 		LoadUsers()
 		defer CloseLog()
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
