@@ -348,6 +348,7 @@ func initTask() script.Settings {
 
 func wsTaskHandle(c echo.Context) error {
 	//	var cmd WsCmd
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err

@@ -4971,7 +4971,7 @@ M3YyLKJk8NM51r0kPi+3Z5l/AgAA///y9sEPpgYAAA==
 		name:    "dialogs.tpl",
 		local:   "../eonza-assets/themes/default/templates/dialogs.tpl",
 		size:    9352,
-		modtime: 1600353049,
+		modtime: 1601632567,
 		compressed: `
 H4sIAAAAAAAC/+xZbW/bOPJ/n08xVf/+y0Ejx4ndBpAjo710Axx20T1cdq8oir6gxZHNMyVqScoPF/i7
 H0g9WpbTNL0tWmBfNJVmhjPDmeH8RvS1CiVLNehtioGjcaPPN57GOOVEowOMBg7lcy9LuSDUmZ4AAFyv
@@ -5209,7 +5209,7 @@ OENODWZ7LY47MIPW69k1LvAOyvLmmzb/UTqNMHdfi2v2X+SfAAAA//9sLKc6ggcAAA==
 		name:    "index.tpl",
 		local:   "../eonza-assets/themes/default/templates/index.tpl",
 		size:    15868,
-		modtime: 1601286051,
+		modtime: 1601484115,
 		compressed: `
 H4sIAAAAAAAC/9xb/4/jNnb/3X/FG/U2lrGWPLO7AQKP5TTYXFG02ybo7l0QDAYBLdE2dyhSJSl7fBP/
 78UjKVnf7JnNJWh7+8OsSD5++L7x8fFJXlx9/8P7Tz//+GfYmpwvR4vqP0qyJYwAFjk1BNItUZqaJCjN

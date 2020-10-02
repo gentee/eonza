@@ -70,7 +70,10 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 			}
 		}
-		host := c.Request().Host[:strings.LastIndex(c.Request().Host, `:`)]
+		host := c.Request().Host
+		if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
+			host = host[:offPort]
+		}
 		if IsScript {
 			access = scriptTask.Header.HTTP.Access
 		} else {
