@@ -43,7 +43,9 @@ type Config struct {
 	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
 	Playground lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
 	Whitelist  []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
-	PortShift  int64                `yaml:"portshift,omitempty"` // shift of the port
+	//  undocumented fields
+	PortShift int64  `yaml:"portshift,omitempty"` // shift of the port
+	CDN       string `yaml:"cdn,omitempty"`       // url for static files in task
 
 	path       string // path to cfg file
 	develop    bool

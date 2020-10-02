@@ -137,6 +137,7 @@ func runHandle(c echo.Context) error {
 		Title:        title,
 		AssetsDir:    cfg.AssetsDir,
 		LogDir:       cfg.Log.Dir,
+		CDN:          cfg.CDN,
 		Console:      console,
 		IsPlayground: cfg.playground,
 		UserID:       c.(*Auth).User.ID,

@@ -39,6 +39,7 @@ type RenderScript struct {
 	IsScript bool
 	Start    string
 	Finish   string
+	CDN      string
 	Source   template.HTML
 	Stdout   template.HTML
 	Logout   template.HTML
@@ -114,6 +115,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Finish = time.Unix(renderScript.Task.FinishTime, 0).Format(TimeFormat)
 		}
 		renderScript.IsScript = IsScript
+		renderScript.CDN = scriptTask.Header.CDN
 		data = renderScript
 	} else {
 		render.App = appInfo

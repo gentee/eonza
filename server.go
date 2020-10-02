@@ -205,10 +205,10 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
-	/*	e.Use(md.CORSWithConfig(md.CORSConfig{
-		AllowOrigins: []string{"http://localhost"},
-		AllowMethods: []string{http.MethodGet, http.MethodPost},
-	}))*/
+	/* e.Use(md.CORSWithConfig(md.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet},
+	}))}*/
 
 	//e.HTTPErrorHandler = customHTTPErrorHandler
 

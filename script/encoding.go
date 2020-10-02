@@ -21,6 +21,7 @@ type Header struct {
 	AssetsDir    string
 	LogDir       string
 	Theme        string
+	CDN          string
 	Console      bool
 	IsPlayground bool
 	SourceCode   []byte
