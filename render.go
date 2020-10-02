@@ -25,6 +25,7 @@ type Render struct {
 	Lang       string
 	Login      bool
 	Localhost  bool
+	PortShift  int64
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -126,6 +127,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		}
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
+		render.PortShift = cfg.PortShift
 		data = render
 	}
 

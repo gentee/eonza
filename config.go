@@ -35,14 +35,15 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version    string               `yaml:"version"`    // Version of the application
-	Mode       string               `yaml:"mode"`       // Mode: default, develop, playground
-	AssetsDir  string               `yaml:"assetsdir"`  // Directory for assets file. empty - dir of cfg file
-	Log        LogConfig            `yaml:"log"`        // Log settings
-	Users      UsersConfig          `yaml:"users"`      // Users settings
-	HTTP       lib.HTTPConfig       `yaml:"http"`       // Web-server settings
-	Playground lib.PlaygroundConfig `yaml:"playground"` // Playground settings
-	Whitelist  []string             `yaml:"whitelist"`  // Whitelist of IP-addresses
+	Version    string               `yaml:"version"`             // Version of the application
+	Mode       string               `yaml:"mode"`                // Mode: default, develop, playground
+	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file. empty - dir of cfg file
+	Log        LogConfig            `yaml:"log"`                 // Log settings
+	Users      UsersConfig          `yaml:"users"`               // Users settings
+	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
+	Playground lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
+	Whitelist  []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
+	PortShift  int64                `yaml:"portshift,omitempty"` // shift of the port
 
 	path       string // path to cfg file
 	develop    bool
