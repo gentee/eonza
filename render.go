@@ -96,6 +96,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		if IsScript {
 			renderScript.Task = task
 			renderScript.Title = scriptTask.Header.Title
+			renderScript.CDN = scriptTask.Header.CDN
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
@@ -115,7 +116,6 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Finish = time.Unix(renderScript.Task.FinishTime, 0).Format(TimeFormat)
 		}
 		renderScript.IsScript = IsScript
-		renderScript.CDN = scriptTask.Header.CDN
 		data = renderScript
 	} else {
 		render.App = appInfo
