@@ -165,6 +165,9 @@ func indexHandle(c echo.Context) error {
 }*/
 
 func exitHandle(c echo.Context) error {
+	if cfg.playground {
+		return jsonError(c, `Access denied`)
+	}
 	golog.Info(`Finish`)
 	stopchan <- os.Interrupt
 	return c.JSON(http.StatusOK, Response{Success: true})
