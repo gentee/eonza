@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gentee/gentee"
+	"github.com/gentee/gentee/vm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -125,12 +126,12 @@ var (
 	}
 )
 
-func IsCond(item *ConditionItem) (err error) {
+func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	var (
 		i      int64
 		val, s string
 	)
-	if len(item.Var) == 0 {
+	if len(item.Var) == 0 && len(item.Value) == 0 {
 		return fmt.Errorf(`empty variable in If Statement`)
 	}
 	if val, err = Macro(item.Value); err != nil {
@@ -149,6 +150,18 @@ func IsCond(item *ConditionItem) (err error) {
 			}
 			item.result = s == val
 		}
+	case `fileexists`:
+		if len(item.Var) > 0 {
+			if s, err = GetVar(item.Var); err != nil {
+				return
+			}
+		} else {
+			s = val
+		}
+		if i, err = vm.ExistFile(rt, s); err != nil {
+			return
+		}
+		item.result = i != 0
 	default:
 		return fmt.Errorf(`Unknown comparison type: %s`, item.Cmp)
 	}
@@ -158,7 +171,7 @@ func IsCond(item *ConditionItem) (err error) {
 	return
 }
 
-func Condition(casevar, list string) (ret int64, err error) {
+func Condition(rt *vm.Runtime, casevar, list string) (ret int64, err error) {
 	if len(casevar) > 0 {
 		var used int64
 		if used, err = GetVarBool(casevar); err != nil || used != 0 {
@@ -173,7 +186,7 @@ func Condition(casevar, list string) (ret int64, err error) {
 	if count == 0 {
 		ret = 1
 	} else {
-		if err = IsCond(&cond[0]); err != nil {
+		if err = IsCond(rt, &cond[0]); err != nil {
 			return
 		}
 		// collect OR
@@ -190,7 +203,7 @@ func Condition(casevar, list string) (ret int64, err error) {
 					continue
 				}
 			}
-			if err = IsCond(&cond[i]); err != nil {
+			if err = IsCond(rt, &cond[i]); err != nil {
 				return
 			}
 			cond[0].result = cond[i].result
