@@ -140,6 +140,7 @@ func runHandle(c echo.Context) error {
 		CDN:          cfg.CDN,
 		Console:      console,
 		IsPlayground: cfg.playground,
+		IP:           c.RealIP(),
 		UserID:       c.(*Auth).User.ID,
 		Constants:    storage.Settings.Constants,
 		Lang:         langCode,

@@ -49,6 +49,10 @@ func getCookie(c echo.Context, name string) string {
 	return cookie.Value
 }
 
+func accessIP(curIP, originalIP string) bool {
+	return curIP == originalIP || net.ParseIP(curIP).IsLoopback()
+}
+
 func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		var (
@@ -83,7 +87,8 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			isAccess = lib.IsPrivate(host, ip)
 		} else if access == AccessHost {
 			if IsScript {
-				isAccess = host == scriptTask.Header.HTTP.Host || host == Localhost
+				isAccess = (host == scriptTask.Header.HTTP.Host && accessIP(ip, scriptTask.Header.IP)) ||
+					host == Localhost
 			} else {
 				isAccess = host == cfg.HTTP.Host || host == Localhost
 			}
