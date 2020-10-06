@@ -1,4 +1,4 @@
-module eonza
+module github.com/gentee/eonza
 
 go 1.12
 
