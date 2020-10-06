@@ -74,6 +74,11 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 			}
 		}
+		url := c.Request().URL.String()
+		if url == `/ping` {
+			return next(c)
+		}
+
 		host := c.Request().Host
 		if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
 			host = host[:offPort]
@@ -101,7 +106,6 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		mutex.Lock()
 		defer mutex.Unlock()
 
-		url := c.Request().URL.String()
 		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
 			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
 			hashid := getCookie(c, "hashid")
