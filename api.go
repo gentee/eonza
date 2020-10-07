@@ -26,6 +26,7 @@ type CompileResponse struct {
 
 type RunResponse struct {
 	Success bool   `json:"success"`
+	Port    int    `json:"port"`
 	ID      uint32 `json:"id"`
 	Error   string `json:"error,omitempty"`
 }
@@ -184,7 +185,7 @@ func runHandle(c echo.Context) error {
 	if console {
 		return c.Blob(http.StatusOK, ``, data.Bytes())
 	}
-	return c.JSON(http.StatusOK, RunResponse{Success: true, ID: header.TaskID})
+	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: header.HTTP.Port, ID: header.TaskID})
 }
 
 func pingHandle(c echo.Context) error {
