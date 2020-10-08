@@ -27,7 +27,7 @@ const (
 	PortsPool   = 1000
 	TasksLimit  = 50
 	TimeFormat  = `2006/01/02 15:04:05`
-	TimeoutOpen = 3000
+	TimeoutOpen = 4000
 	SourceCode  = `source-code`
 	DefLang     = 0
 	// ConsolePrefix is the prefix of eonza console version
