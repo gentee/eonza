@@ -25,6 +25,7 @@ type Render struct {
 	Lang       string
 	Login      bool
 	Localhost  bool
+	PortShift  int64
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -38,6 +39,7 @@ type RenderScript struct {
 	IsScript bool
 	Start    string
 	Finish   string
+	CDN      string
 	Source   template.HTML
 	Stdout   template.HTML
 	Logout   template.HTML
@@ -94,6 +96,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		if IsScript {
 			renderScript.Task = task
 			renderScript.Title = scriptTask.Header.Title
+			renderScript.CDN = scriptTask.Header.CDN
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
@@ -126,6 +129,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		}
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
+		render.PortShift = cfg.PortShift
 		data = render
 	}
 

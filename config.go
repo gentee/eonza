@@ -35,13 +35,17 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version    string               `yaml:"version"`    // Version of the application
-	Mode       string               `yaml:"mode"`       // Mode: default, develop, playground
-	AssetsDir  string               `yaml:"assetsdir"`  // Directory for assets file. empty - dir of cfg file
-	Log        LogConfig            `yaml:"log"`        // Log settings
-	Users      UsersConfig          `yaml:"users"`      // Users settings
-	HTTP       lib.HTTPConfig       `yaml:"http"`       // Web-server settings
-	Playground lib.PlaygroundConfig `yaml:"playground"` // Playground settings
+	Version    string               `yaml:"version"`             // Version of the application
+	Mode       string               `yaml:"mode"`                // Mode: default, develop, playground
+	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file. empty - dir of cfg file
+	Log        LogConfig            `yaml:"log"`                 // Log settings
+	Users      UsersConfig          `yaml:"users"`               // Users settings
+	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
+	Playground lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
+	Whitelist  []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
+	//  undocumented fields
+	PortShift int64  `yaml:"portshift,omitempty"` // shift of the port
+	CDN       string `yaml:"cdn,omitempty"`       // url for static files in task
 
 	path       string // path to cfg file
 	develop    bool
@@ -51,6 +55,7 @@ type Config struct {
 const (
 	AccessLocalhost = Localhost
 	AccessPrivate   = `private`
+	AccessHost      = `host`
 )
 
 var (
@@ -129,12 +134,19 @@ func LoadConfig() {
 		cfg.HTTP.Theme = DefTheme
 	}
 	switch cfg.HTTP.Access {
+	case AccessHost:
 	case AccessPrivate:
 	default:
 		cfg.HTTP.Access = AccessLocalhost
 	}
 	cfg.develop = cfg.Mode == ModeDevelop
 	cfg.playground = cfg.Mode == ModePlayground
+	if cfg.playground {
+		if cfg.Playground.Tasks == 0 {
+			cfg.Playground.Tasks = DefTaskLimit
+		}
+	}
+
 	SetLogging(basename)
 	if err = InitTaskManager(); err != nil {
 		golog.Fatal(err)

@@ -21,12 +21,14 @@ type Header struct {
 	AssetsDir    string
 	LogDir       string
 	Theme        string
+	CDN          string
 	Console      bool
 	IsPlayground bool
 	SourceCode   []byte
 	Constants    map[string]string
 	Lang         string
 	UserID       uint32
+	IP           string
 	TaskID       uint32
 	ServerPort   int
 	HTTP         *lib.HTTPConfig

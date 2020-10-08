@@ -165,6 +165,9 @@ func indexHandle(c echo.Context) error {
 }*/
 
 func exitHandle(c echo.Context) error {
+	if cfg.playground {
+		return jsonError(c, `Access denied`)
+	}
 	golog.Info(`Finish`)
 	stopchan <- os.Interrupt
 	return c.JSON(http.StatusOK, Response{Success: true})
@@ -205,10 +208,10 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
-	/*	e.Use(md.CORSWithConfig(md.CORSConfig{
-		AllowOrigins: []string{"http://localhost"},
-		AllowMethods: []string{http.MethodGet, http.MethodPost},
-	}))*/
+	/* e.Use(md.CORSWithConfig(md.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet},
+	}))}*/
 
 	//e.HTTPErrorHandler = customHTTPErrorHandler
 

@@ -6,6 +6,7 @@ package main
 
 import (
 	"eonza/lib"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -48,22 +49,56 @@ func getCookie(c echo.Context, name string) string {
 	return cookie.Value
 }
 
+func accessIP(curIP, originalIP string) bool {
+	return curIP == originalIP || net.ParseIP(curIP).IsLoopback()
+}
+
 func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		var (
 			access   string
 			isAccess bool
 		)
-		host := c.Request().Host[:strings.LastIndex(c.Request().Host, `:`)]
+		ip := c.RealIP()
+		if len(cfg.Whitelist) > 0 {
+			var matched bool
+			clientip := net.ParseIP(ip)
+			for _, item := range cfg.Whitelist {
+				_, network, err := net.ParseCIDR(item)
+				if err == nil && network.Contains(clientip) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+			}
+		}
+		url := c.Request().URL.String()
+		if url == `/ping` {
+			return next(c)
+		}
+
+		host := c.Request().Host
+		if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
+			host = host[:offPort]
+		}
 		if IsScript {
 			access = scriptTask.Header.HTTP.Access
 		} else {
 			access = cfg.HTTP.Access
 		}
 		if access == AccessPrivate {
-			isAccess = lib.IsPrivate(host, c.RealIP())
+			isAccess = lib.IsPrivate(host, ip)
+		} else if access == AccessHost {
+			if IsScript {
+				isAccess = (host == scriptTask.Header.HTTP.Host && accessIP(ip, scriptTask.Header.IP)) ||
+					host == Localhost
+			} else {
+				isAccess = host == cfg.HTTP.Host || host == Localhost
+			}
 		} else {
-			isAccess = lib.IsLocalhost(host, c.RealIP())
+			isAccess = lib.IsLocalhost(host, ip)
 		}
 		if !isAccess {
 			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
@@ -71,7 +106,6 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		mutex.Lock()
 		defer mutex.Unlock()
 
-		url := c.Request().URL.String()
 		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
 			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
 			hashid := getCookie(c, "hashid")

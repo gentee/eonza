@@ -58,6 +58,9 @@ func setPasswordHandle(c echo.Context) error {
 		err  error
 		hash []byte
 	)
+	if cfg.playground {
+		return jsonError(c, Lang(GetLangId(c.(*Auth).User), `errplaypsw`))
+	}
 	if err = c.Bind(&psw); err != nil {
 		return jsonError(c, err)
 	}

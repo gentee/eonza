@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "1.1.0+1"
+	Version = "1.2.0+1"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
@@ -27,12 +27,14 @@ const (
 	PortsPool   = 1000
 	TasksLimit  = 50
 	TimeFormat  = `2006/01/02 15:04:05`
-	TimeoutOpen = 3000
+	TimeoutOpen = 4000
 	SourceCode  = `source-code`
 	DefLang     = 0
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
 	Localhost     = `localhost`
+	// DefTaskLimit is the maximum running scripts in playground mode
+	DefTaskLimit = 2
 )
 
 // AppInfo contains information about the application
