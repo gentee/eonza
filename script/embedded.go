@@ -123,6 +123,7 @@ var (
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
+		{Prototype: `UnsetEnv(str)`, Object: UnsetEnv},
 	}
 )
 

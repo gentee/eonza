@@ -5,8 +5,12 @@
 package script
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,4 +28,13 @@ func YamlToMap(in string) (*core.Map, error) {
 		return nil, err
 	}
 	return ret.(*core.Map), nil
+}
+
+// UnsetEnv unsets the environment variable
+func UnsetEnv(rt *vm.Runtime, name string) error {
+	if rt.Owner.Settings.IsPlayground {
+		// restore in gentee ErrorText(ErrPlayEnv))
+		return fmt.Errorf(`[Playground] setting the environment variable is disabled`)
+	}
+	return os.Unsetenv(name)
 }
