@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"eonza/lib"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -162,6 +163,21 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 		if i, err = vm.ExistFile(rt, s); err != nil {
 			return
 		}
+		item.result = i != 0
+	case `envexists`:
+		if len(item.Var) > 0 {
+			if s, err = GetVar(item.Var); err != nil {
+				return
+			}
+		} else {
+			s = val
+		}
+		_, item.result = os.LookupEnv(s)
+	case `match`:
+		if s, err = GetVar(item.Var); err != nil {
+			return
+		}
+		i, err = vm.MatchºStrStr(s, val)
 		item.result = i != 0
 	default:
 		return fmt.Errorf(`Unknown comparison type: %s`, item.Cmp)
