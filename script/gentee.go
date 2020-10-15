@@ -38,3 +38,9 @@ func UnsetEnv(rt *vm.Runtime, name string) error {
 	}
 	return os.Unsetenv(name)
 }
+
+// remove after gentee update
+// replaced GetEnvironment to GetEnv in Set Variable command
+func GetEnv(name string) string {
+	return os.Getenv(name)
+}
