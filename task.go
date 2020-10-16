@@ -25,12 +25,13 @@ import (
 )
 
 const (
-	WcClose  = iota // close connection
-	WcStatus        // change status
-	WcStdout        // new line in console
-	WcStdbuf        // current output including carriage
-	WcLogout        // log output
-	WcForm          // form output
+	WcClose    = iota // close connection
+	WcStatus          // change status
+	WcStdout          // new line in console
+	WcStdbuf          // current output including carriage
+	WcLogout          // log output
+	WcForm            // form output
+	WcProgress        // progress bar
 )
 
 const (
@@ -87,6 +88,7 @@ var (
 	chLogout   chan string
 	chForm     chan script.FormInfo
 	chFormNext chan bool
+	chProgress chan script.Progress
 	chSystem   chan int
 	chFinish   chan bool
 
@@ -164,6 +166,15 @@ func sendLogout(client WsClient) error {
 	}
 	return nil
 }
+
+func sendProgress(client WsClient, msg string) error {
+	return client.Conn.WriteJSON(WsCmd{
+		TaskID:  task.ID,
+		Cmd:     WcProgress,
+		Message: msg,
+	})
+}
+
 func initTask() script.Settings {
 	var err error
 
@@ -213,6 +224,8 @@ func initTask() script.Settings {
 	chLogout = make(chan string)
 	chForm = make(chan script.FormInfo)
 	chFormNext = make(chan bool)
+	chProgress = make(chan script.Progress)
+	script.ChProgress = chProgress
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
 	stdoutBuf = []string{``}
@@ -270,6 +283,26 @@ func initTask() script.Settings {
 				} else {
 					client.Conn.Close()
 					delete(clients, id)
+				}
+			}
+			mutex.Unlock()
+		}
+	}()
+
+	go func() {
+		var prog script.Progress
+		for {
+			select {
+			case prog = <-chProgress:
+			}
+			mutex.Lock()
+			msg, err := prog.String()
+			if err == nil {
+				for id, client := range clients {
+					if sendProgress(client, msg) != nil {
+						client.Conn.Close()
+						delete(clients, id)
+					}
 				}
 			}
 			mutex.Unlock()

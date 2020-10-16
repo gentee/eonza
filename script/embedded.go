@@ -126,6 +126,7 @@ var (
 		{Prototype: `GetEnvironment(str) str`, Object: GetEnv},
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		{Prototype: `UnsetEnv(str)`, Object: UnsetEnv},
+		{Prototype: `CopyFileEx(str,str) int`, Object: CopyFileEx},
 	}
 )
 
