@@ -292,20 +292,18 @@ func initTask() script.Settings {
 	go func() {
 		var prog script.Progress
 		for {
-			select {
-			case prog = <-chProgress:
-			}
-			mutex.Lock()
+			prog = <-chProgress
 			msg, err := prog.String()
 			if err == nil {
+				mutex.Lock()
 				for id, client := range clients {
 					if sendProgress(client, msg) != nil {
 						client.Conn.Close()
 						delete(clients, id)
 					}
 				}
+				mutex.Unlock()
 			}
-			mutex.Unlock()
 		}
 	}()
 

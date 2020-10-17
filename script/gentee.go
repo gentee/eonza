@@ -56,31 +56,39 @@ const (
 type Progress struct {
 	ID      uint32
 	Type    int
-	Summary int64
-	CurSize int64
+	Total   int64
+	Current int64
 	Source  string
 	Dest    string
 	Percent int64
 	Remain  time.Duration
+
+	start   time.Time
+	updated time.Time
+	handle  ProgressFunc
 }
 
 type ProgressInfo struct {
 	ID      uint32 `json:"id"`
 	Type    int    `json:"type"`
-	Summary string `json:"summary"`
-	CurSize string `json:"cursize"`
-	Source  string `json:"source,omitempty"`
-	Dest    string `json:"dest,omitempty"`
+	Total   string `json:"total"`
+	Current string `json:"current"`
+	Source  string `json:"source"`
+	Dest    string `json:"dest"`
 	Percent int64  `json:"percent"`
 	Remain  string `json:"remain"`
 }
 
+type ProgressFunc func(Progress) bool
+
 type ProgressReader struct {
 	Progress
-	reader  io.Reader
-	start   time.Time
-	updated time.Time
-	ch      chan Progress
+	reader io.Reader
+}
+
+func ProgressHandle(prog Progress) bool {
+	ChProgress <- prog
+	return true
 }
 
 const (
@@ -116,13 +124,19 @@ func SizeToStr(size int64) string {
 	return fmt.Sprintf("%.2f", float64(size)/float64(base)) + ext
 }
 
-func NewProgress(r io.Reader, size int64, ptype int) *ProgressReader {
+func NewProgress(r io.Reader, total int64, ptype int, handle ProgressFunc) *ProgressReader {
 	now := time.Now()
+	prog := Progress{
+		ID:      lib.RndNum(),
+		Total:   total,
+		Type:    ptype,
+		start:   now,
+		updated: now,
+		handle:  handle,
+	}
 	return &ProgressReader{
-		Progress: Progress{ID: lib.RndNum(), Summary: size, Type: ptype},
+		Progress: prog,
 		reader:   r,
-		start:    now,
-		updated:  now,
 	}
 }
 
@@ -130,21 +144,25 @@ var ChProgress chan Progress
 
 func (progress *ProgressReader) Read(data []byte) (n int, err error) {
 	n, err = progress.reader.Read(data)
-	if err == nil {
+	if err == nil && n > 0 {
 		var percent int64
-		progress.CurSize += int64(n)
-		if progress.CurSize > 0 {
-			ratio := float64(progress.CurSize) / float64(progress.Summary)
-			if progress.CurSize >= progress.Summary {
-				percent = 100
-			} else {
-				percent = int64(100.0 * ratio)
-
-			}
-			if /*percent != progress.Percent &&*/ time.Since(progress.updated) > 500*time.Millisecond {
-				progress.Remain = time.Duration(float64(time.Since(progress.start)) * (1 - ratio) / ratio).Round(time.Second)
+		progress.Current += int64(n)
+		ratio := float64(progress.Current) / float64(progress.Total)
+		if progress.Current >= progress.Total {
+			percent = 100
+		} else {
+			percent = int64(100.0 * ratio)
+		}
+		if /*percent != progress.Percent &&*/ time.Since(progress.updated) > 500*time.Millisecond {
+			/*				dif := progress.Current - progress.prevTotal
+							speed := float64(dif) / float64(since)
+							progress.Remain = time.Duration(float64(progress.Total-progress.Current) / speed).Round(time.Second)*/
+			remain := time.Duration(float64(time.Since(progress.start)) * (1 - ratio) / ratio).Round(time.Second)
+			if percent != progress.Percent || remain != progress.Remain {
 				progress.Percent = percent
-				progress.Update()
+				progress.Remain = remain
+				progress.updated = time.Now()
+				progress.handle(progress.Progress)
 			}
 		}
 	}
@@ -152,30 +170,30 @@ func (progress *ProgressReader) Read(data []byte) (n int, err error) {
 }
 
 func (progress *Progress) String() (string, error) {
+	var remain string
+	if progress.Remain <= 24*time.Hour {
+		remain = progress.Remain.String()
+	}
+
 	data, err := json.Marshal(ProgressInfo{
 		ID:      progress.ID,
 		Type:    progress.Type,
-		Summary: SizeToStr(progress.Summary),
-		CurSize: SizeToStr(progress.CurSize),
+		Total:   SizeToStr(progress.Total),
+		Current: SizeToStr(progress.Current),
 		Percent: progress.Percent,
-		Remain:  progress.Remain.String(),
+		Remain:  remain,
 		Source:  progress.Source,
 		Dest:    progress.Dest,
 	})
 	return string(data), err
 }
 
-func (progress *ProgressReader) Update() {
-	progress.updated = time.Now()
-	progress.ch <- progress.Progress
-}
-
-func (progress *ProgressReader) Complete() {
+func (progress *Progress) Complete() {
 	if progress.start == progress.updated {
 		return
 	}
 	progress.Percent = 100
-	progress.Update()
+	progress.handle(*progress)
 	return
 }
 
@@ -194,10 +212,9 @@ func CopyFileEx(rt *vm.Runtime, src, dest string) (int64, error) {
 	}
 	defer destFile.Close()
 
-	prog := NewProgress(srcFile, finfo.Size(), ProgCopy)
+	prog := NewProgress(srcFile, finfo.Size(), ProgCopy, ProgressHandle)
 	prog.Source = src
 	prog.Dest = dest
-	prog.ch = ChProgress
 	ret, err := io.Copy(destFile, prog)
 	prog.Complete()
 	destFile.Chmod(finfo.Mode())
