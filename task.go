@@ -88,7 +88,7 @@ var (
 	chLogout   chan string
 	chForm     chan script.FormInfo
 	chFormNext chan bool
-	chProgress chan script.Progress
+	chProgress chan script.ProgressData
 	chSystem   chan int
 	chFinish   chan bool
 
@@ -224,7 +224,7 @@ func initTask() script.Settings {
 	chLogout = make(chan string)
 	chForm = make(chan script.FormInfo)
 	chFormNext = make(chan bool)
-	chProgress = make(chan script.Progress)
+	chProgress = make(chan script.ProgressData)
 	script.ChProgress = chProgress
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
@@ -290,20 +290,21 @@ func initTask() script.Settings {
 	}()
 
 	go func() {
-		var prog script.Progress
+		var prog script.ProgressData
 		for {
 			prog = <-chProgress
-			msg, err := prog.String()
-			if err == nil {
-				mutex.Lock()
-				for id, client := range clients {
-					if sendProgress(client, msg) != nil {
-						client.Conn.Close()
-						delete(clients, id)
-					}
-				}
-				mutex.Unlock()
-			}
+			fmt.Println(prog)
+			/*			msg, err := prog.String()
+						if err == nil {
+							mutex.Lock()
+							for id, client := range clients {
+								if sendProgress(client, msg) != nil {
+									client.Conn.Close()
+									delete(clients, id)
+								}
+							}
+							mutex.Unlock()
+						}*/
 		}
 	}()
 

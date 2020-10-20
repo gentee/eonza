@@ -5,16 +5,10 @@
 package script
 
 import (
-	"encoding/json"
-	"eonza/lib"
-	"fmt"
-	"io"
-	"os"
 	"time"
 
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/core"
-	"github.com/gentee/gentee/vm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,38 +28,11 @@ func YamlToMap(in string) (*core.Map, error) {
 	return ret.(*core.Map), nil
 }
 
-// UnsetEnv unsets the environment variable
-func UnsetEnv(rt *vm.Runtime, name string) error {
-	if rt.Owner.Settings.IsPlayground {
-		// restore in gentee ErrorText(ErrPlayEnv))
-		return fmt.Errorf(`[Playground] setting the environment variable is disabled`)
-	}
-	return os.Unsetenv(name)
-}
-
-// remove after gentee update
-// replaced GetEnvironment to GetEnv in Set Variable command
-func GetEnv(name string) string {
-	return os.Getenv(name)
-}
-
-const (
-	ProgCopy = iota
-)
-
-type Progress struct {
-	ID      uint32
-	Type    int
-	Total   int64
-	Current int64
-	Source  string
-	Dest    string
+type ProgressData struct {
 	Percent int64
 	Remain  time.Duration
-
-	start   time.Time
-	updated time.Time
-	handle  ProgressFunc
+	Start   time.Time
+	Updated time.Time
 }
 
 type ProgressInfo struct {
@@ -79,51 +46,14 @@ type ProgressInfo struct {
 	Remain  string `json:"remain"`
 }
 
-type ProgressFunc func(Progress) bool
-
-type ProgressReader struct {
-	Progress
-	reader io.Reader
-}
-
-func ProgressHandle(prog Progress) bool {
-	ChProgress <- prog
+func ProgressHandle(prog *gentee.Progress) bool {
+	//ChProgress <- prog
 	return true
 }
 
-const (
-	sizeB  int64 = 1
-	sizeKB int64 = 1 << (10 * iota)
-	sizeMB
-	sizeGB
-	sizeTB
-)
+var ChProgress chan ProgressData
 
-func SizeToStr(size int64) string {
-	var (
-		base int64
-		ext  string
-	)
-	switch {
-	case size >= sizeTB:
-		base = sizeTB
-		ext = "TB"
-	case size >= sizeGB:
-		base = sizeGB
-		ext = "GB"
-	case size >= sizeMB:
-		base = sizeMB
-		ext = "MB"
-	case size >= sizeKB:
-		base = sizeKB
-		ext = "KB"
-	default:
-		base = sizeB
-		ext = "B"
-	}
-	return fmt.Sprintf("%.2f", float64(size)/float64(base)) + ext
-}
-
+/*
 func NewProgress(r io.Reader, total int64, ptype int, handle ProgressFunc) *ProgressReader {
 	now := time.Now()
 	prog := Progress{
@@ -140,8 +70,6 @@ func NewProgress(r io.Reader, total int64, ptype int, handle ProgressFunc) *Prog
 	}
 }
 
-var ChProgress chan Progress
-
 func (progress *ProgressReader) Read(data []byte) (n int, err error) {
 	n, err = progress.reader.Read(data)
 	if err == nil && n > 0 {
@@ -153,10 +81,10 @@ func (progress *ProgressReader) Read(data []byte) (n int, err error) {
 		} else {
 			percent = int64(100.0 * ratio)
 		}
-		if /*percent != progress.Percent &&*/ time.Since(progress.updated) > 500*time.Millisecond {
+		if /*percent != progress.Percent && time.Since(progress.updated) > 500*time.Millisecond {
 			/*				dif := progress.Current - progress.prevTotal
 							speed := float64(dif) / float64(since)
-							progress.Remain = time.Duration(float64(progress.Total-progress.Current) / speed).Round(time.Second)*/
+							progress.Remain = time.Duration(float64(progress.Total-progress.Current) / speed).Round(time.Second)
 			remain := time.Duration(float64(time.Since(progress.start)) * (1 - ratio) / ratio).Round(time.Second)
 			if percent != progress.Percent || remain != progress.Remain {
 				progress.Percent = percent
@@ -220,3 +148,4 @@ func CopyFileEx(rt *vm.Runtime, src, dest string) (int64, error) {
 	destFile.Chmod(finfo.Mode())
 	return ret, err
 }
+*/
