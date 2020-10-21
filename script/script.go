@@ -16,9 +16,10 @@ type Script struct {
 }
 
 type Settings struct {
-	ChStdin  chan []byte
-	ChStdout chan []byte
-	ChSystem chan int
+	ChStdin        chan []byte
+	ChStdout       chan []byte
+	ChSystem       chan int
+	ProgressHandle gentee.ProgressFunc
 }
 
 func (script *Script) Run(options Settings) (interface{}, error) {
@@ -75,5 +76,6 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 		settings.Playground.FilesLimit = int(script.Header.Playground.Files)
 		settings.Playground.SizeLimit = script.Header.Playground.Size
 	}
+	settings.ProgressHandle = options.ProgressHandle
 	return script.Exec.Run(settings)
 }

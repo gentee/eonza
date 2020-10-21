@@ -25,12 +25,13 @@ import (
 )
 
 const (
-	WcClose  = iota // close connection
-	WcStatus        // change status
-	WcStdout        // new line in console
-	WcStdbuf        // current output including carriage
-	WcLogout        // log output
-	WcForm          // form output
+	WcClose    = iota // close connection
+	WcStatus          // change status
+	WcStdout          // new line in console
+	WcStdbuf          // current output including carriage
+	WcLogout          // log output
+	WcForm            // form output
+	WcProgress        // progress bar
 )
 
 const (
@@ -87,6 +88,7 @@ var (
 	chLogout   chan string
 	chForm     chan script.FormInfo
 	chFormNext chan bool
+	chProgress chan *gentee.Progress
 	chSystem   chan int
 	chFinish   chan bool
 
@@ -164,6 +166,15 @@ func sendLogout(client WsClient) error {
 	}
 	return nil
 }
+
+func sendProgress(client WsClient, msg string) error {
+	return client.Conn.WriteJSON(WsCmd{
+		TaskID:  task.ID,
+		Cmd:     WcProgress,
+		Message: msg,
+	})
+}
+
 func initTask() script.Settings {
 	var err error
 
@@ -213,6 +224,7 @@ func initTask() script.Settings {
 	chLogout = make(chan string)
 	chForm = make(chan script.FormInfo)
 	chFormNext = make(chan bool)
+	chProgress = make(chan *gentee.Progress)
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
 	stdoutBuf = []string{``}
@@ -273,6 +285,24 @@ func initTask() script.Settings {
 				}
 			}
 			mutex.Unlock()
+		}
+	}()
+
+	go func() {
+		var prog *gentee.Progress
+		for {
+			prog = <-chProgress
+			msg, err := ProgressToString(prog)
+			if err == nil {
+				mutex.Lock()
+				for id, client := range clients {
+					if sendProgress(client, msg) != nil {
+						client.Conn.Close()
+						delete(clients, id)
+					}
+				}
+				mutex.Unlock()
+			}
 		}
 	}()
 
@@ -340,9 +370,10 @@ func initTask() script.Settings {
 
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{
-		ChStdin:  chStdin,
-		ChStdout: chStdout,
-		ChSystem: chSystem,
+		ChStdin:        chStdin,
+		ChStdout:       chStdout,
+		ChSystem:       chSystem,
+		ProgressHandle: ProgressHandle,
 	}
 }
 
