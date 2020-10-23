@@ -68,7 +68,7 @@ const (
 	LOG_INHERIT
 
 	VarChar   = '#'
-	VarLength = 32
+	VarLength = 48
 	VarDeep   = 16
 
 	ErrVarLoop  = `%s variable refers to itself`
@@ -119,11 +119,15 @@ var (
 		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
 		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
+		{Prototype: `SetVar(str,obj)`, Object: SetVarObj},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
+		{Prototype: `append(obj,obj) obj`, Object: AppendObj},
+		{Prototype: `str(time) str`, Object: TimeToStr},
+		{Prototype: `obj(finfo) obj`, Object: FinfoToObj},
 	}
 )
 
@@ -422,23 +426,37 @@ func replace(values map[string]string, input []rune, stack *[]string,
 		return input, nil
 	}
 	var (
-		err        error
-		isName, ok bool
-		value      string
-		tmp        []rune
+		err               error
+		isName, ok, isobj bool
+		value             string
+		tmp               []rune
+		qstack            int
 	)
 	result := make([]rune, 0, len(input))
 	name := make([]rune, 0, VarLength+1)
-
+	clearName := func() {
+		name = name[:0]
+		isobj = false
+		qstack = 0
+	}
 	for i := 0; i < len(input); i++ {
 		r := input[i]
-		if r != VarChar {
+		if r != VarChar || qstack > 0 {
 			if isName {
 				name = append(name, r)
+				switch r {
+				case ']':
+					qstack--
+				case '[':
+					qstack++
+					fallthrough
+				case '.':
+					isobj = true
+				}
 				if len(name) > VarLength {
 					result = append(append(result, VarChar), name...)
 					isName = false
-					name = name[:0]
+					clearName()
 				}
 			} else {
 				result = append(result, r)
@@ -456,6 +474,9 @@ func replace(values map[string]string, input []rune, stack *[]string,
 				} else {
 					if values != nil {
 						value, ok = values[key]
+					}
+					if !ok && isobj {
+						value, ok = ReplaceObj(key)
 					}
 				}
 			}
@@ -479,7 +500,7 @@ func replace(values map[string]string, input []rune, stack *[]string,
 				result = append(append(result, VarChar), name...)
 				i--
 			}
-			name = name[:0]
+			clearName()
 		}
 		isName = !isName
 	}
