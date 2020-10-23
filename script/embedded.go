@@ -109,6 +109,7 @@ var (
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
+		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
@@ -245,6 +246,20 @@ func Deinit() {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	dataScript.Vars = dataScript.Vars[:len(dataScript.Vars)-1]
+}
+
+func FileLoad(rt *vm.Runtime, fname string) (ret string, err error) {
+	if ret, err = Macro(fname); err != nil {
+		return
+	}
+	isValue := len(ret) > 2 && ret[0] == '<' && ret[len(ret)-1] == '>'
+	if isValue {
+		if len(ret) > 256 || strings.Contains(ret, "\n") {
+			return
+		}
+		ret = ret[1 : len(ret)-1]
+	}
+	return vm.ReadFileºStr(rt, ret)
 }
 
 func GetVar(name string) (ret string, err error) {
