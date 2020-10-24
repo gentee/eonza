@@ -10,6 +10,7 @@ import (
 
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -52,7 +53,7 @@ func objAny(val interface{}) *core.Obj {
 }
 
 // dup
-func toTime(it *core.Struct) time.Time {
+func toTime(it *vm.Struct) time.Time {
 	utc := time.Local
 	if it.Values[6].(int64) == 1 {
 		utc = time.UTC
@@ -63,20 +64,20 @@ func toTime(it *core.Struct) time.Time {
 }
 
 // + str(time)
-func TimeToStr(it *core.Struct) string {
+func TimeToStr(it *vm.Struct) string {
 	return toTime(it).Format(`2006-01-02 15:04:05`)
 }
 
 // + obj(finfo)
-func FinfoToObj(finfo *core.Struct) *core.Obj {
+func FinfoToObj(finfo *vm.Struct) *core.Obj {
 	obj := core.NewObj()
 	val := core.NewMap()
-	val.SetIndex(`Name`, objAny(finfo.Values[0]))
-	val.SetIndex(`Size`, objAny(finfo.Values[1]))
-	val.SetIndex(`Mode`, objAny(finfo.Values[2]))
-	val.SetIndex(`Time`, TimeToStr(finfo.Values[3].(*core.Struct)))
-	val.SetIndex(`IsDir`, objAny(finfo.Values[4].(int64) != 0))
-	val.SetIndex(`Dir`, objAny(finfo.Values[5]))
+	val.SetIndex(`name`, objAny(finfo.Values[0]))
+	val.SetIndex(`size`, objAny(finfo.Values[1]))
+	val.SetIndex(`mode`, objAny(finfo.Values[2]))
+	val.SetIndex(`time`, objAny(TimeToStr(finfo.Values[3].(*vm.Struct))))
+	val.SetIndex(`isdir`, objAny(finfo.Values[4].(int64) != 0))
+	val.SetIndex(`dir`, objAny(finfo.Values[5]))
 	obj.Data = val
 	return obj
 }

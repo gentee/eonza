@@ -64,9 +64,21 @@ func (src *Source) FindStrConst(value string) string {
 	return fmt.Sprintf(`STR%d`, id)
 }
 
-func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string) (string, string) {
-	var isMacro bool
+func (src *Source) Value(value string) string {
+	var f string
+	if len(value) > 2 && value[0] == '<' && value[len(value)-1] == '>' {
+		f = `File`
+	} else if strings.ContainsRune(value, es.VarChar) {
+		f = `Macro`
+	}
+	value = src.FindStrConst(value)
+	if len(f) > 0 {
+		value = fmt.Sprintf("%s(%s)", f, value)
+	}
+	return value
+}
 
+func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string) (string, string) {
 	ptype := `str`
 	switch par.Type {
 	case es.PCheckbox:
@@ -78,11 +90,7 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 		}
 	case es.PTextarea, es.PSingleText:
 		if script.Settings.Name != SourceCode {
-			isMacro = strings.ContainsRune(value, es.VarChar)
-			value = src.FindStrConst(value)
-			if isMacro {
-				value = fmt.Sprintf("Macro(%s)", value)
-			}
+			value = src.Value(value)
 		}
 	case es.PSelect:
 		if len(par.Options.Type) > 0 {
@@ -142,11 +150,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 				}
 			case string:
 				if par.Type == es.PNumber || par.Type == es.PCheckbox {
-					isMacro := strings.ContainsRune(v, es.VarChar)
-					val = src.FindStrConst(v)
-					if isMacro {
-						val = fmt.Sprintf("Macro(%s)", val)
-					}
+					val = src.Value(v)
 					if par.Type == es.PNumber {
 						val = fmt.Sprintf(`int(%s)`, val)
 					} else if par.Type == es.PCheckbox {
