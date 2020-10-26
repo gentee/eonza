@@ -190,13 +190,12 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 		} else {
 			value = par.Options.Default
 		}
+		isEmpty := len(value) == 0
 		ptype, value = src.getTypeValue(script, par, value)
 		switch par.Type {
 		case es.PTextarea, es.PSingleText, es.PNumber:
-			if len(value) == 0 {
-				if par.Options.Required {
-					return nil, nil, errField(par.Title)
-				}
+			if isEmpty && par.Options.Required {
+				return nil, nil, errField(par.Title)
 			}
 		case es.PList:
 			if val != nil && reflect.TypeOf(val).Kind() == reflect.Slice &&

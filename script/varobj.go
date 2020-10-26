@@ -7,13 +7,8 @@ package script
 import (
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/gentee/gentee/core"
-)
-
-var (
-	mapObj sync.Map
 )
 
 func ReplaceObj(key string) (ret string, found bool) {
@@ -24,12 +19,14 @@ func ReplaceObj(key string) (ret string, found bool) {
 		v      interface{}
 		index  int
 	)
+	iMap := len(dataScript.ObjVars) - 1
+
 	input := []rune(key)
 	getObj := func(i int) bool {
 		var ok bool
 		name := string(input[off:i])
 		if obj == nil {
-			if v, ok = mapObj.Load(name); ok {
+			if v, ok = dataScript.ObjVars[iMap].Load(name); ok {
 				obj = v.(*core.Obj)
 			} else {
 				return false
@@ -90,6 +87,27 @@ func ReplaceObj(key string) (ret string, found bool) {
 	return
 }
 
-func SetVarObj(name string, value *core.Obj) {
-	mapObj.Store(name, value)
+func GetVarObj(name string) (*core.Obj, error) {
+	val, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(name)
+	if !ok {
+		return nil, fmt.Errorf(`object var %s doesn't exist`, name)
+	}
+	return val.(*core.Obj), nil
+}
+
+func setRawVarObj(shift int, name string, value *core.Obj) error {
+	off := len(dataScript.ObjVars) - 1 - shift
+	if off < 0 {
+		return fmt.Errorf(`set shift obj var %s error`, name)
+	}
+	dataScript.ObjVars[off].Store(name, value)
+	return nil
+}
+
+func ResultVarObj(name string, value *core.Obj) error {
+	return setRawVarObj(1, name, value)
+}
+
+func SetVarObj(name string, value *core.Obj) error {
+	return setRawVarObj(0, name, value)
 }

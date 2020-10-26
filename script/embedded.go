@@ -95,6 +95,7 @@ type FormInfo struct {
 type Data struct {
 	LogLevel int64
 	Vars     []map[string]string
+	ObjVars  []sync.Map
 	Mutex    sync.Mutex
 	chLogout chan string
 	chForm   chan FormInfo
@@ -115,6 +116,7 @@ var (
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `ResultVar(str,str)`, Object: ResultVar},
+		{Prototype: `ResultVar(str,obj)`, Object: ResultVarObj},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
@@ -124,6 +126,7 @@ var (
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
+		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		{Prototype: `append(obj,obj) obj`, Object: AppendObj},
@@ -246,6 +249,7 @@ func Deinit() {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	dataScript.Vars = dataScript.Vars[:len(dataScript.Vars)-1]
+	dataScript.ObjVars = dataScript.ObjVars[:len(dataScript.ObjVars)-1]
 }
 
 func FileLoad(rt *vm.Runtime, fname string) (ret string, err error) {
@@ -296,6 +300,7 @@ func Init(pars ...interface{}) {
 	for i := 0; i < len(pars); i += 2 {
 		dataScript.Vars[ind][pars[i].(string)] = fmt.Sprint(pars[i+1])
 	}
+	dataScript.ObjVars = append(dataScript.ObjVars, sync.Map{})
 }
 
 func InitCmd(name string, pars ...interface{}) bool {
