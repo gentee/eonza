@@ -88,6 +88,9 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 		} else if value == `1` {
 			value = `true`
 		}
+		if value != `false` && value != `true` {
+			value = src.Value(value) + `?`
+		}
 	case es.PTextarea, es.PSingleText:
 		if script.Settings.Name != SourceCode {
 			value = src.Value(value)
@@ -117,11 +120,28 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 			es.ReplaceVars(field, script.Langs[src.Header.Lang], &glob),
 			es.ReplaceVars(script.Settings.Title, script.Langs[src.Header.Lang], &glob))
 	}
-	var opt map[string]interface{}
+	var (
+		opt    map[string]interface{}
+		params map[string]interface{}
+	)
 	if optional, ok := node.Values[`_optional`]; ok {
 		if v, ok := optional.(string); ok {
 			if err := yaml.Unmarshal([]byte(v), &opt); err != nil {
 				return nil, nil, err
+			}
+		}
+	}
+	if adv, ok := node.Values[`_advanced`]; ok {
+		var advanced map[string]interface{}
+		if v, ok := adv.(string); ok {
+			if err := yaml.Unmarshal([]byte(v), &advanced); err != nil {
+				return nil, nil, err
+			}
+			retypeValues(advanced)
+		}
+		if v, ok := advanced[`params`]; ok {
+			if pars, ok := v.(map[string]interface{}); ok {
+				params = pars
 			}
 		}
 	}
@@ -160,6 +180,8 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 			default:
 				val = fmt.Sprintf(value)
 			}
+		} else if v, ok := params[par.Name]; ok {
+			val = v
 		} else {
 			val = node.Values[par.Name]
 		}
