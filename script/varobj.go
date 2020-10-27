@@ -11,6 +11,16 @@ import (
 	"github.com/gentee/gentee/core"
 )
 
+func ObjToStr(key string) (string, bool) {
+	if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
+		switch Type(v.(*core.Obj)) {
+		case `int`, `float`, `str`, `bool`:
+			return fmt.Sprint(v.(*core.Obj).Data), true
+		}
+	}
+	return ``, false
+}
+
 func ReplaceObj(key string) (ret string, found bool) {
 	var (
 		obj    *core.Obj

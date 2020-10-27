@@ -46,6 +46,26 @@ func AppendObj(obj *core.Obj, value *core.Obj) (*core.Obj, error) {
 }
 
 // dup
+func Type(val *core.Obj) string {
+	if val.Data == nil {
+		return `nil`
+	}
+	switch val.Data.(type) {
+	case bool:
+		return `bool`
+	case int64:
+		return `int`
+	case float64:
+		return `float`
+	case *core.Array:
+		return `arr.obj`
+	case *core.Map:
+		return `map.obj`
+	}
+	return `str`
+}
+
+// dup
 func objAny(val interface{}) *core.Obj {
 	obj := core.NewObj()
 	obj.Data = val
@@ -66,6 +86,46 @@ func toTime(it *vm.Struct) time.Time {
 // + str(time)
 func TimeToStr(it *vm.Struct) string {
 	return toTime(it).Format(`2006-01-02 15:04:05`)
+}
+
+// + arr(obj)
+func ArrayObj(obj *core.Obj) (*core.Array, error) {
+	if obj.Data == nil {
+		return nil, fmt.Errorf("object is undefined")
+	}
+	ret, ok := obj.Data.(*core.Array)
+	if !ok {
+		return nil, fmt.Errorf("object is not array")
+	}
+	return ret, nil
+}
+
+// + map(obj)
+func MapObj(obj *core.Obj) (*core.Map, error) {
+	if obj.Data == nil {
+		return nil, fmt.Errorf("object is undefined")
+	}
+	ret, ok := obj.Data.(*core.Map)
+	if !ok {
+		return nil, fmt.Errorf("object is not map")
+	}
+	return ret, nil
+}
+
+// + IsArray(obj)
+func IsArrayObj(obj *core.Obj) int64 {
+	if Type(obj) == `arr.obj` {
+		return 1
+	}
+	return 0
+}
+
+// + IsMap(obj)
+func IsMapObj(obj *core.Obj) int64 {
+	if Type(obj) == `map.obj` {
+		return 1
+	}
+	return 0
 }
 
 // + obj(finfo)

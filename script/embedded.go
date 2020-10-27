@@ -132,6 +132,10 @@ var (
 		{Prototype: `append(obj,obj) obj`, Object: AppendObj},
 		{Prototype: `str(time) str`, Object: TimeToStr},
 		{Prototype: `obj(finfo) obj`, Object: FinfoToObj},
+		{Prototype: `arr(obj) arr.obj`, Object: ArrayObj},
+		{Prototype: `map(obj) map.obj`, Object: MapObj},
+		{Prototype: `IsMap(obj) bool`, Object: IsMapObj},
+		{Prototype: `IsArray(obj) bool`, Object: IsArrayObj},
 	}
 )
 
@@ -495,8 +499,12 @@ func replace(values map[string]string, input []rune, stack *[]string,
 					if values != nil {
 						value, ok = values[key]
 					}
-					if !ok && isobj {
-						value, ok = ReplaceObj(key)
+					if !ok {
+						if isobj {
+							value, ok = ReplaceObj(key)
+						} else {
+							value, ok = ObjToStr(key)
+						}
 					}
 				}
 			}
