@@ -66,7 +66,8 @@ func (src *Source) FindStrConst(value string) string {
 
 func (src *Source) Value(value string) string {
 	var f string
-	if len(value) > 2 && value[0] == '<' && value[len(value)-1] == '>' {
+	if len(value) > 2 && value[0] == '<' && value[len(value)-1] == '>' &&
+		!strings.Contains(value[1:], `<`) {
 		f = `File`
 	} else if strings.ContainsRune(value, es.VarChar) {
 		f = `Macro`
