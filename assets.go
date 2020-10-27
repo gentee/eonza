@@ -564,6 +564,24 @@ CxuQSNkJGQ8FRExp6EKfkmCXWe2olTZr5c4Nj5sPwTQdA+Op4v5RzeyX7cA5lFINqD4icj0rtqy6c0jG
 `,
 	},
 
+	"/eonza-assets/scripts/foreach.yaml": {
+		name:    "foreach.yaml",
+		local:   "../eonza-assets/scripts/foreach.yaml",
+		size:    1034,
+		modtime: 1603776814,
+		compressed: `
+H4sIAAAAAAAC/6SSz27TTBTF9/MUR62iOlK+qh8LFpYqxIYKIcQCxLaaJDexI3vGXI8rIohUZckfsWHP
+K6SCsGghz3D9RmjGTuSmXUEW0cyZO79z7h2X5FxqpmWsAKNzijGxTHqUKMClLqMYR4fn/uTwSAFjKkdB
+8YugZHaa0QVlMR4qoDJcmRiOK1JAQlnRBfp9ps00Bleq0KzzMlb/tb4Xmv2i63vcasHIzQuK8UABtnCp
+NSEywPSmSpnGrWmHljrK92le+0uaGdPbOzgv3uL59gKLTEM8b0Z2ZuESttU0gUsIdjijkQNllJNxZVPZ
+eD3ZjYurWwj5Juv6UtZyVV/Kql7Wn1B/lhtZyy9Zy+96WX+EbOSq/iBrua6Xsupi5avc1F8g17KSn/JD
+NvJdNmpkxxTjvR/DcIbU/53ijNxrzS+Gs6idfz+880hnGNrxHO8CF+j5XU8BCwWkEzwtn+si8pD+ribX
+xXFA57rAqd82Be3xxDL8mwwQRonUNJXb6/6XTnbzf4QYeBniRVttgGc0j/ytFtLvdy53ihsbR3n33LcQ
+bQXfxwKUhV4eM+v5Xjf3xNXMe0X3ZL4TuQn6bzlBWUlbV2K2HP1/cjLAwauE0Cu331hawlgHHaLqOSxD
++3c4GKDzvAv1JwAA//9ySY3ZCgQAAA==
+`,
+	},
+
 	"/eonza-assets/scripts/form.yaml": {
 		name:    "form.yaml",
 		local:   "../eonza-assets/scripts/form.yaml",
@@ -10232,6 +10250,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/fileinfo.yaml"],
 		_escData["/eonza-assets/scripts/for.eonza.yaml"],
 		_escData["/eonza-assets/scripts/foreach-file.yaml"],
+		_escData["/eonza-assets/scripts/foreach.yaml"],
 		_escData["/eonza-assets/scripts/form.yaml"],
 		_escData["/eonza-assets/scripts/get-webpage.yaml"],
 		_escData["/eonza-assets/scripts/httprequest.yaml"],
