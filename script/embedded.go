@@ -538,12 +538,16 @@ func replace(values map[string]string, input []rune, stack *[]string,
 	return result, nil
 }
 
-func Macro(in string) (string, error) {
-	dataScript.Mutex.Lock()
-	defer dataScript.Mutex.Unlock()
+func macro(in string) (string, error) {
 	stack := make([]string, 0)
 	out, err := replace(dataScript.Vars[len(dataScript.Vars)-1], []rune(in), &stack, dataScript.Global)
 	return string(out), err
+}
+
+func Macro(in string) (string, error) {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	return macro(in)
 }
 
 func SetLogLevel(level int64) int64 {

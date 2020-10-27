@@ -61,7 +61,7 @@ func ReplaceObj(key string) (ret string, found bool) {
 		case ']':
 			index--
 			if index == 0 {
-				if ind, err := Macro(string(input[off:i])); err != nil {
+				if ind, err := macro(string(input[off:i])); err != nil {
 					return
 				} else {
 					switch obj.Data.(type) {
@@ -69,6 +69,7 @@ func ReplaceObj(key string) (ret string, found bool) {
 						if obj, _ = ItemºObjStr(obj, ind); obj == nil {
 							return
 						}
+						off = i + 1
 					case *core.Array:
 						if aindex, err = strconv.ParseInt(ind, 10, 64); err != nil {
 							return
@@ -76,6 +77,7 @@ func ReplaceObj(key string) (ret string, found bool) {
 						if obj, _ = ItemºObjInt(obj, aindex); obj == nil {
 							return
 						}
+						off = i + 1
 					default:
 						return
 					}
