@@ -30,19 +30,20 @@ func ReplaceObj(key string) (ret string, found bool) {
 		index  int
 	)
 	iMap := len(dataScript.ObjVars) - 1
-
 	input := []rune(key)
 	getObj := func(i int) bool {
 		var ok bool
 		name := string(input[off:i])
-		if obj == nil {
-			if v, ok = dataScript.ObjVars[iMap].Load(name); ok {
-				obj = v.(*core.Obj)
-			} else {
+		if len(name) > 0 {
+			if obj == nil {
+				if v, ok = dataScript.ObjVars[iMap].Load(name); ok {
+					obj = v.(*core.Obj)
+				} else {
+					return false
+				}
+			} else if obj, _ = ItemºObjStr(obj, name); obj == nil {
 				return false
 			}
-		} else if obj, _ = ItemºObjStr(obj, name); obj == nil {
-			return false
 		}
 		off = i + 1
 		return true
