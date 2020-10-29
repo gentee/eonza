@@ -257,7 +257,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		if IsScript {
 			e.Logger.SetOutput(ioutil.Discard)
 		}
-		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil {
+		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil && !isShutdown {
 			if IsScript {
 				setStatus(TaskFailed, err)
 			}

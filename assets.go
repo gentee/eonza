@@ -738,15 +738,15 @@ AAA=
 	"/eonza-assets/scripts/parse-json.yaml": {
 		name:    "parse-json.yaml",
 		local:   "../eonza-assets/scripts/parse-json.yaml",
-		size:    499,
-		modtime: 1603892726,
+		size:    560,
+		modtime: 1603965786,
 		compressed: `
-H4sIAAAAAAAC/4SQv05yQRDF+32Kk1AAyceXaGGxj0AhJhhbssAEL1l2r/vnJnZEWmNr6yOghmAh+gqz
-b2TuXiRQ2e2emfmdmeMphMLMvBSAUQuSKJXz1Jt7awQQiqBJot0a1cVWWwBT8pOs1I+saDvTVJGWuBDA
-LelSwpZk9h+tzEzCRQFE46KRCC6SKJVTCy9Fb+9bKR3p2PJ/VrJDuC9J4kwAtgyFNXldwNFdLBxN98Rf
-kiMfdaiUO6Ed1CPi+R/EevVcIdPUR831V3VGqDNCsFColCvUWFPT02zR9PSHg0sBuHgyz8+85ve0TCve
-8kd6SI8NjN/A37xJS97wJ294x7u0Sk/HWH7hNW/5i1/Tktd5NHtM7JQkhhRulOscbv2Hvrfm2g7G806O
-s9sVPwEAAP//vahv7fMBAAA=
+H4sIAAAAAAAC/4SRvYrbQBSF+3mKAy5sQxxIihRTp3IRBxzSmrF1cWTGM8r8CNKZuExImzaPoPwIp1jv
+vsKdN1o0so0NC9tJ91x95+PKUwilWXspAKO2JFEp52my8dYIIJRBk8RwsOjCwVAABflVnnQPeaLtWlNN
+WuKNAD6RriRsReb0opVZS7gogGhcNBLBRRKVcmrrpZicemulI91Udg6FCiqXhC8VSbwSgK1CaU02Bhx9
+jqWj4gQ9wxz5qEOt3DXw5WV6RXz9DLGzzwmZPl/0B3jfnQmdIoKFQq1cqZaa+p2zusR0PnuHtyqoPuj1
++o+7SAAu3oD5Jzf8N+3Sng/8P31N3/sW/gN+4DbtuOU7bvnIx7RPP57s43/c5IVv3F738i9u+MD3/Dvt
+uMnsLLGyBUnMKXxUbnS50gtMvTUf7Gy5GeW/Mx6LxwAAAP//kGP9XzACAAA=
 `,
 	},
 
