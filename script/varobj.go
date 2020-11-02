@@ -9,11 +9,12 @@ import (
 	"strconv"
 
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 )
 
 func ObjToStr(key string) (string, bool) {
 	if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
-		switch Type(v.(*core.Obj)) {
+		switch vm.Type(v.(*core.Obj)) {
 		case `int`, `float`, `str`, `bool`:
 			return fmt.Sprint(v.(*core.Obj).Data), true
 		}
@@ -41,7 +42,7 @@ func ReplaceObj(key string) (ret string, found bool) {
 				} else {
 					return false
 				}
-			} else if obj, _ = ItemºObjStr(obj, name); obj == nil {
+			} else if obj, _ = vm.ItemºObjStr(obj, name); obj == nil {
 				return false
 			}
 		}
@@ -67,7 +68,7 @@ func ReplaceObj(key string) (ret string, found bool) {
 				} else {
 					switch obj.Data.(type) {
 					case *core.Map:
-						if obj, _ = ItemºObjStr(obj, ind); obj == nil {
+						if obj, _ = vm.ItemºObjStr(obj, ind); obj == nil {
 							return
 						}
 						off = i + 1
@@ -75,7 +76,7 @@ func ReplaceObj(key string) (ret string, found bool) {
 						if aindex, err = strconv.ParseInt(ind, 10, 64); err != nil {
 							return
 						}
-						if obj, _ = ItemºObjInt(obj, aindex); obj == nil {
+						if obj, _ = vm.ItemºObjInt(obj, aindex); obj == nil {
 							return
 						}
 						off = i + 1

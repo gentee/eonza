@@ -129,13 +129,6 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
-		{Prototype: `append(obj,obj) obj`, Object: AppendObj},
-		{Prototype: `str(time) str`, Object: TimeToStr},
-		{Prototype: `obj(finfo) obj`, Object: FinfoToObj},
-		{Prototype: `arr(obj) arr.obj`, Object: ArrayObj},
-		{Prototype: `map(obj) map.obj`, Object: MapObj},
-		{Prototype: `IsMap(obj) bool`, Object: IsMapObj},
-		{Prototype: `IsArray(obj) bool`, Object: IsArrayObj},
 	}
 )
 
