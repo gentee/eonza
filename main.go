@@ -23,6 +23,7 @@ var (
 	stopchan    = make(chan os.Signal)
 	scriptTask  *script.Script
 	consoleData []byte
+	isShutdown  bool
 )
 
 func main() {
@@ -116,5 +117,6 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
 	defer cancel()
+	isShutdown = true
 	e.Shutdown(ctx)
 }

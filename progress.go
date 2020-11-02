@@ -31,6 +31,9 @@ type ProgressInfo struct {
 }
 
 func ProgressHandle(prog *gentee.Progress) bool {
+	if scriptTask.Header.Console {
+		return true
+	}
 	switch prog.Status {
 	case 0:
 		now := time.Now()
