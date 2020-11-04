@@ -68,7 +68,7 @@ const (
 	LOG_INHERIT
 
 	VarChar   = '#'
-	VarLength = 32
+	VarLength = 48
 	VarDeep   = 16
 
 	ErrVarLoop  = `%s variable refers to itself`
@@ -95,6 +95,7 @@ type FormInfo struct {
 type Data struct {
 	LogLevel int64
 	Vars     []map[string]string
+	ObjVars  []sync.Map
 	Mutex    sync.Mutex
 	chLogout chan string
 	chForm   chan FormInfo
@@ -109,19 +110,23 @@ var (
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
+		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `ResultVar(str,str)`, Object: ResultVar},
+		{Prototype: `ResultVar(str,obj)`, Object: ResultVarObj},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
 		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
+		{Prototype: `SetVar(str,obj)`, Object: SetVarObj},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
+		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 	}
@@ -241,6 +246,21 @@ func Deinit() {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	dataScript.Vars = dataScript.Vars[:len(dataScript.Vars)-1]
+	dataScript.ObjVars = dataScript.ObjVars[:len(dataScript.ObjVars)-1]
+}
+
+func FileLoad(rt *vm.Runtime, fname string) (ret string, err error) {
+	if ret, err = Macro(fname); err != nil {
+		return
+	}
+	isValue := len(ret) > 2 && ret[0] == '<' && ret[len(ret)-1] == '>'
+	if isValue {
+		if len(ret) > 256 || strings.Contains(ret, "\n") {
+			return
+		}
+		ret = ret[1 : len(ret)-1]
+	}
+	return vm.ReadFileºStr(rt, ret)
 }
 
 func GetVar(name string) (ret string, err error) {
@@ -277,6 +297,7 @@ func Init(pars ...interface{}) {
 	for i := 0; i < len(pars); i += 2 {
 		dataScript.Vars[ind][pars[i].(string)] = fmt.Sprint(pars[i+1])
 	}
+	dataScript.ObjVars = append(dataScript.ObjVars, sync.Map{})
 }
 
 func InitCmd(name string, pars ...interface{}) bool {
@@ -422,23 +443,37 @@ func replace(values map[string]string, input []rune, stack *[]string,
 		return input, nil
 	}
 	var (
-		err        error
-		isName, ok bool
-		value      string
-		tmp        []rune
+		err               error
+		isName, ok, isobj bool
+		value             string
+		tmp               []rune
+		qstack            int
 	)
 	result := make([]rune, 0, len(input))
 	name := make([]rune, 0, VarLength+1)
-
+	clearName := func() {
+		name = name[:0]
+		isobj = false
+		qstack = 0
+	}
 	for i := 0; i < len(input); i++ {
 		r := input[i]
-		if r != VarChar {
+		if r != VarChar || qstack > 0 {
 			if isName {
 				name = append(name, r)
+				switch r {
+				case ']':
+					qstack--
+				case '[':
+					qstack++
+					fallthrough
+				case '.':
+					isobj = true
+				}
 				if len(name) > VarLength {
 					result = append(append(result, VarChar), name...)
 					isName = false
-					name = name[:0]
+					clearName()
 				}
 			} else {
 				result = append(result, r)
@@ -456,6 +491,13 @@ func replace(values map[string]string, input []rune, stack *[]string,
 				} else {
 					if values != nil {
 						value, ok = values[key]
+					}
+					if !ok {
+						if isobj {
+							value, ok = ReplaceObj(key)
+						} else {
+							value, ok = ObjToStr(key)
+						}
 					}
 				}
 			}
@@ -479,7 +521,7 @@ func replace(values map[string]string, input []rune, stack *[]string,
 				result = append(append(result, VarChar), name...)
 				i--
 			}
-			name = name[:0]
+			clearName()
 		}
 		isName = !isName
 	}
@@ -489,12 +531,16 @@ func replace(values map[string]string, input []rune, stack *[]string,
 	return result, nil
 }
 
-func Macro(in string) (string, error) {
-	dataScript.Mutex.Lock()
-	defer dataScript.Mutex.Unlock()
+func macro(in string) (string, error) {
 	stack := make([]string, 0)
 	out, err := replace(dataScript.Vars[len(dataScript.Vars)-1], []rune(in), &stack, dataScript.Global)
 	return string(out), err
+}
+
+func Macro(in string) (string, error) {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	return macro(in)
 }
 
 func SetLogLevel(level int64) int64 {

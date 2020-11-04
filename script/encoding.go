@@ -85,7 +85,7 @@ func Decode(scriptData []byte) (script *Script, err error) {
 }
 
 func ReplaceVars(input string, values map[string]string, glob *map[string]string) string {
-	if len(values) == 0 {
+	if len(values) == 0 && len(*glob) == 0 {
 		return input
 	}
 	stack := make([]string, 0)

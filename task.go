@@ -367,6 +367,10 @@ func initTask() script.Settings {
 	(*glob)[`os`] = runtime.GOOS
 	(*glob)[`isconsole`] = fmt.Sprint(scriptTask.Header.Console)
 	(*glob)[`port`] = fmt.Sprint(scriptTask.Header.HTTP.Port)
+	(*glob)[`n`] = "\n"
+	(*glob)[`r`] = "\r"
+	(*glob)[`t`] = "\t"
+	(*glob)[`s`] = " "
 
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{
