@@ -13,10 +13,12 @@ import (
 )
 
 func ObjToStr(key string) (string, bool) {
-	if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
-		switch vm.Type(v.(*core.Obj)) {
-		case `int`, `float`, `str`, `bool`:
-			return fmt.Sprint(v.(*core.Obj).Data), true
+	if len(dataScript.ObjVars) > 0 {
+		if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
+			switch vm.Type(v.(*core.Obj)) {
+			case `int`, `float`, `str`, `bool`:
+				return fmt.Sprint(v.(*core.Obj).Data), true
+			}
 		}
 	}
 	return ``, false

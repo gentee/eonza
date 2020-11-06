@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"hash/crc64"
 	"reflect"
+	"strconv"
 	"strings"
 
 	es "eonza/script"
@@ -195,7 +196,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 		ptype, value = src.getTypeValue(script, par, value)
 		switch par.Type {
 		case es.PTextarea, es.PSingleText, es.PNumber:
-			if isEmpty && par.Options.Required {
+			if isEmpty && par.Options.Required && len(node.Name) != 0 {
 				return nil, nil, errField(par.Title)
 			}
 		case es.PList:
@@ -441,7 +442,56 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		level = script.Settings.LogLevel
 	}
 	params += fmt.Sprintf("SetLogLevel(%d)\r\ninit()\r\n", level)
-	code := strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
+
+	var (
+		code     string
+		parForm  []string
+		jsonForm []es.FormParam
+	)
+
+	// Define form for parameters
+	for i, par := range script.Params {
+		var (
+			pval, setvar string
+		)
+		pval = par.Options.Initial
+		if len(pval) == 0 {
+			pval = par.Options.Default
+		}
+
+		switch par.Type {
+		case es.PList:
+			parForm = append(parForm, fmt.Sprintf(`arr.obj %s%d`, par.Name, i))
+			setvar = fmt.Sprintf(`SetVar("%s", obj(%[1]s%d))`, par.Name, i)
+		default:
+			setvar = fmt.Sprintf(`SetVar("%s", %s)`, par.Name, src.Value(pval))
+		}
+		if par.Type != es.PList {
+			parOpt, err := json.Marshal(par.Options)
+			if err != nil {
+				return ``, err
+			}
+			jsonForm = append(jsonForm, es.FormParam{
+				Var:     par.Name,
+				Text:    es.ReplaceVars(par.Title, script.Langs[src.Header.Lang], &langRes[langsId[src.Header.Lang]]),
+				Type:    strconv.FormatInt(int64(par.Type), 10),
+				Options: string(parOpt),
+			})
+		}
+		parForm = append(parForm, setvar)
+	}
+	if len(parForm) > 0 {
+		code = strings.Join(parForm, "\n")
+		if len(jsonForm) > 0 {
+			outForm, err := json.Marshal(jsonForm)
+			if err != nil {
+				return ``, err
+			}
+			code += fmt.Sprintf("\nform( %s )", src.Value(string(outForm)))
+		}
+		code += "\n"
+	}
+	code += strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
 	if len(code) > 0 {
 		code += "\r\n"
 	}

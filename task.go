@@ -520,6 +520,9 @@ func formHandle(c echo.Context) error {
 		}
 		for _, item := range formParams {
 			var options es.ScriptOptions
+			if len(item.Options) == 0 {
+				continue
+			}
 			ptype, _ := strconv.ParseInt(item.Type, 10, 62)
 			switch es.ParamType(ptype) {
 			case es.PNumber, es.PSingleText, es.PTextarea:
