@@ -419,33 +419,21 @@ func ValToStr(input string) string {
 }
 
 func GenSource(script *Script, header *es.Header) (string, error) {
-	var params string
+	var params []string
 	src := &Source{
 		Linked:      make(map[string]bool),
 		CRCTable:    crc64.MakeTable(crc64.ISO),
 		HashStrings: make(map[uint64]int),
 		Header:      header,
 	}
-	values, optvalues, err := src.ScriptValues(script, scriptTree{})
-	if err != nil {
-		return ``, err
-	}
-	for _, par := range append(values, optvalues...) {
-		val := par.Value
-		if par.Type == `str` {
-			val = ValToStr(val)
-		}
-		params += fmt.Sprintf("%s %s = %s\r\n", par.Type, par.Name, val)
-	}
 	level := storage.Settings.LogLevel
 	if script.Settings.LogLevel < es.LOG_INHERIT {
 		level = script.Settings.LogLevel
 	}
-	params += fmt.Sprintf("SetLogLevel(%d)\r\ninit()\r\n", level)
+	params = append(params, fmt.Sprintf("SetLogLevel(%d)\r\ninit()", level))
 
 	var (
 		code     string
-		parForm  []string
 		jsonForm []es.FormParam
 	)
 
@@ -461,12 +449,12 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 
 		switch par.Type {
 		case es.PList:
-			parForm = append(parForm, fmt.Sprintf(`arr.obj %s%d`, par.Name, i))
+			params = append(params, fmt.Sprintf(`arr.obj %s%d`, par.Name, i))
 			setvar = fmt.Sprintf(`SetVar("%s", obj(%[1]s%d))`, par.Name, i)
 		default:
 			setvar = fmt.Sprintf(`SetVar("%s", %s)`, par.Name, src.Value(pval))
 		}
-		if par.Type != es.PList {
+		if par.Type != es.PList && !par.Options.Optional {
 			parOpt, err := json.Marshal(par.Options)
 			if err != nil {
 				return ``, err
@@ -478,23 +466,41 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 				Options: string(parOpt),
 			})
 		}
-		parForm = append(parForm, setvar)
+		params = append(params, setvar)
 	}
-	if len(parForm) > 0 {
-		code = strings.Join(parForm, "\n")
-		if len(jsonForm) > 0 {
-			outForm, err := json.Marshal(jsonForm)
-			if err != nil {
-				return ``, err
-			}
-			code += fmt.Sprintf("\nform( %s )", src.Value(string(outForm)))
+	if len(jsonForm) > 0 {
+		outForm, err := json.Marshal(jsonForm)
+		if err != nil {
+			return ``, err
 		}
-		code += "\n"
+		params = append(params, fmt.Sprintf("form( %s )", src.Value(string(outForm))))
 	}
-	code += strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``))
-	if len(code) > 0 {
-		code += "\r\n"
+	for _, par := range script.Params {
+		var ptype string
+		switch par.Type {
+		case es.PCheckbox:
+			ptype = `bool`
+		case es.PSelect:
+			if len(par.Options.Type) > 0 {
+				ptype = par.Options.Type
+			}
+		case es.PNumber:
+			ptype = `int`
+		case es.PList:
+			ptype = `obj`
+		}
+		switch ptype {
+		case `bool`:
+			params = append(params, fmt.Sprintf(`bool %s = GetVarBool("%[1]s")`, par.Name))
+		case `int`:
+			params = append(params, fmt.Sprintf(`int %s = GetVarInt("%[1]s")`, par.Name))
+		case `obj`:
+			params = append(params, fmt.Sprintf(`obj %s = GetVarObj("%[1]s")`, par.Name))
+		default:
+			params = append(params, fmt.Sprintf(`str %s = GetVar("%[1]s")`, par.Name))
+		}
 	}
+	code = strings.Join(params, "\r\n")
 	if predef, err := src.Predefined(script); err != nil {
 		return ``, err
 	} else {
@@ -503,6 +509,11 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	body, err := src.Tree(script.Tree)
 	if err != nil {
 		return ``, err
+	}
+	if strings.Contains(script.Code, `%body%`) {
+		body = strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, body))
+	} else {
+		body = script.Code + "\r\n" + body
 	}
 	var constStr string
 	if len(src.Strings) > 0 {
@@ -515,6 +526,6 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	constStr += `const IOTA { LOG_DISABLE
 	LOG_ERROR LOG_WARN LOG_FORM LOG_INFO LOG_DEBUG }
 `
-	return fmt.Sprintf("%s%s\r\nrun {\r\n%s%s%s\r\ndeinit()}", constStr, src.Funcs, params,
+	return fmt.Sprintf("%s%s\r\nrun {\r\n%s\r\n%s\r\ndeinit()}", constStr, src.Funcs,
 		code, body), nil
 }
