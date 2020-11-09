@@ -45,6 +45,14 @@ type ScriptParam struct {
 	Options ScriptOptions `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
+type FormParam struct {
+	Var     string `json:"var,omitempty"`
+	Text    string `json:"text,omitempty"`
+	Value   string `json:"value,omitempty"`
+	Type    string `json:"type"`
+	Options string `json:"options,omitempty"`
+}
+
 type ScriptOptions struct {
 	Initial  string        `json:"initial,omitempty" yaml:"initial,omitempty"`
 	Default  string        `json:"default,omitempty" yaml:"default,omitempty"`
@@ -129,6 +137,7 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
+		{Prototype: `FindFirstRegExp(str,str) arr.str`, Object: FindFirstRegExpºStrStr},
 	}
 )
 
