@@ -439,7 +439,7 @@ OsSz7mOnpz+Uf4XkdUEWDySPGc/Gt7nqCy8CLx3P5nPzHQAA//+AZ2Fh0wEAAA==
 		name:    "delete-dir.yaml",
 		local:   "../eonza-assets/scripts/delete-dir.yaml",
 		size:    481,
-		modtime: 1604989167,
+		modtime: 1604989370,
 		compressed: `
 H4sIAAAAAAAC/4yQPU4DMRCFe5/iSSkCRSgQleucgAtESzwklhzv4p+gdCGiRHAILpAiSAtB4QrjGyF7
 N1JAFEgurPfmzfs0nkLQdualAGy1IAlFhgKNlHYCCDoYkhgOJtkcDAWgyE+Lkj9FmZNpfuWyZCo7k3BR
