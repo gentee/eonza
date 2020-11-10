@@ -473,7 +473,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		if err != nil {
 			return ``, err
 		}
-		params = append(params, fmt.Sprintf("form( %s )", src.Value(string(outForm))))
+		params = append(params, fmt.Sprintf("initcmd(`form`, %s)\r\nForm( %[1]s )", src.Value(string(outForm))))
 	}
 	for _, par := range script.Params {
 		var ptype string
