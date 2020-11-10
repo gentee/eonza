@@ -432,6 +432,11 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	}
 	params = append(params, fmt.Sprintf("SetLogLevel(%d)\r\ninit()", level))
 
+	if predef, err := src.Predefined(script); err != nil {
+		return ``, err
+	} else if len(strings.TrimSpace(predef)) > 0 {
+		params = append(params, strings.TrimSpace(predef))
+	}
 	var (
 		code     string
 		jsonForm []es.FormParam
@@ -501,11 +506,6 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		}
 	}
 	code = strings.Join(params, "\r\n")
-	if predef, err := src.Predefined(script); err != nil {
-		return ``, err
-	} else {
-		code = predef + code
-	}
 	body, err := src.Tree(script.Tree)
 	if err != nil {
 		return ``, err
