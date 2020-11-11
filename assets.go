@@ -687,7 +687,7 @@ dXfvt7uH3SP4Z/Bv/t2/tMZ8S49kS5NhzKgjfsQL8Sv+7U/2GQAA///5Sxx5ugIAAA==
 		name:    "message.yaml",
 		local:   "../eonza-assets/scripts/message.yaml",
 		size:    4300,
-		modtime: 1604999993,
+		modtime: 1605007803,
 		compressed: `
 H4sIAAAAAAAC/9xX3U4cNxS+36c48ihit90lELo0ncBKLWkqRYoqNVVvGATe2bOLkxkbbM8ApUhN7qr2
 Faqqb0AroSLU0FfwvlFlz8/OzIIgKBcoXCD72N93POf77LUVas34RPktAE5j9CFGpegEWwCa6Qh9WPC2
