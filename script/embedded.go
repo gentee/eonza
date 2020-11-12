@@ -120,6 +120,7 @@ var (
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
 		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
+		{Prototype: `IsObjVar(str) bool`, Object: IsVarObj},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
@@ -137,7 +138,6 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
-		{Prototype: `FindFirstRegExp(str,str) arr.str`, Object: FindFirstRegExpºStrStr},
 	}
 )
 
