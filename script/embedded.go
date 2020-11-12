@@ -120,7 +120,7 @@ var (
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
 		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
-		{Prototype: `IsObjVar(str) bool`, Object: IsVarObj},
+		{Prototype: `IsVarObj(str) bool`, Object: IsVarObj},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
 		{Prototype: `Macro(str) str`, Object: Macro},
@@ -273,7 +273,7 @@ func FileLoad(rt *vm.Runtime, fname string) (ret string, err error) {
 }
 
 func GetVar(name string) (ret string, err error) {
-	if IsVar(name) {
+	if IsVar(name) != 0 {
 		id := len(dataScript.Vars) - 1
 		ret, err = Macro(dataScript.Vars[id][name])
 	}
@@ -330,11 +330,14 @@ func InitCmd(name string, pars ...interface{}) bool {
 	return true
 }
 
-func IsVar(key string) bool {
+func IsVar(key string) int64 {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
 	_, ret := dataScript.Vars[len(dataScript.Vars)-1][key]
-	return ret
+	if ret {
+		return 1
+	}
+	return 0
 }
 
 func loadForm(data string, form *[]map[string]interface{}) error {
