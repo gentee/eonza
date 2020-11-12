@@ -13,10 +13,12 @@ import (
 )
 
 func ObjToStr(key string) (string, bool) {
-	if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
-		switch vm.Type(v.(*core.Obj)) {
-		case `int`, `float`, `str`, `bool`:
-			return fmt.Sprint(v.(*core.Obj).Data), true
+	if len(dataScript.ObjVars) > 0 {
+		if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
+			switch vm.Type(v.(*core.Obj)) {
+			case `int`, `float`, `str`, `bool`:
+				return fmt.Sprint(v.(*core.Obj).Data), true
+			}
 		}
 	}
 	return ``, false
@@ -107,6 +109,14 @@ func GetVarObj(name string) (*core.Obj, error) {
 		return nil, fmt.Errorf(`object var %s doesn't exist`, name)
 	}
 	return val.(*core.Obj), nil
+}
+
+func IsVarObj(name string) int64 {
+	_, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(name)
+	if ok {
+		return 1
+	}
+	return 0
 }
 
 func setRawVarObj(shift int, name string, value *core.Obj) error {

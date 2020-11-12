@@ -119,7 +119,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		data = renderScript
 	} else {
 		render.App = appInfo
-		render.Version = Version
+		render.Version = GetVersion()
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground
 		render.Lang = GetLangCode(c.(*Auth).User)

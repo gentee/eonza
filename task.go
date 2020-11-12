@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"eonza/lib"
 	"eonza/script"
+	es "eonza/script"
 	"fmt"
 	"net/http"
 	"os"
@@ -513,6 +514,26 @@ func formHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if len(formData) > 0 && formData[0].ID == form.FormID {
+		var formParams []es.FormParam
+		if err = json.Unmarshal([]byte(formData[0].Data), &formParams); err != nil {
+			return jsonError(c, err)
+		}
+		for _, item := range formParams {
+			var options es.ScriptOptions
+			if len(item.Options) == 0 {
+				continue
+			}
+			ptype, _ := strconv.ParseInt(item.Type, 10, 62)
+			switch es.ParamType(ptype) {
+			case es.PNumber, es.PSingleText, es.PTextarea:
+				if err = json.Unmarshal([]byte(item.Options), &options); err != nil {
+					return jsonError(c, err)
+				}
+				if options.Required && len(fmt.Sprint(form.Values[item.Var])) == 0 {
+					return jsonError(c, fmt.Errorf(Lang(GetLangId(nil), "errreq", item.Text)))
+				}
+			}
+		}
 		for key, val := range form.Values {
 			script.SetVar(key, fmt.Sprint(val))
 		}

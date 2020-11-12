@@ -60,7 +60,7 @@ const (
 
 var (
 	cfg = Config{
-		Version: Version,
+		Version: GetVersion(),
 		Mode:    ModeDefault,
 		Log: LogConfig{
 			Mode:  logModeFile,
