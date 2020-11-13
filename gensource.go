@@ -90,7 +90,8 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 		} else if value == `1` {
 			value = `true`
 		}
-		if value != `false` && value != `true` {
+		if value != `false` && value != `true` &&
+			!(strings.HasPrefix(value, `bool(`) && strings.HasSuffix(value, `)`)) {
 			value = src.Value(value) + `?`
 		}
 	case es.PTextarea, es.PSingleText:
