@@ -381,26 +381,55 @@ uIlb6JPu4zpLox7jWvdx+42i9/E6jvqgBz3q4w+Myq6iFGnu+Fe6z2/zFgAA//+wyvtPwgEAAA==
 	"/eonza-assets/scripts/copy-file.yaml": {
 		name:    "copy-file.yaml",
 		local:   "../eonza-assets/scripts/copy-file.yaml",
-		size:    2660,
-		modtime: 1605702514,
+		size:    2775,
+		modtime: 1605758239,
 		compressed: `
-H4sIAAAAAAAC/5xWX2/jxBd9z6e4v6l2m/yUVAgkHiwCYoGuFq22iCKeKlVT57qZreMxM+OU0FYqu+wT
-aPuKeOOF56q0Updly1cYfyN0x/bEdrwB0ZcmZ849c/8c31ijMSI51EEPIOEzDCCU6WIUiRh7AEaYGAPY
-3NgnlMCNzR7ABHXoUPrgkFgexjjHOID3ewBTjNOmECExTw4DUFkv5YrPdNAblTdqFTbu0ir0V5lFigG8
-2wOQqREycYkCKPwmEwonARiVoVeaoDYNKQIiGU9Q/Qc1EeG3oim4JSJKzeE1xffaiiIRRvA4ADlHdayE
-wQI2OCsZo5qoJzlJ+pvzOMN2dGdIgsdvjUrweCVQH4m0HUDYCpHrozaP66MuWkcKBbqcMJ+jEbOmpSqw
-1sd3fMRUTJCnabxYhjSgkv62tjMaJHPYBCOexaaBFUFEbAxcoc5iM+eqMXKPrrNQS9EoxJrBZaZCHIVy
-gi4Ok5JW9qvUoPMATkdlK7VR9GjAGD4+0F9wM+0/RPM1V32mVcgGgxqNbN7BI7hJLC0NY6g4JcLqLF9x
-jecx1r6YHggYw+dSJO52woYAD7jGJ3yGfa1Cn4OIfAr/GwPzTmVw/z58Rvi2iLFfyQ7gpAxsR4/HwMi2
-DGhsJlNJnRiJJJIQiTCjEkjyURLJpWwXN8HjOpeyXnN3/RljcHraOCzcz5rJlyLuoq2vxAzhg3GRYvEt
-gI5CztakwPXRv78ZYLccZJgp6gEbQmc7muQEj0sy2zspUt8V3+HZcO9EG9VfFjM4Yx0y9w7kZHFvFZcH
-T6lYb6+dg6fkMNOlISL4vzffRxDAl+4LpefhIal1x9LK7Ss0Q2AHJmGDLcp78A/+qdpe/f9EpgtnTK3C
-1b49loc7mUkz03+883D/0ZPtnSGw8YfuB3CfiP29E61CahqFng1Y7XEoGvBAyrjPqo3IWr73Hl1nUJoZ
-HdI0vNOHEIliPrWKwqmIJwoT2jrViiLyKJRJJNSM0yrr+W1ebieA/eWS2/TLOAC24b9ssOp3wFmSRGmF
-lpbzPxKlq+io/OiP/EjdWHr0zuDuL7IF8C8igRuKa0dxULyUONBM0RUERgJPpJmigolQGBqpFp5dvhgE
-8ClqIxJXNWw7rOBU4whgl88RquaWh8VLSgC7brlXiahsJU/7i72zf9nb/Nze2St7mT/Lf4L8B3tpX9nX
-9dzXEsFegb3Oz/Pn9vf8ef4S7LVj3tg/8mf2Lj+3t/nL1drsb/bGvrY3Tu+iK+iiXaz91d7lL/Jze2nf
-2FuXhL1yQX/mFz4fe9nqg/05/z5/Ye/stX2T/2hfLUv8OwAA///EH2/3ZAoAAA==
+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
+ixL/DgAA///EAOEc1woAAA==
+`,
+	},
+
+	"/eonza-assets/scripts/copy-files.yaml": {
+		name:    "copy-files.yaml",
+		local:   "../eonza-assets/scripts/copy-files.yaml",
+		size:    3055,
+		modtime: 1605759202,
+		compressed: `
+H4sIAAAAAAAC/7RWzW7cNhC+6ymmMoJoA+0iSYEeBOwpTfp3qAEDvRSFzZVGu4xpSiWptRdNASPprUUe
+oE8RpAngtqj7CtIbFUNRtKTVtkCA6mBrh998M5z5OKJGY7hc6yQAkOwCE0iLcjfPuUAdABhuBCZw/+iU
+Fo/uBwAZ6tRa6MVaRLEWuEWRwCcBwAZFOWIhk2BynYCqgpIpdqGTYO7ilcxs+pEWZLC8ZldiAo8DgKI0
+vJA2SQCF31dcYZaAURV6ngy12ePqjB/Ax3O84toM6HhOW7L2HuPHY0YuueFMJFBsUV0qbrA1G7xwiHmP
+1IMsJT1bJioce0+6SLw86CXxcs9Rn/Ny7EC2PSDT52Mc0+dTsIkUWquvpMK0UppvcVBLb+1V8uHBSobU
+m7AvGoNKjnVDNurQoN2+oWtZqGEOeJWKKsM9F6MQ7xSq0cy3THG2EuRuN+nyE1ybrqN5JdME2Eo7FdJj
+xZ5AGNrfPcH/T9z+EHT8tLW5aHXcJz9l2ZbJlFT/Yt4ndOvu8U1KIDy661gbsi0oFbJ9czKg+GT05w66
+djkrvbqFHn/OhEZn1JUwW6YSW4MPq5VAuf7XUqVFJU3QU+0wVlGpFOdpkaHVJEo3HoZxaT2BF48DF6hY
+PQdOf5bwGZpvmPp69TwKiTmcOQiXBkpVrBVqDUs4dq8nhikTPSDnGB49fBg7guhMyPWCxqmdpmezGM7O
+BlzMbARKWMID5xGSycfTRllZ+JSisFOJx5y4hYsiw9BHDt0IDGcd7oKVi1VRCMi40s6WF8pOthi4zPAK
+uASmVEQbmcEPfTH1Allo6FxmIxBlrFUKS/iy4PKYmU1EAaI2SphxFc4W2qhoFkN/gTrXrcwOBKYiWlxM
+ISYjV3nOr2AJJ9WKqLRK467IMTygxObd7yn/jCtYwqdcRT57W//YMe+lxnP46Av9Fe4iqmpMBPuF88in
+1JFnXGBkcQk8UcgMUjwyTLkR7bcZV9/BstNw//nxQKko6bBNZ4S4tyqy3b1xKNo8CagnNKun/Zx4Dp8z
+faww51cRYeKQ6fPwwK7bU8VS+iwMz1VrC2fTXjxv1dGiYgiZEOHM6jc6GGrqOAxZVkYeEtmBgk5YulMf
+dZMghkeerUN3oKcy8zgCpRsuMoWSRtB8fGu7m2h+kk/N+slp3915aNjT3t2cBzhtP8r0Ie4x9OZ0Wx2/
+suEZsrIUu/5Yt1dHQ98A+u/vDD7m8LoDoNkWDafN9USrlb18dsf46H5AF0u7jbYgAKftDfVJUe7s50+D
+KYDJwmzQnk5MTaF2LbQtnoU+c5dVgMHAbVe5XLdci8UiAFDVIFT9a31b/13fNNf1bf22ftO8bH6B5qf6
+Tf17/WfzM9RvoX7XXDev6t+aV81rqN9Z7Pv6j+Zlfdtc1zfN634+/8E3leTYpf6rvqnfeycyUur/BAAA
+//9WxR4a7wsAAA==
 `,
 	},
 
@@ -547,8 +576,8 @@ Wp7kKK+QvRzlXfZDzE5Vt9z9K+N/9RUAAP//K+yCAIcBAAA=
 	"/eonza-assets/scripts/file-confirmation.yaml": {
 		name:    "file-confirmation.yaml",
 		local:   "../eonza-assets/scripts/file-confirmation.yaml",
-		size:    3065,
-		modtime: 1605713155,
+		size:    3063,
+		modtime: 1605715075,
 		compressed: `
 H4sIAAAAAAAC/7RVzW7cNhfd6yluNAvFQDyOv0U+QJgMEBT923TRFt0EhkGPqBm2NKVS1EycH8A/QYHA
 RbvtpggC9AEMI5OOXXv8CpdvVJDUcCR57ARpuxHES95zDi/vIQuqFBPDIg4ABNmlMaSM0/VBJlImd4li
@@ -566,9 +595,9 @@ vULJTAz7teu4t1HFgHBJSbLnHsyi29swaR5LOKKF9GW8umdjiCxFDRqSjBYiipSD7EY+yZoxhufr1UH3
 bAAGnBTFw9DUxAbCvp+X/Z5K+r0N81FJv9Mt2FMj3o8Tohpjew+78YaSbaCOr10tJ2Vt1JQlj+9vtQKb
 W+/BFS1cd1k2cOyVuiq0EnzDVsMMZdnob3yNczzHE/xTH+MpnuhD/TPgFc7xrT7EU5zqfXyHb3GKlzjD
 KeCV3scZ4DnO8Qpneh/nJs3OzkC/xBM8w7/w5Joh8I0+0q9wqg8Mrj7Sv+hXOMMzn3PNJPgGz/W+PnaS
-XhtevLBCLnHmguc4BzzVBzjFi7qF7K5Wb6AtsWEr/A0v9Uuc6328wBP9E870r2A4Lu0253ixzJ+2/daQ
-WAk0vGduy658dcU1LZX8mh8/rF5tj+IfbvJ2n+ojfGdKcdCkwKk+vMG0+LspgD5exV/zr6evexgvb+KK
-gr8DAAD//8ZG3Dz5CwAA
+XhtevHBCXOgc54Cn+gCneFE3kN3TavltgQ1T4W94qV/iXO/jBZ7on3CmfwXDcWk3OceLZf607bZVAg3v
+mduwK15dcU1LJb/mxg+rVtuh+IebvN2l+gjfmVIcNClwqg9vsCz+bgqgj1fx19zr6esOxsubuKLg7wAA
+AP//OF3/ifcLAAA=
 `,
 	},
 
@@ -10421,6 +10450,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/bash.yaml"],
 		_escData["/eonza-assets/scripts/chdir.yaml"],
 		_escData["/eonza-assets/scripts/copy-file.yaml"],
+		_escData["/eonza-assets/scripts/copy-files.yaml"],
 		_escData["/eonza-assets/scripts/create-dir.yaml"],
 		_escData["/eonza-assets/scripts/create-file.yaml"],
 		_escData["/eonza-assets/scripts/curdir.yaml"],
