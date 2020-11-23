@@ -6,10 +6,15 @@ package main
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/vm"
+)
+
+const (
+	ProgCounter = 100
 )
 
 type ProgressData struct {
@@ -70,17 +75,24 @@ func ProgressHandle(prog *gentee.Progress) bool {
 }
 
 func ProgressToString(progress *gentee.Progress) (string, error) {
-	var remain string
+	var remain, total, current string
 	custom := progress.Custom.(ProgressData)
 	if custom.Remain <= 24*time.Hour {
 		remain = custom.Remain.String()
+	}
+	if progress.Type >= ProgCounter {
+		total = strconv.FormatInt(progress.Total, 10)
+		current = strconv.FormatInt(progress.Current, 10)
+	} else {
+		total = vm.SizeToStr(progress.Total, ``)
+		current = vm.SizeToStr(progress.Current, ``)
 	}
 
 	data, err := json.Marshal(ProgressInfo{
 		ID:      progress.ID,
 		Type:    progress.Type,
-		Total:   vm.SizeToStr(progress.Total, ``),
-		Current: vm.SizeToStr(progress.Current, ``),
+		Total:   total,
+		Current: current,
 		Percent: custom.Percent,
 		Remain:  remain,
 		Source:  progress.Source,

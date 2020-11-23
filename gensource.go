@@ -90,7 +90,8 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 		} else if value == `1` {
 			value = `true`
 		}
-		if value != `false` && value != `true` {
+		if value != `false` && value != `true` &&
+			!(strings.HasPrefix(value, `bool(`) && strings.HasSuffix(value, `)`)) {
 			value = src.Value(value) + `?`
 		}
 	case es.PTextarea, es.PSingleText:
@@ -104,7 +105,7 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 			ptype = `str`
 		}
 		if ptype == `str` {
-			value = src.FindStrConst(value)
+			value = src.Value(value) //src.FindStrConst(value)
 		}
 	case es.PNumber:
 		ptype = `int`
@@ -510,11 +511,8 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	if err != nil {
 		return ``, err
 	}
-	if strings.Contains(script.Code, `%body%`) {
-		body = strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, body))
-	} else {
-		body = script.Code + "\r\n" + body
-	}
+	body = strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``)) + "\r\n" + body
+
 	var constStr string
 	if len(src.Strings) > 0 {
 		constStr = "const {\r\n"
