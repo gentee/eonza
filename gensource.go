@@ -400,6 +400,9 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		}
 	}
 	out := fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
+	if script.Settings.Name == Return {
+		out += "     deinit();return\r\n"
+	}
 	if len(ifcond) > 0 {
 		out = fmt.Sprintf(`   if %s {
         %s   }`, ifcond, out)
