@@ -365,12 +365,18 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			}
 			if len(script.Tree) > 0 {
 				code += "\r\ninit(" + strings.Join(vars, `,`) + ")\r\n" + predef
+				code += "try {\r\n"
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
 					return ``, err
 				}
 				code += "\r\n" + tmp
-				code += "\r\ndeinit()"
+				code += `
+	} // try
+	catch err {
+		if ErrID(err) == RETURN : recover
+	}
+	deinit()`
 			}
 		}
 		if script.Settings.LogLevel < es.LOG_INHERIT {
@@ -400,12 +406,12 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		}
 	}
 	out := fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
-	if script.Settings.Name == Return {
+	/*	if script.Settings.Name == Return {
 		out += "     deinit();return\r\n"
-	}
+	}*/
 	if len(ifcond) > 0 {
 		out = fmt.Sprintf(`   if %s {
-        %s   }`, ifcond, out)
+        %s   }`+"\r\n", ifcond, out)
 	}
 	return out, nil
 }
@@ -510,11 +516,16 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		}
 	}
 	code = strings.Join(params, "\r\n")
+	code += "\r\ntry {"
 	body, err := src.Tree(script.Tree)
 	if err != nil {
 		return ``, err
 	}
 	body = strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``)) + "\r\n" + body
+	body += `
+	} catch err {
+		if ErrID(err) == RETURN : recover
+	}`
 
 	var constStr string
 	if len(src.Strings) > 0 {
@@ -526,6 +537,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	}
 	constStr += `const IOTA { LOG_DISABLE
 	LOG_ERROR LOG_WARN LOG_FORM LOG_INFO LOG_DEBUG }
+	const : RETURN = 500
 `
 	return fmt.Sprintf("%s%s\r\nrun {\r\n%s\r\n%s\r\ndeinit()}", constStr, src.Funcs,
 		code, body), nil

@@ -974,14 +974,14 @@ nagxk+xfAAAA///Q6V0ZzgQAAA==
 	"/eonza-assets/scripts/return.eonza.yaml": {
 		name:    "return.eonza.yaml",
 		local:   "../eonza-assets/scripts/return.eonza.yaml",
-		size:    450,
-		modtime: 1606133705,
+		size:    470,
+		modtime: 1606189159,
 		compressed: `
-H4sIAAAAAAAC/3RPPUoDQRTu3yk+SBEVE9DCYhrvkMI2DMlLsjCZXeYnoFgkqQXBkwSbBAu9wpsbycya
-dS1sln3ffL+eQ6js0isCrF6zguMQnR1zbZ80AaEKhhWGg2l+HgwJmLOfFST/FMTUS8MbNgp3BETrolUI
-LjIBKzbN2fXnNNouFVykRju99opGXbaPJmy06wePO7RkhceGFW47zUabkvPLL0iPe0M5sExkm7/AtN0w
-Ka2wcPUaYcXwM1c1oWW07pNzbxf/KOVNPuUo72krh7SXU9qnl7RLr5CTHJF28pG2cpKvtJdD3+8/Hc3q
-OSs8jwioFrjqNt8jl8jHg3YXHXzd7r4k+g4AAP//0E1Ig8IBAAA=
+H4sIAAAAAAAC/3RPP086MRje+ymehAH4BUh+Dg5dnFwdLuoKDbzAJaV3eduSaByA2cTET0JcIA76Fdpv
+ZNqTEweXy71Pn7+WnCvNwkoBGLUiCSbn2YyoMo9KAK50miS6nXF67nQFMCM7zUj6yYiuFprWpCUuBeAN
+eyPh2JMAlqTrk+v3qZVZSLAXtWK1slIM22zrtVsrPg8etWjOcg81SVy0mrXSOeeHn5Ez7n+RAvNEMukL
+jJsNRW6FOVcruCXBTrmsXcNo3ItTb/a/lOE1fIRDeIubsI+7cIy7+By38QXhGA6I2/AeN+EYPuMu7M/9
+/tKJaTUjiaehAMo5/rWbr5BKpONeca+FB83uftrEXHGvuL69K24GmEz6QnwFAAD///58c7vWAQAA
 `,
 	},
 
