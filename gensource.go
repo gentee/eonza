@@ -246,11 +246,13 @@ func (src *Source) Predefined(script *Script) (ret string, err error) {
 				}
 			}
 		}
-		data, err = yaml.Marshal(predef)
-		if err != nil {
-			return
+		if len(predef) > 0 {
+			data, err = yaml.Marshal(predef)
+			if err != nil {
+				return
+			}
+			ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
 		}
-		ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
 	}
 	return
 }
@@ -309,7 +311,13 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		ifcond, _ = ifraw.(string)
 		ifcond = processIf(ifcond)
 	}
-	var params []string
+	var (
+		params []string
+		predef string
+	)
+	if predef, err = src.Predefined(script); err != nil {
+		return ``, err
+	}
 	if !src.Linked[idname] || script.Settings.Name == SourceCode || len(node.Children) > 0 {
 		src.Linked[idname] = true
 
@@ -317,12 +325,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		if err != nil {
 			return ``, err
 		}
-		var (
-			code, predef string
-		)
-		if predef, err = src.Predefined(script); err != nil {
-			return ``, err
-		}
+		var code string
 		if script.Settings.Name == SourceCode {
 			code = values[1].Value
 		} else {
@@ -388,10 +391,9 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			name = `*` + name
 		}
 		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", name, parNames)
-		/*		if len(script.Tree) > 0 || len(predef) > 0 {
-				initcmd += "init()\r\n" + predef
-				code += "\r\ndeinit()"
-			}*/
+		if len(script.Tree) == 0 || len(predef) > 0 {
+			initcmd += "\r\n" + predef
+		}
 		code = initcmd + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"
@@ -537,7 +539,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	}
 	constStr += `const IOTA { LOG_DISABLE
 	LOG_ERROR LOG_WARN LOG_FORM LOG_INFO LOG_DEBUG }
-	const : RETURN = 500
+	const IOTA+500 : RETURN ASSERT
 `
 	return fmt.Sprintf("%s%s\r\nrun {\r\n%s\r\n%s\r\ndeinit()}", constStr, src.Funcs,
 		code, body), nil

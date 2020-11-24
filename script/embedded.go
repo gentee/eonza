@@ -117,6 +117,7 @@ var (
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
+		{Prototype: `Condition(map.obj) bool`, Object: MapCondition},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
 		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
