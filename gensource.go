@@ -94,7 +94,7 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 			!(strings.HasPrefix(value, `bool(`) && strings.HasSuffix(value, `)`)) {
 			value = src.Value(value) + `?`
 		}
-	case es.PTextarea, es.PSingleText:
+	case es.PTextarea, es.PSingleText, es.PPassword:
 		if script.Settings.Name != SourceCode {
 			value = src.Value(value)
 		}
@@ -196,7 +196,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 		isEmpty := len(value) == 0
 		ptype, value = src.getTypeValue(script, par, value)
 		switch par.Type {
-		case es.PTextarea, es.PSingleText, es.PNumber:
+		case es.PTextarea, es.PSingleText, es.PNumber, es.PPassword:
 			if isEmpty && par.Options.Required && len(node.Name) != 0 {
 				return nil, nil, errField(par.Title)
 			}

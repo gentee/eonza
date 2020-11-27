@@ -31,6 +31,7 @@ const (
 	PHTMLText
 	PButton
 	PDynamic
+	PPassword
 )
 
 type ScriptItem struct {
