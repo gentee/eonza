@@ -622,6 +622,22 @@ AP//OF3/ifcLAAA=
 `,
 	},
 
+	"/eonza-assets/scripts/file-hash.yaml": {
+		name:    "file-hash.yaml",
+		local:   "../eonza-assets/scripts/file-hash.yaml",
+		size:    699,
+		modtime: 1606732166,
+		compressed: `
+H4sIAAAAAAAC/5SRscrbMBSFdz3FwRmSQNMhxRkEHQohZMkU6GQIwr6xBbLsSnJK19JClz5Cx+4ZW/oS
+9hsVWbF/O9u/Xc49Ouf6syXnpM4tZ4AWJXFcpaJNIWzBACedIo7l4uJ3iyUDMrJpr/ihV1SVK7qR4tgx
+oNGm0RzONMSAglQ9j/SKEjrnMA2rhRGl5Wwz6fbTtPrtIPZl7ktNHFsGVLWTle4PBwx9aqSh7FE85AmV
+V0a6opwFjuok8d1zonRUPsbN8Pa0j+fC+fhhG+/GOkO2Ue4mzKxuVF/xAZ5QvyEd9pfA/SB1Bk8S1RWu
+oJ5YMIQTDlIRjgG1aWZv21/tvf3bfW3/oPve/ex+oPvmlfZfe59GtL+fl2mVEUdknQndibafpUuLF75I
+dCosIYlO+ziJePC9xymL/UWr4R+ug48BSRTgTcznQmzj3bP/TO6jMKuR4pvevo7Y/wAAAP//O2NPQbsC
+AAA=
+`,
+	},
+
 	"/eonza-assets/scripts/file-list.yaml": {
 		name:    "file-list.yaml",
 		local:   "../eonza-assets/scripts/file-list.yaml",
@@ -743,22 +759,6 @@ xwLwxnoj4ayPgCnp/Ds0alqZRMJ6kSurZoUUvSbfW72f+99bXYW465wkjgSQ5S7NTFUZsHTlU0uTJvCL
 Mlc2DgekRvsDLZasHDK1P6yXPyEHNyWMM+PIOGSX1XFBIzQrAsO6SLx6QSP0a936AxA/cMlvYRNueRfW
 4R5hxSW/8DYs+ZV3/M4lb8HPvOWnXliFdVjyI3/wLtyEu/2YH6Df32zEOJuQxBm5c2U7zY/8w+lg0I8N
 O97qbld8BgAA//+0NbTvFgIAAA==
-`,
-	},
-
-	"/eonza-assets/scripts/hash-file.yaml": {
-		name:    "hash-file.yaml",
-		local:   "../eonza-assets/scripts/hash-file.yaml",
-		size:    702,
-		modtime: 1606713085,
-		compressed: `
-H4sIAAAAAAAC/5RRscrbMBjc9RSH/+FPoOmQ4gyCDoUQsoQOgU6GIOwvtkCWXUlO6Vpa6NJH6Ng9Y0tf
-wn6jIst27Wz/9nF3uvt0nyXnpM4tZ4AWJXEUwhabq1TEACedIo7np4vnnp4ZkJFNe8QPPaKqXNGNFMeO
-AY02jeZwpvEGBal6aekRJXTOYRpWCyNKy9lmyPYaP82jX49gH+Y+18SxZUBVO1npfnHA0MdGGsqG4NFP
-qLwy0hXlwnBCZ45vHh2lo3IYN+Pb0z5eAufju228m+IM2Ua5mzCLuAl9wQd8Qz1DOvCX0PtB6qyvE9UV
-riAMrQKXsMLRc++vOATcNIvn7c/23v7pvrS/0X3rfnTf0X31SPu3vc9d2l+PZFplxBFZZ0J8ou0n6dLi
-f8VIdCosIYlO+ziJwtXxFqcs9susxjOug44BSRT6m4nPhdjGu0f9mdwHYVZTka96+Tpi/wIAAP//ctxq
-Fr4CAAA=
 `,
 	},
 
@@ -1074,28 +1074,29 @@ jMO9ipTX7G8AAAD//5srcUP/AgAA
 	"/eonza-assets/scripts/set-variable.yaml": {
 		name:    "set-variable.yaml",
 		local:   "../eonza-assets/scripts/set-variable.yaml",
-		size:    3109,
-		modtime: 1606103023,
+		size:    3303,
+		modtime: 1606714346,
 		compressed: `
-H4sIAAAAAAAC/4xW3W4bRRS+91Mcthe1S9ImRXAxkqmitlBQA0gJlaJuVa2dsbPVemaZmV0LoUhpIlQh
-UEGot6gIXiAJuE1akr7CmTdCM7Pr/fEkqi+86znn+84352fGkioVs7EkHQAWTSgBSdVyHok4GiS0A6Bi
-lVACV688llTlkbhytQOwTeXQrpkXu5LwcUJzmhD4pAOQMZExAkpkhmKHJukCr1lMIjYmILJOGoloIkln
-udBgvuuxr+eRMGs2lPo+pQRudgB4qmLOrHYAQb/LYkG3i7AlVR4lWZsryepMq3PfJJaq4TrK2NCGqLl/
-3A5sUO6t5DEwu+DjslTWZOk+Kn41KCuzVGK+Eis6qTks12oTDWQaqZ05t/nYfRIoTH5YmlK27UVZixdE
-WV72QQvkLF5QQtnYr89Z/CA+pd5A1uCFZGnqh1iDF8L41AdgfOp1l2kSKx/AGvyQbCCVV5WzNJrHzsJC
-99hVqqiQrf652TFTZNuCMtccZTcQWBtInmSKwjdlBxQlJ7BWFfixG+c1KeMxg8hpA8Xt63xgAYrKE/ic
-KrjL8lhwNqFMwYOGlysogftVYV0lCdw3D7gdycKV8SmB25kQhmUznhTL7qQhsEHb3DbHBDbmqS5yS2DD
-PmM2dsu23AS+NY8yoMja+cHf8Eg/xXN8q5/rfTzTP+Mp4Dt9oPf1L8184Qs8xyM8xGM8qawuc/hS7+GJ
-forHeO6sgK/xDA/1M5zhGZ7gDPAdzvQezvA/u3SG53jazCq+tEIO9LOSowXRB/o54Dm+0Xv6AF85av1r
-M+v4At/iiQneyDz+gSf4ymo5BUv6j1Gs9/VerRT4F87wjT7QP+HMaD524csYZV3wb4PEQ7uL40vUNoqG
-f+Ihvsajev7K6tm9/+v0mB2W6osy4u+GW//o1z/k25RAwAdPIDdfffhScrbJvx486ZrDuQchi0fWdgt+
-CJk9S0dwzfV5vw8r5WptNqFv2vxBJLpmLHvOvuseIy4gN6cxxMyFrOGlEm6GoQ/r0VDwrvHsWv8lCANr
-C4PedalEt9erAaexGu5A3RvCwFwbc+/KeRhJCmFQdHIYAJnLXhtIM+5d+9sDsQ0dBiXgw76Tu+Do+jIM
-mskpkveBxdwCMt+rZWt7lppMLu+yvGuda5p2F6K6PvZGZcpcFh4xX0hTJ7dfsDcK9OFaUb52GtyHJiXO
-dIkfWlkW0ZJW3pfu3NQtoezyPZsZrSrSd+fkRQVkfPreRQmDra2trRvr6zfu3IF798hkQqQMg4vEfsbF
-JFKuSkvwFZ82GtSj3I72BWoKMQ1TJATk0HcHuNvgErSbotKTP1x51GTeqGZyCbgpUK+369FlzxWPMNNE
-fDSSVBV/PFp2IzCNxFxikYowIGHQboOCp29Iu5sinmyk0ZAayMOVR722tzlxDPOnsArlvx4vdnURW+bD
-XXJl3lz8pYLr8kLZg7TeYvZmbLTYbsh2Q9ZIsDMH/wcAAP//icI5tyUMAAA=
+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
+AP//XjnbBecMAAA=
 `,
 	},
 
@@ -10518,6 +10519,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/error.eonza.yaml"],
 		_escData["/eonza-assets/scripts/exit.eonza.yaml"],
 		_escData["/eonza-assets/scripts/file-confirmation.yaml"],
+		_escData["/eonza-assets/scripts/file-hash.yaml"],
 		_escData["/eonza-assets/scripts/file-list.yaml"],
 		_escData["/eonza-assets/scripts/fileinfo.yaml"],
 		_escData["/eonza-assets/scripts/for.eonza.yaml"],
@@ -10525,7 +10527,6 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/foreach.yaml"],
 		_escData["/eonza-assets/scripts/form.yaml"],
 		_escData["/eonza-assets/scripts/get-webpage.yaml"],
-		_escData["/eonza-assets/scripts/hash-file.yaml"],
 		_escData["/eonza-assets/scripts/httprequest.yaml"],
 		_escData["/eonza-assets/scripts/if.eonza.yaml"],
 		_escData["/eonza-assets/scripts/join-text.yaml"],
