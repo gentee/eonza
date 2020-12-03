@@ -141,6 +141,7 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
+		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
 	}
 )
 

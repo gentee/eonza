@@ -497,6 +497,30 @@ OsSz7mOnpz+Uf4XkdUEWDySPGc/Gt7nqCy8CLx3P5nPzHQAA//+AZ2Fh0wEAAA==
 `,
 	},
 
+	"/eonza-assets/scripts/decrypt-file.yaml": {
+		name:    "decrypt-file.yaml",
+		local:   "../eonza-assets/scripts/decrypt-file.yaml",
+		size:    1896,
+		modtime: 1606988372,
+		compressed: `
+H4sIAAAAAAAC/5xV3WrcRhS+36c43bCNlMhmYxoworow9rpNKYnxui2FAVsrHe0OyDPKzCgmcQ1tyUWh
+fYg+ggkUUkr7DNo3Kmd+tFJzU7JX8nfO+eac73wz1mgMF2udTgBEfo0plFio143Zq3iNEwDDTY0pPHxw
+SeEHDycAJerCIvRhkVqua3yFdQqfTQA2WDcf8BBY52KdgmonTa7ya51O9vyZlENfw/P2A2hPMK8bTOFg
+AiAbw6WwDQMofNlyhWUKRrXY8zW51jdSlSO+AH4EX4naNLnZjPgCOOLbVRT/FXBftqZpDcGjEqMQd1JY
+0eRe1YpC96CWrSpwr5AlMb7K6xZ9wwSlMNVGQaNvIIMv0Hybq4hNw7hsGjNB8Yq4IIOjlT7LzSbqM4PQ
+bBq7VMsMQMMNGcPAlpFX8MglZDCHWyZGNSdcRfa8mIk7JrwU9Ku4gAxeNChOeY0uKYHzxdHJi+dffx8z
+sWorWNmkc8zLqOIigadPDmImFsdfYl6igg3mJTDBhfGkBCz5G5ruBEmSZ8JEK6qcx0wsjWoL4wLRsl2t
+2soFD5O+Mnafo/mlW9ZYArvWXoE+ZSjCro4o90+DvKSEdxH9MvhKcmFXQWgS6hy131bmFE0BlZIqejI/
+SIBNT9zdAqJOAZbWHr3ANQK+bPNag9kgONdB37aNV7I1wzW4Bo7PF0cXC/gBLs6/eX4cDxXW/A0ysURz
+JrXbySE87tVzOnNhoFFyrVBryODMfy5NrkxkpbC5nvHpPIFTqa5zE+30rcV63z8cbBon3h3UXZzA1VXM
+xM2G+qd24HPoST1n2ID1kHaG6F10GA+iNP+nQ4sNfEOFyZzugqdlfqtUcbRYevWjRt/YpQXe7xQ3GJG0
+IzjoEAVtggKPBkm22ceZxaxReOWwT7LdlGE+54WD+TyBq2eikEphERbl1eNiDbICmN2SeHcpzG6J7o74
+Zrc9492Vu6Chx4Uo+zZjJo5rqdHdU9frEg39ecGvvWf8qYYAy0qheFzKRTyd0Ntv3ywU7uW6dP9GgpXJ
+qv0zcemevaHNLT6wRx+lSWcajISZngCodkTf/d7db3/a/tK9377d/tj9073r7rc/b3+D7dvuvvuz+2t4
+3v9LHjXxYcn2Vyrr/u7ed39QY907auzfAAAA//8UWKnJaAcAAA==
+`,
+	},
+
 	"/eonza-assets/scripts/delete-dir.yaml": {
 		name:    "delete-dir.yaml",
 		local:   "../eonza-assets/scripts/delete-dir.yaml",
@@ -561,6 +585,32 @@ DsfG6mw4wm4iNMXMsI9+MK3Km4NesHOftRMZ4bjr/JzsF/2ryq7OFxULIUtNyl9F/nrXbO+2e9Pt02wt
 Dg4Tv0FCvsEBLppl9E8ACv8f44drF4RSaCpspW+awoYxFv4Xt5JfZs19xZRQ8wZlPB4ngK73aNx39+ge
 3LNbb+4337D54h7cT/e8+Qr36NabO/fkfm3u3cvmzq3depf3zc6eiK7uyf12a/fUVboX98Nr+hMAAP//
 MYnVG7EFAAA=
+`,
+	},
+
+	"/eonza-assets/scripts/encrypt-file.yaml": {
+		name:    "encrypt-file.yaml",
+		local:   "../eonza-assets/scripts/encrypt-file.yaml",
+		size:    2117,
+		modtime: 1606988361,
+		compressed: `
+H4sIAAAAAAAC/5xVz27bxhO+6ykGDBKTDiU4/v2cA1EeVJluXLR2ILkuWhBwVuJSWoDaZXaXNpK2QFHk
+0EPvfYUejQAFUhTtM1BvVMz+oUi3h6I6rWZmv/n2+2aXimrN+FolIwBOtjQBylfyTa3HJavoCEAzXdEE
+Dh7dYPrRwQigoGplIrgwkUqsK3pLqwT+PwLY0Kr+Gw4GK8LXCchmVBNJtioZjV1PrMFVv9/EB00H/aam
+CRyPAEStmeCGMICkrxsmaZGAlg3t8Ei1FpLpzXYA2EV7iP97iMg03brl2O+dZovx8cnzDr4mSt0JWQzQ
+ffA/0C2o0jXRmwGeDw7wxnuTHvozEY2uG43hwRYtKd0rbTwR47LhK9UFFdXjWyIZWRrIW1I11DG+YeVK
+8CKBg8NPqL4mMgxc7yCCNIWjA1NWMaW9aIg9sBR/xvEEgsD8f3gI1xOP0bk+oauDPUPRyBUdr0TxkCCG
+EgiUllCrO0jB0cwDb0geRDnHfIlYkMJ0qV4SvQm7St8zDyJb2pHWmz6it8QgshIObUEKR/BNzgd7TpkM
+Tb8o59/l3LmLvxQ+FYwbAhiN9/BOD8uClZ5vajEToFIKGT47ehZDHmT2ejnQM4ZDAAsjk9Ee6OuGVAr0
+hoKdDHDgOTf5knFI4bKmHDdbsjHMs+np5cVnX7kqB1+KRveLLfHZPJteZfAtXM2/uJiZHbwUUDJIDaFz
+XoqwZDzKeTZ7QUlBJb4DpOiU8KrZZALZ7EU2Pc3msYtfU6mY4Ji4zuaL88sLn5n6u4y5abY4Pnke59wB
+514SOzwfE0UvyNadMfIQVwyTjOuwZBP802UW7K15lCa4MP4tm9Jh620NKSy0bFY64zh9IR4pMjWoNOTc
+xs+5DkWjYzjU2zqCnGPyaYoIOf9SMk1D1DV2wKLRaDvXoNhbCnZZS7GWVClI4aVbLjSRhjKSi+HkKIYz
+IbdEh/tJqvh64t7fPIhi621vqKMYXr2Kcn63wUkw/T7y5+1MMVQ2rETnP2c8zGaL86+z2NeNcVs01Bwl
+WDIOT1KYU1Kg+bHFiBwoavAkxRfVDXBYq7sYN/mKvdRL5kI9sWCv7ZLFcIiqRf9QZtU0YS9c6MX0SgyI
+GRGepmBPaUz3GzNedHujnM8qoai9M7ZLL8B4FIzwM2deJ8rdI2q/mO7E5kp2l+vGzqjPnfl4z8Iuy/ga
+HivQAh6rEYBsBvDtz+397sf2w+7d7vv2z/Z9e7/7YfcT7N619+1v7e/9bv+mdECg/aVf3P7Rfmh/RSrt
+e6TyVwAAAP//9uHvTEUIAAA=
 `,
 	},
 
@@ -1074,29 +1124,29 @@ jMO9ipTX7G8AAAD//5srcUP/AgAA
 	"/eonza-assets/scripts/set-variable.yaml": {
 		name:    "set-variable.yaml",
 		local:   "../eonza-assets/scripts/set-variable.yaml",
-		size:    3303,
-		modtime: 1606714346,
+		size:    3412,
+		modtime: 1606981278,
 		compressed: `
-H4sIAAAAAAAC/4xWUW/bthN/96e4v/pQu/+0TTpsDwS8Imi7dUWzDUhWIKiKQXZoR4VMaiQlYxgCpAmG
-YtjQDUNfhw7bF0iyuU3aJf0Kx280kJRkSaaD+cGS7+73u+P9jqQlVSpmY0k6ACyaUAKSqut5JOJokNAO
-gIpVQglcvfK1pCqPxJWrHYAdKofWZl6sJeHjhOY0IfBRByBjImMElMgMxS5N0gVeY0wiNiYgsk4aiWgi
-Sed6UYP5rue+kUfC2Gwq9W1KCdzqAPBUxZzZ2gEE/SaLBd0p0pZUeZRkba4kqzOtVbFJLFUjdJSxoU1R
-C/+wndig3FvJY2DW4OOyVNZl6T4ofjUo526pRGWJFZ3UAq7XtIkGMo3UbsVtPnadBAqXH5amlO14UdZz
-CWhpusrrBVOWl0PUAjqPF5RQNvZncx4/iE+pN5F1eCFZmvoh1uGFMD71ARifesNlmsTKB7AOPyQbSOWt
-ynkak2c30sLoWStVVMjW8N3qmC1oZ4oyN1nlKBFYH0ieZIrCl6WYhfQE1ufTURuH0l4DuINiXcp4zCBy
-hYPi9rU6CgCKsSDwKVVwj+Wx4GxCmYJHjSinNoGHc9WdzAQemgfciWQRyviUwJ1MCMOyFU8KszvDCGzS
-NrcVgMBmpUPReAKb9hmzsTPbWSDwlXmUCUXWbh7+gsf6GV7gO/1CH+C5/hHPAN/rQ32gf2o2E1/iBR7j
-EZ7gadtbkLUiWkSuyfhK7+OpfoYneFGGvcFzPNLPcYbneIozwPc40/s4w3+s6Rwv8KwpAL6yNR/q51Wq
-JkQf6heAF/hW7+tDfO2o9c9NgfAlvsNTk7whEv6Gp/ja1nIGlvQvU7E+0Ps11fAPnOFbfah/wJmp+cSl
-L3OUEuKfBolHdhUnl1Tb0Bd/xyN8g8f1VpdC27X/7eoxKyyrLxTHXw23/t5f/5DvUAIBHzyF3Hz14YHk
-bIt/MXjaNTdED0IWj6zvNnwXMnugj+Ca2xL9PqyW1toeh77ZEY8i0TXbu+f8e+4x4gJycyVAzFzKGl4q
-4c4C6MNGNBS8ayK7Nn4FwsD6wqB3QyrR7fVqwGmshrtQj4YwMHdXFT0PHkaSQhgUQx8GQKqy1wfSnAJd
-+9sDsdMdBiXg/31X7pJARz9nf8BjNqdfcdjFLG6ow6DZ2aLz/7Og20CqRlmydmSZ0ghxj+Xddqq9haxu
-E3izMmVuLE8xn0kjsmsW2GsN+nCt0L7dQ/ehSYkzI+aHzj2LaEnn0Zeu3IieUHb5ms0Grytkz+Nl6jM+
-/c+ihMH29vb2zY2Nm3fvwv37ZDIhUobBsmI/4WISKafSCnzOp43p9lRuz4Ul1RTFNFyREJBD310Uy+Zv
-Xk/+ePVJk3lzvqFXgBuBer09T132UPIUZoaIj0aSquLfT8tvCkwjUZVYtCIMSBi0x6Dg6RvS7paIJ5tp
-NKQG8nj1Sa8dbY4rw/wxrEH518uLXVvElv1wl2nZN5d/peC6XCh7CtdHzN7AjRHbC9leyBoNdu7g3wAA
-AP//XjnbBecMAAA=
+H4sIAAAAAAAC/4xW327bthe+91Ocn3pRu7/0TzpsFwS8Imu7dUXTDUhWIKiKQXZoR4VMaiQlYxgCpAmG
+YtjQDUNvhw7bCyTZ3Cbtkr7C4RsNJCVZkulguYhsnvN959M5H0lLqlTMxpJ0AFg0oQQkVVfzSMTRIKEd
+ABWrhBK4fOlrSVUeiUuXOwDbVA7tmvlgVxI+TmhOEwIfdQAyJjJGQInMUOzQJF3gNYtJxMYERNZJIxFN
+JOlcLTSY//Xa1/JImDVbSn2bUgI3OwA8VTFnVjuAoN9ksaDbRdmSKo+SrM2VZHWm1So3iaVqpI4yNrQl
+aukftgsblPtU8hiYXfBxWSobsnQfFN8alPOwVKJaiRWd1BKu1mYTDWQaqZ2K2/zZ9yRQhPywNKVs24uy
+kQtAS8tVUS+Ysrw0UQvoIj7QtVGc0Gr8LVgZ81ZLKBv7ZbqIH8Sn1KvQBryQLE39EBvwQhif+gCMT73p
+Mk1i5QPYgB+SDaTyqnKRhmXtDlzwrF2ligrZcu3Njtm71oyUOUuWHiSwNpA8yRSFL0sXFJ4hsDa3Vc1H
+5XoN4E6YNSnjMYPICQfF7cfqDAEo/ETgM6rgLstjwdmEMgWPGllu2gQezKfuxkzggXnA7UgWqYxPCdzO
+hDAsm3FhrOLwI7BB29x2AAQ2qjkUjSewYZ8xG7tl6wUCX5lHWVBk7ebhL3ikn+E5vtMv9D6e6R/xFPC9
+PtD7+qdmM/ElnuMRHuIxnrSjBVkro0Xkmoyv9B6e6Gd4jOdl2hs8w0P9HGd4hic4A3yPM72HM/zHLp3h
+OZ42B4CvrOYD/bwq1YToA/0C8Bzf6j19gK8dtf65OSB8ie/wxBRvDAl/wxN8bbWcgiX9yyjW+3qvNjX8
+A2f4Vh/oH3BmNB+78mWNcoT4p0HioX2L4wvUNuaLv+MhvsGjeqvLQdt3/9vpMW9Yqi8mjr8abv29X/+Q
+b1MCAR88hdz868N9ydkm/2LwtGuulh6ELB7Z2C34LmT2JhjBFbcl+n24Ua7W9jj0zY54FImu2d49F991
+jxEXkJu7BGLmStbwUgl3FkAf1qOh4F2T2bX5KxAGNhYGvWtSiW6vVwNOYzXcgXo2hIG59KrsefIwkhTC
+oDB9GACpZK8NpDkFuva7B2LdHQYl4P99J3dJoqOfs9/nMZvTrzjsYhVn6jBodrbo/P8s6BaQqlGWrJ1Z
+ljSDuMvybrvU7kLV8iqrC/4kkvRhNKHL+uE2jlcpU+aW87zA59IYwxGCvQqhD1cKv7TruD+alDhjSz90
+HllESzrPvrBbxigJZRf2yR4K9SbZM3xZhxif/udBhsHW1tbW9fX163fuwL17ZDIhUobBMrGfcjGJlJvs
+Cjzk08aO8Ci3Z8kSNYWYRigSAnLou8tlmWfnevLHN540mTfmh8AKcDOgXm/Xo8seZB5hxkR8NJJUFb+Y
+WnEjMI1EJbFoRRiQMGjboODpG9LupognG2k0pAby+MaTXjvbHHGG+WNYhfLnmhe7uogt++Eu4LJvrv5K
+wXXxoOzJXbeYvbUbFtsN2W7IGg124eDfAAAA//8kLW2wVA0AAA==
 `,
 	},
 
@@ -10512,10 +10562,12 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/create-dir.yaml"],
 		_escData["/eonza-assets/scripts/create-file.yaml"],
 		_escData["/eonza-assets/scripts/curdir.yaml"],
+		_escData["/eonza-assets/scripts/decrypt-file.yaml"],
 		_escData["/eonza-assets/scripts/delete-dir.yaml"],
 		_escData["/eonza-assets/scripts/delete-empty-folders.yaml"],
 		_escData["/eonza-assets/scripts/delete-file.yml"],
 		_escData["/eonza-assets/scripts/delete-files.yaml"],
+		_escData["/eonza-assets/scripts/encrypt-file.yaml"],
 		_escData["/eonza-assets/scripts/error.eonza.yaml"],
 		_escData["/eonza-assets/scripts/exit.eonza.yaml"],
 		_escData["/eonza-assets/scripts/file-confirmation.yaml"],
