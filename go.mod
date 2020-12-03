@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/alecthomas/chroma v0.8.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gentee/gentee v1.18.0
+	github.com/gentee/gentee v1.19.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/kataras/golog v0.1.5
 	github.com/labstack/echo/v4 v4.1.17
