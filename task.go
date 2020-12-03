@@ -518,14 +518,18 @@ func formHandle(c echo.Context) error {
 		if err = json.Unmarshal([]byte(formData[0].Data), &formParams); err != nil {
 			return jsonError(c, err)
 		}
+		psw := make(map[string]bool)
 		for _, item := range formParams {
 			var options es.ScriptOptions
+			ptype, _ := strconv.ParseInt(item.Type, 10, 62)
+			if es.ParamType(ptype) == es.PPassword {
+				psw[item.Var] = true
+			}
 			if len(item.Options) == 0 {
 				continue
 			}
-			ptype, _ := strconv.ParseInt(item.Type, 10, 62)
 			switch es.ParamType(ptype) {
-			case es.PNumber, es.PSingleText, es.PTextarea:
+			case es.PNumber, es.PSingleText, es.PTextarea, es.PPassword:
 				if err = json.Unmarshal([]byte(item.Options), &options); err != nil {
 					return jsonError(c, err)
 				}
@@ -536,6 +540,9 @@ func formHandle(c echo.Context) error {
 		}
 		for key, val := range form.Values {
 			script.SetVar(key, fmt.Sprint(val))
+			if psw[key] {
+				form.Values[key] = `***`
+			}
 		}
 		if forLog, err := json.Marshal(form.Values); err != nil {
 			script.LogOutput(script.LOG_ERROR, err.Error())

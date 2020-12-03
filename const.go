@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "1.6.0"
+	Version = "1.7.0"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
@@ -29,6 +29,7 @@ const (
 	TimeFormat  = `2006/01/02 15:04:05`
 	TimeoutOpen = 4000
 	SourceCode  = `source-code`
+	Return      = `return.eonza`
 	DefLang     = 0
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
