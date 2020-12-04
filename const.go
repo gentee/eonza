@@ -48,12 +48,15 @@ type AppInfo struct {
 	Issue     string
 }
 
-var VerType string
+var (
+	VerType     string
+	CompileDate string
+)
 
 func GetVersion() string {
 	ret := Version
 	if VerType == `beta` {
 		ret += `b`
 	}
-	return ret + `+1`
+	return ret
 }
