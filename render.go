@@ -9,6 +9,7 @@ import (
 	"eonza/lib"
 	"fmt"
 	"html/template"
+	"os"
 	"strings"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 
 type Render struct {
 	App        AppInfo
+	AppPath    string
 	Version    string
 	Develop    bool
 	Playground bool
@@ -119,6 +121,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		data = renderScript
 	} else {
 		render.App = appInfo
+		render.AppPath = strings.Join(os.Args, ` `)
 		render.Version = GetVersion()
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground

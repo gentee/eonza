@@ -168,7 +168,7 @@ func exitHandle(c echo.Context) error {
 	if cfg.playground {
 		return jsonError(c, `Access denied`)
 	}
-	golog.Info(`Finish`)
+	golog.Info(`Shutdown`)
 	stopchan <- os.Interrupt
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
