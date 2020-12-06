@@ -28,6 +28,7 @@ type Settings struct {
 	Constants      map[string]string `json:"constants"`
 	PasswordHash   []byte            `json:"passwordhash"`
 	NotAskPassword bool              `json:"notaskpassword"`
+	Title          string            `json:"title"`
 }
 
 // Storage contains all application data

@@ -22,6 +22,7 @@ type Render struct {
 	AppPath     string
 	Version     string
 	CompileDate string
+	Title       string
 	Develop     bool
 	Playground  bool
 	Langs       map[string]string
@@ -125,6 +126,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.AppPath = strings.Join(os.Args, ` `)
 		render.Version = GetVersion()
 		render.CompileDate = CompileDate
+		render.Title = storage.Settings.Title
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground
 		render.Lang = GetLangCode(c.(*Auth).User)
