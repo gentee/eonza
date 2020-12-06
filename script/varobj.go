@@ -12,6 +12,35 @@ import (
 	"github.com/gentee/gentee/vm"
 )
 
+func MapCondition(rt *vm.Runtime, item *core.Map) (int64, error) {
+	var (
+		cond ConditionItem
+		ok   bool
+		tmp  interface{}
+	)
+
+	if tmp, ok = item.Data["var"]; ok {
+		cond.Var = fmt.Sprint(tmp.(*core.Obj).Data)
+	}
+	if tmp, ok = item.Data["cmp"]; ok {
+		cond.Cmp = fmt.Sprint(tmp.(*core.Obj).Data)
+	}
+	if tmp, ok = item.Data["value"]; ok {
+		cond.Value = fmt.Sprint(tmp.(*core.Obj).Data)
+	}
+	if tmp, ok = item.Data["not"]; ok {
+		not := fmt.Sprint(tmp.(*core.Obj).Data)
+		cond.Not = !(len(not) == 0 || not == `0` || not == `false`)
+	}
+	if err := IsCond(rt, &cond); err != nil {
+		return 0, err
+	}
+	if cond.result {
+		return 1, nil
+	}
+	return 0, nil
+}
+
 func ObjToStr(key string) (string, bool) {
 	if len(dataScript.ObjVars) > 0 {
 		if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {

@@ -31,6 +31,7 @@ const (
 	PHTMLText
 	PButton
 	PDynamic
+	PPassword
 )
 
 type ScriptItem struct {
@@ -117,9 +118,11 @@ var (
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(str)`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
+		{Prototype: `Condition(map.obj) bool`, Object: MapCondition},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
 		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
+		{Prototype: `IsEntry() bool`, Object: IsEntry},
 		{Prototype: `IsVarObj(str) bool`, Object: IsVarObj},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
 		{Prototype: `LogOutput(int,str)`, Object: LogOutput},
@@ -138,13 +141,14 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
+		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
 	}
 )
 
 func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	var (
-		i      int64
-		val, s string
+		i              int64
+		val, s, varVal string
 	)
 	if len(item.Var) == 0 && len(item.Value) == 0 {
 		return fmt.Errorf(`empty variable in If Statement`)
@@ -152,24 +156,33 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	if val, err = Macro(item.Value); err != nil {
 		return
 	}
+	if len(item.Var) > 0 {
+		if varVal, err = GetVar(item.Var); err != nil {
+			if !strings.ContainsAny(item.Var, ` #[.`) {
+				return
+			}
+			var found bool
+			if varVal, found = ReplaceObj(item.Var); !found {
+				if varVal, err = Macro(item.Var); err != nil {
+					return
+				}
+			}
+		}
+	}
 	switch item.Cmp {
 	case `equal`:
 		if len(item.Value) == 0 {
-			if i, err = GetVarBool(item.Var); err != nil {
-				return
+			var i int64
+			if len(varVal) > 0 && varVal != `0` && varVal != `false` {
+				i = 1
 			}
 			item.result = i == 0
 		} else {
-			if s, err = GetVar(item.Var); err != nil {
-				return
-			}
-			item.result = s == val
+			item.result = varVal == val
 		}
 	case `fileexists`:
 		if len(item.Var) > 0 {
-			if s, err = GetVar(item.Var); err != nil {
-				return
-			}
+			s = varVal
 		} else {
 			s = val
 		}
@@ -179,18 +192,13 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 		item.result = i != 0
 	case `envexists`:
 		if len(item.Var) > 0 {
-			if s, err = GetVar(item.Var); err != nil {
-				return
-			}
+			s = varVal
 		} else {
 			s = val
 		}
 		_, item.result = os.LookupEnv(s)
 	case `match`:
-		if s, err = GetVar(item.Var); err != nil {
-			return
-		}
-		i, err = vm.MatchºStrStr(s, val)
+		i, err = vm.MatchºStrStr(varVal, val)
 		item.result = i != 0
 	default:
 		return fmt.Errorf(`Unknown comparison type: %s`, item.Cmp)
@@ -328,6 +336,15 @@ func InitCmd(name string, pars ...interface{}) bool {
 	msg := fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `))
 	LogOutput(level, msg)
 	return true
+}
+
+func IsEntry() int64 {
+	dataScript.Mutex.Lock()
+	defer dataScript.Mutex.Unlock()
+	if len(dataScript.Vars) == 1 {
+		return 1
+	}
+	return 0
 }
 
 func IsVar(key string) int64 {
@@ -580,6 +597,9 @@ func setRawVar(shift int, name, value string) error {
 }
 
 func ResultVar(name, value string) error {
+	if IsEntry() == 1 {
+		return nil
+	}
 	return setRawVar(1, name, value)
 }
 

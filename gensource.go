@@ -94,7 +94,7 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 			!(strings.HasPrefix(value, `bool(`) && strings.HasSuffix(value, `)`)) {
 			value = src.Value(value) + `?`
 		}
-	case es.PTextarea, es.PSingleText:
+	case es.PTextarea, es.PSingleText, es.PPassword:
 		if script.Settings.Name != SourceCode {
 			value = src.Value(value)
 		}
@@ -196,7 +196,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 		isEmpty := len(value) == 0
 		ptype, value = src.getTypeValue(script, par, value)
 		switch par.Type {
-		case es.PTextarea, es.PSingleText, es.PNumber:
+		case es.PTextarea, es.PSingleText, es.PNumber, es.PPassword:
 			if isEmpty && par.Options.Required && len(node.Name) != 0 {
 				return nil, nil, errField(par.Title)
 			}
@@ -246,11 +246,13 @@ func (src *Source) Predefined(script *Script) (ret string, err error) {
 				}
 			}
 		}
-		data, err = yaml.Marshal(predef)
-		if err != nil {
-			return
+		if len(predef) > 0 {
+			data, err = yaml.Marshal(predef)
+			if err != nil {
+				return
+			}
+			ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
 		}
-		ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
 	}
 	return
 }
@@ -309,7 +311,13 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		ifcond, _ = ifraw.(string)
 		ifcond = processIf(ifcond)
 	}
-	var params []string
+	var (
+		params []string
+		predef string
+	)
+	if predef, err = src.Predefined(script); err != nil {
+		return ``, err
+	}
 	if !src.Linked[idname] || script.Settings.Name == SourceCode || len(node.Children) > 0 {
 		src.Linked[idname] = true
 
@@ -317,12 +325,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		if err != nil {
 			return ``, err
 		}
-		var (
-			code, predef string
-		)
-		if predef, err = src.Predefined(script); err != nil {
-			return ``, err
-		}
+		var code string
 		if script.Settings.Name == SourceCode {
 			code = values[1].Value
 		} else {
@@ -365,12 +368,18 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			}
 			if len(script.Tree) > 0 {
 				code += "\r\ninit(" + strings.Join(vars, `,`) + ")\r\n" + predef
+				code += "try {\r\n"
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
 					return ``, err
 				}
 				code += "\r\n" + tmp
-				code += "\r\ndeinit()"
+				code += `
+	} // try
+	catch err {
+		if ErrID(err) == RETURN : recover
+	}
+	deinit()`
 			}
 		}
 		if script.Settings.LogLevel < es.LOG_INHERIT {
@@ -382,10 +391,9 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			name = `*` + name
 		}
 		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", name, parNames)
-		/*		if len(script.Tree) > 0 || len(predef) > 0 {
-				initcmd += "init()\r\n" + predef
-				code += "\r\ndeinit()"
-			}*/
+		if len(script.Tree) == 0 || len(predef) > 0 {
+			initcmd += "\r\n" + predef
+		}
 		code = initcmd + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"
@@ -400,9 +408,12 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		}
 	}
 	out := fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
+	/*	if script.Settings.Name == Return {
+		out += "     deinit();return\r\n"
+	}*/
 	if len(ifcond) > 0 {
 		out = fmt.Sprintf(`   if %s {
-        %s   }`, ifcond, out)
+        %s   }`+"\r\n", ifcond, out)
 	}
 	return out, nil
 }
@@ -507,11 +518,16 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		}
 	}
 	code = strings.Join(params, "\r\n")
+	code += "\r\ntry {"
 	body, err := src.Tree(script.Tree)
 	if err != nil {
 		return ``, err
 	}
 	body = strings.TrimSpace(strings.ReplaceAll(script.Code, `%body%`, ``)) + "\r\n" + body
+	body += `
+	} catch err {
+		if ErrID(err) == RETURN : recover
+	}`
 
 	var constStr string
 	if len(src.Strings) > 0 {
@@ -523,6 +539,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	}
 	constStr += `const IOTA { LOG_DISABLE
 	LOG_ERROR LOG_WARN LOG_FORM LOG_INFO LOG_DEBUG }
+	const IOTA+500 : RETURN ASSERT
 `
 	return fmt.Sprintf("%s%s\r\nrun {\r\n%s\r\n%s\r\ndeinit()}", constStr, src.Funcs,
 		code, body), nil
