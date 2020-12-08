@@ -261,25 +261,31 @@ func RunServer(options WebSettings) *echo.Echo {
 			if IsScript {
 				setStatus(TaskFailed, err)
 			}
+			if cfg.HTTP.Access != AccessHost && pingHost(options.Port) {
+				lib.Open(fmt.Sprintf("http://%s:%d", Localhost, options.Port))
+			}
 			golog.Fatal(err)
 		}
 	}()
 	if options.Open {
 		go func() {
-			var (
-				body []byte
-			)
-			url := fmt.Sprintf("http://%s:%d", Localhost, options.Port)
-			for string(body) != Success {
+			for !pingHost(options.Port) {
 				time.Sleep(100 * time.Millisecond)
-				resp, err := http.Get(url + `/ping`)
-				if err == nil {
-					body, _ = ioutil.ReadAll(resp.Body)
-					resp.Body.Close()
-				}
 			}
-			lib.Open(url)
+			lib.Open(fmt.Sprintf("http://%s:%d", Localhost, options.Port))
 		}()
 	}
 	return e
+}
+
+func pingHost(port int) bool {
+	var (
+		body []byte
+	)
+	resp, err := http.Get(fmt.Sprintf("http://%s:%d/ping", Localhost, port))
+	if err == nil {
+		body, _ = ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+	}
+	return string(body) == Success
 }
