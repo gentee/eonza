@@ -97,6 +97,7 @@ func main() {
 		if install {
 			return
 		}
+		hideConsole()
 		LoadUsers()
 		defer CloseLog()
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
