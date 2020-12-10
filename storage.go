@@ -29,6 +29,7 @@ type Settings struct {
 	PasswordHash   []byte            `json:"passwordhash"`
 	NotAskPassword bool              `json:"notaskpassword"`
 	Title          string            `json:"title"`
+	HideTray       bool              `json:"hidetray"`
 }
 
 // Storage contains all application data

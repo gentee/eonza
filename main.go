@@ -104,6 +104,7 @@ func main() {
 			golog.Fatal(err)
 		}
 		InitScripts()
+		CreateSysTray()
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,
 			Open: cfg.HTTP.Open,
