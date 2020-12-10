@@ -25,6 +25,7 @@ var (
 type scriptSettings struct {
 	Name     string `json:"name" yaml:"name"`
 	Title    string `json:"title" yaml:"title"`
+	Path     string `json:"path,omitempty" yaml:"path,omitempty"`
 	Desc     string `json:"desc,omitempty" yaml:"desc,omitempty"`
 	LogLevel int    `json:"loglevel" yaml:"loglevel"`
 	Unrun    bool   `json:"unrun,omitempty" yaml:"unrun,omitempty"`
@@ -158,6 +159,10 @@ func (script *Script) Validate() error {
 	}
 	if len(script.Settings.Title) == 0 {
 		return fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `title`))
+	}
+	if len(script.Settings.Path) > 0 {
+		script.Settings.Path = strings.ReplaceAll(script.Settings.Path, "\\", "/")
+		script.Settings.Path = strings.Trim(script.Settings.Path, "/")
 	}
 	return nil
 }

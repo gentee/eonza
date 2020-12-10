@@ -9,6 +9,7 @@ import (
 	"eonza/lib"
 	"fmt"
 	"html/template"
+	"os"
 	"strings"
 	"time"
 
@@ -17,15 +18,18 @@ import (
 )
 
 type Render struct {
-	App        AppInfo
-	Version    string
-	Develop    bool
-	Playground bool
-	Langs      map[string]string
-	Lang       string
-	Login      bool
-	Localhost  bool
-	PortShift  int64
+	App         AppInfo
+	AppPath     string
+	Version     string
+	CompileDate string
+	Title       string
+	Develop     bool
+	Playground  bool
+	Langs       map[string]string
+	Lang        string
+	Login       bool
+	Localhost   bool
+	PortShift   int64
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -119,7 +123,10 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		data = renderScript
 	} else {
 		render.App = appInfo
+		render.AppPath = strings.Join(os.Args, ` `)
 		render.Version = GetVersion()
+		render.CompileDate = CompileDate
+		render.Title = storage.Settings.Title
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground
 		render.Lang = GetLangCode(c.(*Auth).User)

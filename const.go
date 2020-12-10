@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "1.7.0"
+	Version = "1.8.0"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
@@ -48,12 +48,15 @@ type AppInfo struct {
 	Issue     string
 }
 
-var VerType string
+var (
+	VerType     string
+	CompileDate string
+)
 
 func GetVersion() string {
 	ret := Version
 	if VerType == `beta` {
 		ret += `b`
 	}
-	return ret + `+1`
+	return ret
 }
