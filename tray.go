@@ -15,11 +15,17 @@ import (
 	"github.com/kataras/golog"
 )
 
+var isTray bool = true
+
 func CreateSysTray() {
 	if storage.Settings.HideTray /*|| cfg.HTTP.Access == AccessHost*/ {
 		return
 	}
 	go systray.Run(TrayReady, TrayExit)
+}
+
+func HideTray() {
+	systray.Quit()
 }
 
 func TrayExit() {

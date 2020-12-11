@@ -25,6 +25,7 @@ type Render struct {
 	Title       string
 	Develop     bool
 	Playground  bool
+	Tray        bool
 	Langs       map[string]string
 	Lang        string
 	Login       bool
@@ -129,6 +130,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Title = storage.Settings.Title
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground
+		render.Tray = isTray
 		render.Lang = GetLangCode(c.(*Auth).User)
 		render.Langs = make(map[string]string)
 		for i, lang := range langs {
