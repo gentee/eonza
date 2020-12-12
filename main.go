@@ -97,12 +97,14 @@ func main() {
 		if install {
 			return
 		}
+		hideConsole()
 		LoadUsers()
 		defer CloseLog()
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
 		InitScripts()
+		CreateSysTray()
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,
 			Open: cfg.HTTP.Open,
