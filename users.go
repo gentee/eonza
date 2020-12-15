@@ -18,6 +18,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type Fav struct {
+	Name     string `json:"name" yaml:"name"`
+	IsFolder bool   `json:"isfolder" yaml:"isfolder,omitempty"`
+	Children []Fav  `json:"children,omitempty" yaml:"children,omitempty"`
+}
+
 type History struct {
 	Editor []string `yaml:"editor"`
 	Run    []string `yaml:"run"`
@@ -28,6 +34,7 @@ type UserSettings struct {
 	ID      uint32  `json:"id" yaml:"id"`
 	Lang    string  `json:"lang" yaml:"lang"`
 	History History `json:"history" yaml:"history"`
+	Favs    []Fav   `json:"favs" yaml:"favs"`
 }
 
 // User stores user's parameters
@@ -187,4 +194,11 @@ func SaveUser(id uint32) error {
 	}
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
 		storage.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
+}
+
+func RootUserSettings() UserSettings {
+	for _, user := range storage.Users {
+		return userSettings[user.ID]
+	}
+	return UserSettings{}
 }

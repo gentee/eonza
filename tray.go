@@ -39,11 +39,15 @@ func TrayReady() {
 	}
 	systray.SetTitle(title)
 	systray.SetTooltip(appInfo.Title)
-
-	open := Lang(0, `openbrowser`)
+	var langId int
+	us := RootUserSettings()
+	if len(us.Lang) > 0 {
+		langId = langsId[us.Lang]
+	}
+	open := Lang(langId, `openbrowser`)
 	mOpen := systray.AddMenuItem(open, open)
 	systray.AddSeparator()
-	shutdown := Lang(0, `shutdown`)
+	shutdown := Lang(langId, `shutdown`)
 	mQuit := systray.AddMenuItem(shutdown, shutdown)
 	go func() {
 		for {

@@ -87,3 +87,21 @@ func setPasswordHandle(c echo.Context) error {
 	}
 	return jsonSuccess(c)
 }
+
+func saveFavsHandle(c echo.Context) error {
+	var (
+		favs []Fav
+		err  error
+	)
+	if err = c.Bind(&favs); err != nil {
+		return jsonError(c, err)
+	}
+	id := c.(*Auth).User.ID
+	user := userSettings[id]
+	user.Favs = favs
+	userSettings[id] = user
+	if err = SaveUser(id); err != nil {
+		return jsonError(c, err)
+	}
+	return jsonSuccess(c)
+}
