@@ -78,35 +78,35 @@ func LoadUsers() error {
 	return err
 }
 
-func NewUser(nickname string) error {
+func NewUser(nickname string) (uint32, error) {
 	user := User{
 		Nickname: nickname,
 	}
 	if !lib.ValidateSysName(nickname) {
-		return fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
+		return 0, fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
 	}
 	for _, item := range storage.Users {
 		if item.Nickname == nickname {
-			return fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
+			return 0, fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
 		}
 
 	}
 	private, public, err := lib.GenerateKeys()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	user.PublicKey = public
 	user.ID = crc32.ChecksumIEEE(private)
 	if err = ioutil.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
 		[]byte(hex.EncodeToString(private)), 0777 /*os.ModePerm*/); err != nil {
-		return err
+		return 0, err
 	}
 	storage.Users[user.ID] = &user
 	userSettings[user.ID] = UserSettings{
 		ID:   user.ID,
 		Lang: appInfo.Lang,
 	}
-	return nil
+	return user.ID, nil
 }
 
 // AddHistoryEditor adds the history item to the user's settings

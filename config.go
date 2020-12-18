@@ -180,7 +180,21 @@ func Install() {
 	if err != nil {
 		golog.Fatal(err)
 	}
-	if err = NewUser(`root`); err != nil {
+	var userid uint32
+	if userid, err = NewUser(`root`); err != nil {
+		golog.Fatal(err)
+	}
+	rootSettings := userSettings[userid]
+	rootSettings.Favs = []Fav{
+		{Name: `welcome`},
+		{Name: `tests`},
+		{Name: `Tools`, IsFolder: true, Children: []Fav{
+			{Name: `copy-files`},
+			{Name: `delete-files`},
+		}},
+	}
+	userSettings[userid] = rootSettings
+	if err = SaveUser(userid); err != nil {
 		golog.Fatal(err)
 	}
 	if err = SaveStorage(); err != nil {
