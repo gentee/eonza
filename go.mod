@@ -8,7 +8,7 @@ require (
 	github.com/alecthomas/repr v0.0.0-20201120212035-bb82daffcca2 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dlclark/regexp2 v1.4.0 // indirect
-	github.com/gentee/gentee v1.19.0
+	github.com/gentee/gentee v1.20.0
 	github.com/gentee/systray v1.3.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/kataras/golog v0.1.6

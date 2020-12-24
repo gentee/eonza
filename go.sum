@@ -36,6 +36,8 @@ github.com/dlclark/regexp2 v1.4.0 h1:F1rxgk7p4uKjwIQxBs9oAXe5CqrXlCduYEJvrF4u93E
 github.com/dlclark/regexp2 v1.4.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/gentee/gentee v1.19.0 h1:REr9QHbOdPhV2mSYiGgVsmtgyJUrXD4K4ouuPQp8CQ8=
 github.com/gentee/gentee v1.19.0/go.mod h1:Qyf1jQ8a/yUyPEHrl1RTHKNSTJ923lsPnghIawrdDN4=
+github.com/gentee/gentee v1.20.0 h1:t2UMhmKeNPsJSKxFAj3G6MnJ3D4H0Nhao8vRbwoiPZo=
+github.com/gentee/gentee v1.20.0/go.mod h1:Qyf1jQ8a/yUyPEHrl1RTHKNSTJ923lsPnghIawrdDN4=
 github.com/gentee/systray v1.3.0 h1:LQAgBqmPn8d7R97LDtCjjXBbxzaJuDqXWpzaZvQmAH0=
 github.com/gentee/systray v1.3.0/go.mod h1:kRYUt6YMFVPJdzpimbAH6dkLuZfQSzdcCQUhBiT5auA=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
