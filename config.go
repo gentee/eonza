@@ -190,7 +190,7 @@ func Install() {
 		{Name: `tests`},
 		{Name: `Tools`, IsFolder: true, Children: []Fav{
 			{Name: `copy-files`},
-			{Name: `delete-files`},
+			{Name: `create-archive`},
 		}},
 	}
 	userSettings[userid] = rootSettings
