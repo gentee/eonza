@@ -18,6 +18,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type Fav struct {
+	Name     string `json:"name" yaml:"name"`
+	IsFolder bool   `json:"isfolder" yaml:"isfolder,omitempty"`
+	Children []Fav  `json:"children,omitempty" yaml:"children,omitempty"`
+}
+
 type History struct {
 	Editor []string `yaml:"editor"`
 	Run    []string `yaml:"run"`
@@ -28,6 +34,7 @@ type UserSettings struct {
 	ID      uint32  `json:"id" yaml:"id"`
 	Lang    string  `json:"lang" yaml:"lang"`
 	History History `json:"history" yaml:"history"`
+	Favs    []Fav   `json:"favs" yaml:"favs"`
 }
 
 // User stores user's parameters
@@ -71,35 +78,35 @@ func LoadUsers() error {
 	return err
 }
 
-func NewUser(nickname string) error {
+func NewUser(nickname string) (uint32, error) {
 	user := User{
 		Nickname: nickname,
 	}
 	if !lib.ValidateSysName(nickname) {
-		return fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
+		return 0, fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
 	}
 	for _, item := range storage.Users {
 		if item.Nickname == nickname {
-			return fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
+			return 0, fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
 		}
 
 	}
 	private, public, err := lib.GenerateKeys()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	user.PublicKey = public
 	user.ID = crc32.ChecksumIEEE(private)
 	if err = ioutil.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
 		[]byte(hex.EncodeToString(private)), 0777 /*os.ModePerm*/); err != nil {
-		return err
+		return 0, err
 	}
 	storage.Users[user.ID] = &user
 	userSettings[user.ID] = UserSettings{
 		ID:   user.ID,
 		Lang: appInfo.Lang,
 	}
-	return nil
+	return user.ID, nil
 }
 
 // AddHistoryEditor adds the history item to the user's settings
@@ -187,4 +194,11 @@ func SaveUser(id uint32) error {
 	}
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
 		storage.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
+}
+
+func RootUserSettings() UserSettings {
+	for _, user := range storage.Users {
+		return userSettings[user.ID]
+	}
+	return UserSettings{}
 }

@@ -8,12 +8,15 @@ package main
 
 import (
 	"eonza/lib"
+	es "eonza/script"
 	"fmt"
 	"os"
 
-	"github.com/getlantern/systray"
+	"github.com/gentee/systray"
 	"github.com/kataras/golog"
 )
+
+var isTray bool = true
 
 func CreateSysTray() {
 	if storage.Settings.HideTray /*|| cfg.HTTP.Access == AccessHost*/ {
@@ -22,10 +25,16 @@ func CreateSysTray() {
 	go systray.Run(TrayReady, TrayExit)
 }
 
+func HideTray() {
+	systray.Quit()
+}
+
 func TrayExit() {
 }
 
 func TrayReady() {
+	chanFav := make(chan *systray.MenuItem)
+
 	systray.SetIcon(WebAsset(`favicon.ico`))
 	title := storage.Settings.Title
 	if len(title) == 0 {
@@ -33,15 +42,55 @@ func TrayReady() {
 	}
 	systray.SetTitle(title)
 	systray.SetTooltip(appInfo.Title)
-
-	open := Lang(0, `openbrowser`)
+	var langId int
+	us := RootUserSettings()
+	if len(us.Lang) > 0 {
+		langId = langsId[us.Lang]
+	}
+	glob := &langRes[langId]
+	scriptTitle := func(name string) string {
+		ret := name
+		if iscript := getScript(name); iscript != nil {
+			ret = es.ReplaceVars(iscript.Settings.Title, iscript.Langs[us.Lang], glob)
+		}
+		if len(ret) == 0 {
+			return name
+		}
+		return ret
+	}
+	for i, item := range us.Favs {
+		var m *systray.MenuItem
+		if (item.IsFolder && len(item.Children) == 0) || i > 15 {
+			continue
+		}
+		m = systray.AddMenuItemChan(scriptTitle(item.Name), item.Name, chanFav)
+		if item.IsFolder {
+			for j, sub := range item.Children {
+				if j > 15 {
+					break
+				}
+				m.AddSubMenuItemChan(scriptTitle(sub.Name), sub.Name, chanFav)
+			}
+		}
+	}
+	systray.AddSeparator()
+	open := Lang(langId, `openbrowser`)
 	mOpen := systray.AddMenuItem(open, open)
 	systray.AddSeparator()
-	shutdown := Lang(0, `shutdown`)
+	shutdown := Lang(langId, `shutdown`)
 	mQuit := systray.AddMenuItem(shutdown, shutdown)
 	go func() {
+		var menuItem *systray.MenuItem
 		for {
 			select {
+			case menuItem = <-chanFav:
+				_, name := menuItem.Name()
+				if len(name) > 0 {
+					_, err := request(fmt.Sprintf("%d/api/run?name=%s", cfg.HTTP.Port, name))
+					if err != nil {
+						golog.Error(err)
+					}
+				}
 			case <-mOpen.ClickedCh:
 				lib.Open(fmt.Sprintf("http://%s:%d", Localhost, cfg.HTTP.Port))
 			case <-mQuit.ClickedCh:

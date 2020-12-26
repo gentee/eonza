@@ -6,5 +6,10 @@
 
 package main
 
+var isTray bool
+
 func CreateSysTray() {
+}
+
+func HideTray() {
 }

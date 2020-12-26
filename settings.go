@@ -31,12 +31,14 @@ func settingsHandle(c echo.Context) error {
 
 func saveSettingsHandle(c echo.Context) error {
 	var (
-		options Options
-		err     error
+		options  Options
+		err      error
+		hideTray bool
 	)
 	if err = c.Bind(&options); err != nil {
 		return jsonError(c, err)
 	}
+	hideTray = storage.Settings.HideTray
 	storage.Settings = options.Common
 	if err = SaveStorage(); err != nil {
 		return jsonError(c, err)
@@ -45,7 +47,9 @@ func saveSettingsHandle(c echo.Context) error {
 	user := userSettings[id]
 	user.Lang = options.User.Lang
 	userSettings[id] = user
-
+	if isTray && !hideTray && storage.Settings.HideTray {
+		HideTray()
+	}
 	if err = SaveUser(id); err != nil {
 		return jsonError(c, err)
 	}
@@ -79,6 +83,24 @@ func setPasswordHandle(c echo.Context) error {
 	storage.Settings.PasswordHash = hash
 	storage.PassCounter++
 	if err = SaveStorage(); err != nil {
+		return jsonError(c, err)
+	}
+	return jsonSuccess(c)
+}
+
+func saveFavsHandle(c echo.Context) error {
+	var (
+		favs []Fav
+		err  error
+	)
+	if err = c.Bind(&favs); err != nil {
+		return jsonError(c, err)
+	}
+	id := c.(*Auth).User.ID
+	user := userSettings[id]
+	user.Favs = favs
+	userSettings[id] = user
+	if err = SaveUser(id); err != nil {
 		return jsonError(c, err)
 	}
 	return jsonSuccess(c)

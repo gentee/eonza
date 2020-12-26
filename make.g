@@ -11,6 +11,7 @@ run {
     $ /home/ak/go/bin/esc -ignore "\.git|LICENSE|README.md" -o assets.go ../eonza-assets 
 //    $ go install -ldflags "-s -w" -tags "eonza standard"
     $ go install -tags tray -ldflags "-s -w -X main.VerType=%{vertype} -X main.CompileDate=%{Format(`YYYY-MM-DD`,Now())}"
+//    $ go install -ldflags "-s -w -X main.VerType=%{vertype} -X main.CompileDate=%{Format(`YYYY-MM-DD`,Now())}"
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/eonza
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
     $ /home/ak/app/eonza-dev/eonza
