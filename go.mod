@@ -9,7 +9,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/gentee/gentee v1.20.0
-	github.com/gentee/systray v1.3.0
+	github.com/gentee/systray v1.3.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/kataras/golog v0.1.6
 	github.com/kr/text v0.2.0 // indirect
