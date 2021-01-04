@@ -142,6 +142,7 @@ var (
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
+		{Prototype: `CopyName(str) str`, Object: CopyName},
 		{Prototype: `CloseLines(handle)`, Object: CloseLines},
 		{Prototype: `GetLine(handle) str`, Object: GetLine},
 		{Prototype: `ReadLines(str) handle`, Object: ReadLines},

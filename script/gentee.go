@@ -6,10 +6,14 @@ package script
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -32,6 +36,38 @@ func YamlToMap(in string) (*core.Map, error) {
 		return nil, err
 	}
 	return ret.(*core.Map), nil
+}
+
+func CopyName(rt *vm.Runtime, fname string) (string, error) {
+	var (
+		err error
+		i   int
+	)
+	if !filepath.IsAbs(fname) {
+		fname, err = filepath.Abs(fname)
+		if err != nil {
+			return ``, err
+		}
+	}
+	dir := filepath.Dir(fname)
+	base := strings.SplitN(filepath.Base(fname), `.`, 2)
+	if len(base) == 1 {
+		base = append(base, ``)
+	} else {
+		base[1] = `.` + base[1]
+	}
+	for {
+		i++
+		exist, err := vm.ExistFile(rt, fname)
+		if err != nil {
+			return ``, err
+		}
+		if exist == 0 {
+			break
+		}
+		fname = filepath.Join(dir, fmt.Sprintf("%s (%d)%s", base[0], i, base[1]))
+	}
+	return fname, nil
 }
 
 func CloseLines(flines *FileLines) error {
