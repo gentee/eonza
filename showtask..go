@@ -18,7 +18,7 @@ func showTaskHandle(c echo.Context) error {
 		return jsonError(c, fmt.Errorf(`task %d has not been found`, idtask))
 	}
 	if item := getScript(ptask.Name); item != nil {
-		c.Set(`Title`, item.Settings.Title)
+		c.Set(`Title`, ScriptLang(item, GetLangCode(c.(*Auth).User), item.Settings.Title))
 	} else {
 		c.Set(`Title`, ptask.Name)
 	}

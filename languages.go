@@ -5,7 +5,9 @@
 package main
 
 import (
+	es "eonza/script"
 	"fmt"
+	"strings"
 
 	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
@@ -135,4 +137,14 @@ func RenderLang(input []rune, idLang int) string {
 		result = append(result, name...)
 	}
 	return string(result)
+}
+
+func ScriptLang(script *Script, langCode, text string) string {
+	if strings.Contains(text, `#`) {
+		text = es.ReplaceVars(text, script.Langs[langCode], &langRes[langsId[langCode]])
+		if langCode != LangDefCode && strings.Contains(text, `#`) {
+			text = es.ReplaceVars(text, script.Langs[LangDefCode], &langRes[langsId[LangDefCode]])
+		}
+	}
+	return text
 }

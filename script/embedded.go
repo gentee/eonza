@@ -141,7 +141,12 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
-		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
+		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
+		{Prototype: `CopyName(str) str`, Object: CopyName},
+		{Prototype: `CloseLines(handle)`, Object: CloseLines},
+		{Prototype: `GetLine(handle) str`, Object: GetLine},
+		{Prototype: `ReadLines(str) handle`, Object: ReadLines},
+		{Prototype: `ScanLines(handle) bool`, Object: ScanLines},
 	}
 )
 
@@ -319,11 +324,15 @@ func Init(pars ...interface{}) {
 func InitCmd(name string, pars ...interface{}) bool {
 	params := make([]string, len(pars))
 	for i, par := range pars {
+		val := fmt.Sprint(par)
+		if len(val) > 64 {
+			val = val[:64] + `...`
+		}
 		switch par.(type) {
 		case string:
-			params[i] = `"` + fmt.Sprint(par) + `"`
+			params[i] = `"` + val + `"`
 		default:
-			params[i] = fmt.Sprint(par)
+			params[i] = val
 		}
 	}
 	level := int64(LOG_DEBUG)
