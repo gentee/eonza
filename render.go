@@ -27,6 +27,7 @@ type Render struct {
 	Playground  bool
 	Tray        bool
 	Langs       map[string]string
+	LangRes     map[string]map[string]string
 	Lang        string
 	Login       bool
 	Localhost   bool
@@ -132,11 +133,35 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground
 		render.Tray = isTray
-		render.Lang = GetLangCode(c.(*Auth).User)
 		render.Langs = make(map[string]string)
+		if c.Request().URL.Path == `install` {
+			render.LangRes = make(map[string]map[string]string)
+			render.Lang = LangDefCode
+			for _, item := range strings.Split(c.Request().Header.Get(`Accept-Language`), `,`) {
+				if len(item) >= 2 {
+					if _, ok := langsId[item[:2]]; ok {
+						render.Lang = item[:2]
+						break
+					}
+				}
+			}
+			for i, lang := range langs {
+				render.LangRes[lang] = make(map[string]string)
+				for _, key := range []string{`continue`, `sellang`} {
+					v := langRes[i][key]
+					if len(v) == 0 {
+						v = langRes[0][key]
+					}
+					render.LangRes[lang][key] = v
+				}
+			}
+		} else {
+			render.Lang = GetLangCode(c.(*Auth).User)
+		}
 		for i, lang := range langs {
 			render.Langs[lang] = Lang(i, `native`)
 		}
+
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
 		render.PortShift = cfg.PortShift
