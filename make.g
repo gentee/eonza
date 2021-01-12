@@ -14,11 +14,11 @@ run {
 //    $ go install -ldflags "-s -w -X main.VerType=%{vertype} -X main.CompileDate=%{Format(`YYYY-MM-DD`,Now())}"
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/eonza
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza/eonza
-    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-install/eonza
-    $ rm /home/ak/app/eonza-install/eonza.yaml
-    $ rm /home/ak/app/eonza-install/eonza.eox
-    //$ /home/ak/app/eonza-dev/eonza
-    $ /home/ak/app/eonza-install/eonza
+//    $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-install/eonza
+//    $ rm /home/ak/app/eonza-install/eonza.yaml
+//    $ rm /home/ak/app/eonza-install/eonza.eox
+    $ /home/ak/app/eonza-dev/eonza
+//    $ /home/ak/app/eonza-install/eonza
     
     $ cp ${GOPATH}/bin/eonza /home/ak/app/eonza-dev/ez
 //    $ /home/ak/app/eonza-dev/ez con
