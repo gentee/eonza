@@ -33,6 +33,7 @@ type Render struct {
 	Localhost   bool
 	PortShift   int64
 	Favs        []Fav
+	Nfy         *NfyResponse
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -166,6 +167,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Localhost = cfg.HTTP.Host == Localhost
 		render.PortShift = cfg.PortShift
 		render.Favs = userSettings[c.(*Auth).User.ID].Favs
+		render.Nfy = NfyList(false)
 		data = render
 	}
 

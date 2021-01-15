@@ -103,6 +103,7 @@ func main() {
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
+		LoadNotifications()
 		InitScripts()
 		CreateSysTray()
 		e = RunServer(WebSettings{
