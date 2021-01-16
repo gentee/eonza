@@ -5,9 +5,11 @@
 package script
 
 import (
+	"bytes"
 	"encoding/json"
 	"eonza/lib"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/vm"
+	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,6 +36,12 @@ const (
 	PDynamic
 	PPassword
 )
+
+type PostNfy struct {
+	TaskID uint32
+	Text   string `json:"text"`
+	Script string
+}
 
 type ScriptItem struct {
 	Title string `json:"title" yaml:"title"`
@@ -139,6 +148,7 @@ var (
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
+		{Prototype: `SendNotification(str)`, Object: SendNotification},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
@@ -654,4 +664,24 @@ func InitEngine() error {
 	return gentee.Customize(&gentee.Custom{
 		Embedded: customLib,
 	})
+}
+
+func SendNotification(msg string) error {
+	jsonValue, err := json.Marshal(PostNfy{
+		TaskID: scriptTask.Header.TaskID,
+		Text:   msg,
+		Script: scriptTask.Header.Name,
+	})
+	if err == nil {
+		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/notification",
+			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			golog.Error(err)
+		} else {
+			resp.Body.Close()
+		}
+	} else {
+		return err
+	}
+	return nil
 }

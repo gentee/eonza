@@ -7,13 +7,18 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"eonza/lib"
+	"fmt"
 	"hash/crc64"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
+
+	es "eonza/script"
 
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
@@ -33,9 +38,11 @@ type NfyResponse struct {
 type Nfy struct {
 	Text string `json:"text"`
 	Time string `json:"time"`
+	Hash string `json:"hash"`
 }
 
 type Notification struct {
+	Hash uint64
 	Text string
 	Time time.Time
 }
@@ -69,17 +76,20 @@ func LoadNotifications() {
 		golog.Fatal(err)
 	}
 	for i, item := range nfyData.List {
-		crc := crc64.Checksum([]byte(item.Text), CRCTable)
-		nfyHash[crc] = i
+		nfyHash[item.Hash] = i
 	}
 }
 
-func NewNotification(nfy *Notification) error {
+func NewNotification(nfy *Notification) (err error) {
+	if len(nfy.Text) == 0 {
+		return
+	}
 	nfyMutex.Lock()
 	defer nfyMutex.Unlock()
 	nfy.Time = time.Now()
-	crc := crc64.Checksum([]byte(nfy.Text), CRCTable)
-	if i, ok := nfyHash[crc]; ok {
+	nfy.Hash = crc64.Checksum([]byte(nfy.Text), CRCTable)
+	fmt.Println(`new`, nfy.Text)
+	if i, ok := nfyHash[nfy.Hash]; ok {
 		nlen := len(nfyData.List) - 1
 		if i < nlen {
 			copy(nfyData.List[i:], nfyData.List[i+1:])
@@ -92,10 +102,27 @@ func NewNotification(nfy *Notification) error {
 	} else {
 		nfyData.Unread++
 	}
-	nfyHash[crc] = len(nfyData.List)
+	nfyHash[nfy.Hash] = len(nfyData.List)
 	nfyData.List = append(nfyData.List, nfy)
-
-	return saveNotifications()
+	fmt.Println(`All`, nfyData.List, nfyData.List[0])
+	if err = saveNotifications(); err == nil {
+		var out []byte
+		if out, err = json.Marshal(NfyList(false)); err == nil {
+			cmd := WsCmd{
+				//		    TaskID:   postNfy.TaskID,
+				Cmd:     WcNotify,
+				Message: string(out),
+			}
+			for id, client := range clients {
+				err := client.Conn.WriteJSON(cmd)
+				if err != nil {
+					client.Conn.Close()
+					delete(clients, id)
+				}
+			}
+		}
+	}
+	return err
 }
 
 func saveNotifications() error {
@@ -118,9 +145,6 @@ func saveNotifications() error {
 }
 
 func NfyList(clear bool) *NfyResponse {
-	nfyMutex.Lock()
-	defer nfyMutex.Unlock()
-
 	nlen := len(nfyData.List)
 	slen := nlen
 	if slen > NfyLimit {
@@ -128,9 +152,11 @@ func NfyList(clear bool) *NfyResponse {
 	}
 	ret := make([]Nfy, slen)
 	for i := 0; i < slen; i++ {
+		item := nfyData.List[nlen-i-1]
 		ret[i] = Nfy{
-			Text: nfyData.List[nlen-i-1].Text,
-			Time: nfyData.List[nlen-i-1].Time.Format(TimeFormat),
+			Hash: strconv.FormatUint(item.Hash, 10),
+			Text: item.Text,
+			Time: item.Time.Format(TimeFormat),
 		}
 	}
 	resp := NfyResponse{
@@ -144,5 +170,23 @@ func NfyList(clear bool) *NfyResponse {
 }
 
 func nfyHandle(c echo.Context) error {
+	nfyMutex.Lock()
+	defer nfyMutex.Unlock()
 	return c.JSON(http.StatusOK, NfyList(true))
+}
+
+func notificationHandle(c echo.Context) error {
+	var (
+		postNfy es.PostNfy
+		err     error
+	)
+	if err = c.Bind(&postNfy); err != nil {
+		return jsonError(c, err)
+	}
+	if err = NewNotification(&Notification{
+		Text: postNfy.Text,
+	}); err != nil {
+		return jsonError(c, err)
+	}
+	return jsonSuccess(c)
 }
