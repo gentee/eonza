@@ -33,6 +33,7 @@ const (
 	WcLogout          // log output
 	WcForm            // form output
 	WcProgress        // progress bar
+	WcNotify          // notification
 )
 
 const (

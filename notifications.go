@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	NfyExt = `nfy`
+	NfyExt   = `nfy`
+	NfyLimit = 25
 )
 
 type NfyResponse struct {
@@ -93,6 +94,7 @@ func NewNotification(nfy *Notification) error {
 	}
 	nfyHash[crc] = len(nfyData.List)
 	nfyData.List = append(nfyData.List, nfy)
+
 	return saveNotifications()
 }
 
@@ -100,9 +102,16 @@ func saveNotifications() error {
 	var (
 		data bytes.Buffer
 		err  error
+		infy Notifications
 	)
 	enc := gob.NewEncoder(&data)
-	if err = enc.Encode(nfyData); err != nil {
+	infy.Unread = nfyData.Unread
+	if len(nfyData.List) > 4*NfyLimit {
+		infy.List = nfyData.List[len(nfyData.List)-4*NfyLimit:]
+	} else {
+		infy.List = nfyData.List
+	}
+	if err = enc.Encode(infy); err != nil {
 		return err
 	}
 	return ioutil.WriteFile(lib.ChangeExt(cfg.path, NfyExt), data.Bytes(), 0777 /*os.ModePerm*/)
@@ -113,11 +122,15 @@ func NfyList(clear bool) *NfyResponse {
 	defer nfyMutex.Unlock()
 
 	nlen := len(nfyData.List)
-	ret := make([]Nfy, nlen)
-	for i := nlen - 1; i >= 0; i-- {
-		ret[nlen-i-1] = Nfy{
-			Text: nfyData.List[i].Text,
-			Time: nfyData.List[i].Time.Format(TimeFormat),
+	slen := nlen
+	if slen > NfyLimit {
+		slen = NfyLimit
+	}
+	ret := make([]Nfy, slen)
+	for i := 0; i < slen; i++ {
+		ret[i] = Nfy{
+			Text: nfyData.List[nlen-i-1].Text,
+			Time: nfyData.List[nlen-i-1].Time.Format(TimeFormat),
 		}
 	}
 	resp := NfyResponse{
