@@ -261,6 +261,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/notifications", nfyHandle)
 		e.GET("/api/tasks", tasksHandle)
 		e.GET("/api/remove/:id", removeTaskHandle)
+		e.GET("/api/removenfy/:id", removeNfyHandle)
 		e.GET("/api/sys", sysTaskHandle)
 		e.GET("/api/settings", settingsHandle)
 		e.POST("/api/install", installHandle)
