@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -52,15 +53,8 @@ type Notifications struct {
 	List   []*Notification
 }
 
-/*type NfyItem struct {
-	Data Notification
-	Next *NfyItem
-	Prev *NfyItem
-}
-*/
 var (
-	nfyData Notifications
-	//	nfyHash  = make(map[uint64]*NfyItem)
+	nfyData  Notifications
 	nfyMutex = &sync.Mutex{}
 	CRCTable = crc64.MakeTable(crc64.ISO)
 )
@@ -81,16 +75,6 @@ func LoadNotifications() {
 	if err = dec.Decode(&nfyData); err != nil {
 		golog.Fatal(err)
 	}
-	/*	for i := 0; i < nfyData.Count; i++ {
-		item := NfyItem{}
-		if err = dec.Decode(&item.Data); err != nil {
-			golog.Fatal(err)
-		}
-		nfyHash[item.Data.Hash] = &item
-	}*/
-	/*	for i, item := range nfyData.List {
-		nfyHash[item.Hash] = i
-	}*/
 }
 
 func NewNotification(nfy *Notification) (err error) {
@@ -176,7 +160,7 @@ func NfyList(clear bool) *NfyResponse {
 		item := nfyData.List[nlen-i-1]
 		ret[i] = Nfy{
 			Hash: strconv.FormatUint(item.Hash, 10),
-			Text: item.Text,
+			Text: strings.ReplaceAll(item.Text, "\n", "<br>"),
 			Time: item.Time.Format(TimeFormat),
 		}
 	}
@@ -193,7 +177,12 @@ func NfyList(clear bool) *NfyResponse {
 func nfyHandle(c echo.Context) error {
 	nfyMutex.Lock()
 	defer nfyMutex.Unlock()
-	return c.JSON(http.StatusOK, NfyList(true))
+	prev := nfyData.Unread
+	resp := NfyList(true)
+	if nfyData.Unread != prev {
+		saveNotifications()
+	}
+	return c.JSON(http.StatusOK, resp)
 }
 
 func notificationHandle(c echo.Context) error {
@@ -201,6 +190,9 @@ func notificationHandle(c echo.Context) error {
 		postNfy es.PostNfy
 		err     error
 	)
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
 	if err = c.Bind(&postNfy); err != nil {
 		return jsonError(c, err)
 	}
