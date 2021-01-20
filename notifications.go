@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"eonza/lib"
+	"fmt"
 	"hash/crc64"
 	"io/ioutil"
 	"net/http"
@@ -25,7 +26,7 @@ import (
 )
 
 const (
-	NfyExt       = `nfy`
+	NfyExt       = `eon`
 	NfyPageLimit = 25
 	NfyLimit     = 50 // save
 )
@@ -34,6 +35,13 @@ type NfyResponse struct {
 	Unread int    `json:"unread"`
 	List   []Nfy  `json:"list,omitempty"`
 	Error  string `json:"error,omitempty"`
+}
+
+type LatestResponse struct {
+	Version     string `json:"version"`
+	Notify      string `json:"notify"`
+	LastChecked string `json:"lastchecked"`
+	Error       string `json:"error,omitempty"`
 }
 
 type Nfy struct {
@@ -48,9 +56,17 @@ type Notification struct {
 	Time time.Time
 }
 
+type VerUpdate struct {
+	Version     string `json:"version"`
+	Changelog   string `json:"changelog"`
+	Notify      string `json:"notify"`
+	LastChecked time.Time
+}
+
 type Notifications struct {
 	Unread int
 	List   []*Notification
+	Update VerUpdate
 }
 
 var (
@@ -229,4 +245,48 @@ func removeNfyHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
+}
+
+func GetNewVersion() (ret string) {
+	//	lang := RootUserSettings().Lang
+	if len(nfyData.Update.Version) > 0 {
+		ret = fmt.Sprint(`Доступна новая версия <span style="padding: 4px 8px;
+	font-weight: bold;background-color: #ffff00">{{upd.version}}</span><br>
+	<a style="margin-right: 2rem;" :href="upd.changelog" target="_blank" v-if="upd.changelog">История изменений</a>
+	<a :href="[[.App.Homepage]]downloads.html" target="_blank">Скачать</a>`)
+	}
+	return
+}
+
+func CheckUpdates(manual bool) error {
+	//resp, err := http.Get(appInfo.Homepage + `latest`)
+	resp, err := http.Get(`http://localhost:3000/latest`)
+	if err != nil {
+		return err
+	}
+	if body, err := ioutil.ReadAll(resp.Body); err == nil {
+		var upd VerUpdate
+		if err = json.Unmarshal(body, &upd); err == nil {
+			if len(upd.Version) > 0 && upd.Version != Version {
+				nfyData.Update.Version = upd.Version
+				nfyData.Update.Changelog = upd.Changelog
+			}
+		}
+		resp.Body.Close()
+	}
+	nfyMutex.Lock()
+	defer nfyMutex.Unlock()
+	nfyData.Update.LastChecked = time.Now()
+	return saveNotifications()
+}
+
+func latestVerHandle(c echo.Context) error {
+	if err := CheckUpdates(true); err != nil {
+		return jsonError(c, err)
+	}
+	return c.JSON(http.StatusOK, LatestResponse{
+		Version:     nfyData.Update.Version,
+		Notify:      GetNewVersion(),
+		LastChecked: nfyData.Update.LastChecked.Format(TimeFormat),
+	})
 }

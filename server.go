@@ -264,6 +264,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/removenfy/:id", removeNfyHandle)
 		e.GET("/api/sys", sysTaskHandle)
 		e.GET("/api/settings", settingsHandle)
+		e.GET("/api/latest", latestVerHandle)
 		e.POST("/api/install", installHandle)
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)

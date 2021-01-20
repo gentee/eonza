@@ -34,6 +34,7 @@ type Render struct {
 	PortShift   int64
 	Favs        []Fav
 	Nfy         *NfyResponse
+	Update      VerUpdate
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -61,10 +62,18 @@ func Html(par string) template.HTML {
 	return template.HTML(par)
 }
 
+func Time2Str(t time.Time) string {
+	if t.Year() < 1900 {
+		return ``
+	}
+	return t.Format(TimeFormat)
+}
+
 func InitTemplates() {
 	var err error
 	tmpl = template.New(`assets`).Delims(`[[`, `]]`).Funcs(template.FuncMap{
-		"html": Html,
+		"html":     Html,
+		"time2str": Time2Str,
 	})
 	for _, tpl := range _escDirs["../eonza-assets/themes/default/templates"] {
 		fname := tpl.Name()
@@ -168,6 +177,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.PortShift = cfg.PortShift
 		render.Favs = userSettings[c.(*Auth).User.ID].Favs
 		render.Nfy = NfyList(false)
+		render.Update = nfyData.Update
+		render.Update.Notify = GetNewVersion()
 		data = render
 	}
 
