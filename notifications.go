@@ -57,9 +57,11 @@ type Notification struct {
 }
 
 type VerUpdate struct {
-	Version     string `json:"version"`
-	Changelog   string `json:"changelog"`
-	Notify      string `json:"notify"`
+	Version     string   `json:"version"`
+	Langs       []string `json:"langs"`
+	Changelog   string   `json:"changelog"`
+	Downloads   string   `json:"downloads"`
+	Notify      string   `json:"notify,omitempty"`
 	LastChecked time.Time
 }
 
@@ -247,13 +249,26 @@ func removeNfyHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
-func GetNewVersion() (ret string) {
-	//	lang := RootUserSettings().Lang
+func GetNewVersion(lang string) (ret string) {
 	if len(nfyData.Update.Version) > 0 {
-		ret = fmt.Sprint(`Доступна новая версия <span style="padding: 4px 8px;
-	font-weight: bold;background-color: #ffff00">{{upd.version}}</span><br>
-	<a style="margin-right: 2rem;" :href="upd.changelog" target="_blank" v-if="upd.changelog">История изменений</a>
-	<a :href="[[.App.Homepage]]downloads.html" target="_blank">Скачать</a>`)
+		var (
+			lid  int
+			pref string
+		)
+		for _, item := range nfyData.Update.Langs {
+			if item == lang {
+				lid = langsId[lang]
+				pref = lang + `/`
+				break
+			}
+		}
+		ret = fmt.Sprintf(`%s: <span style="padding: 4px 8px;
+	font-weight: bold;background-color: #ffff00">%s</span><br>
+	<a style="margin-right: 2rem;" href="%s" target="_blank">%s</a>
+	<a href="%s" target="_blank">%s</a>`, Lang(lid, `newver`),
+			nfyData.Update.Version, appInfo.Homepage+pref+nfyData.Update.Changelog,
+			Lang(lid, `changelog`),
+			appInfo.Homepage+pref+nfyData.Update.Downloads, Lang(lid, `downloads`))
 	}
 	return
 }
@@ -270,6 +285,8 @@ func CheckUpdates(manual bool) error {
 			if len(upd.Version) > 0 && upd.Version != Version {
 				nfyData.Update.Version = upd.Version
 				nfyData.Update.Changelog = upd.Changelog
+				nfyData.Update.Downloads = upd.Downloads
+				nfyData.Update.Langs = upd.Langs
 			}
 		}
 		resp.Body.Close()
@@ -280,13 +297,21 @@ func CheckUpdates(manual bool) error {
 	return saveNotifications()
 }
 
+func AutoVerUpdate() error {
+	if err := CheckUpdates(false); err != nil {
+		return err
+	}
+	//	lang := RootUserSettings().Lang
+	return nil
+}
+
 func latestVerHandle(c echo.Context) error {
 	if err := CheckUpdates(true); err != nil {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, LatestResponse{
 		Version:     nfyData.Update.Version,
-		Notify:      GetNewVersion(),
+		Notify:      GetNewVersion(GetLangCode(c.(*Auth).User)),
 		LastChecked: nfyData.Update.LastChecked.Format(TimeFormat),
 	})
 }

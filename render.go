@@ -178,7 +178,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Favs = userSettings[c.(*Auth).User.ID].Favs
 		render.Nfy = NfyList(false)
 		render.Update = nfyData.Update
-		render.Update.Notify = GetNewVersion()
+		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
 		data = render
 	}
 
