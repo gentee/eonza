@@ -263,9 +263,7 @@ func GetNewVersion(lang string) (ret string) {
 			}
 		}
 		ret = fmt.Sprintf(`%s: <span style="padding: 4px 8px;
-	font-weight: bold;background-color: #ffff00">%s</span><br>
-	<a style="margin-right: 2rem;" href="%s" target="_blank">%s</a>
-	<a href="%s" target="_blank">%s</a>`, Lang(lid, `newver`),
+	font-weight: bold;background-color: #ffff00">%s</span><br><a style="margin-right: 2rem;" href="%s" target="_blank">%s</a><a href="%s" target="_blank">%s</a>`, Lang(lid, `newver`),
 			nfyData.Update.Version, appInfo.Homepage+pref+nfyData.Update.Changelog,
 			Lang(lid, `changelog`),
 			appInfo.Homepage+pref+nfyData.Update.Downloads, Lang(lid, `downloads`))
@@ -273,9 +271,8 @@ func GetNewVersion(lang string) (ret string) {
 	return
 }
 
-func CheckUpdates(manual bool) error {
-	//resp, err := http.Get(appInfo.Homepage + `latest`)
-	resp, err := http.Get(`http://localhost:3000/latest`)
+func CheckUpdates() error {
+	resp, err := http.Get(appInfo.Homepage + `latest`)
 	if err != nil {
 		return err
 	}
@@ -297,16 +294,33 @@ func CheckUpdates(manual bool) error {
 	return saveNotifications()
 }
 
-func AutoVerUpdate() error {
-	if err := CheckUpdates(false); err != nil {
-		return err
+func AutoCheckUpdate() {
+	var (
+		update bool
+	)
+	now := time.Now()
+	switch storage.Settings.AutoUpdate {
+	case `daily`:
+		update = now.After(nfyData.Update.LastChecked.Add(time.Hour * 24))
+	case `weekly`:
+		update = now.After(nfyData.Update.LastChecked.Add(time.Hour * 24 * 7))
+	case `mothly`:
+		update = now.After(nfyData.Update.LastChecked.Add(time.Hour * 24 * 30))
 	}
-	//	lang := RootUserSettings().Lang
-	return nil
+	if !update {
+		return
+	}
+	if err := CheckUpdates(); err != nil {
+		return
+	}
+	if nfy := GetNewVersion(RootUserSettings().Lang); len(nfy) > 0 {
+		NewNotification(&Notification{Text: nfy})
+	}
+	return
 }
 
 func latestVerHandle(c echo.Context) error {
-	if err := CheckUpdates(true); err != nil {
+	if err := CheckUpdates(); err != nil {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, LatestResponse{
