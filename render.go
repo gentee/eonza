@@ -27,11 +27,14 @@ type Render struct {
 	Playground  bool
 	Tray        bool
 	Langs       map[string]string
+	LangRes     map[string]map[string]string
 	Lang        string
 	Login       bool
 	Localhost   bool
 	PortShift   int64
 	Favs        []Fav
+	Nfy         *NfyResponse
+	Update      VerUpdate
 	//	Port    int
 	/*	Params   map[string]string
 		Url      string
@@ -59,10 +62,18 @@ func Html(par string) template.HTML {
 	return template.HTML(par)
 }
 
+func Time2Str(t time.Time) string {
+	if t.Year() < 1900 {
+		return ``
+	}
+	return t.Format(TimeFormat)
+}
+
 func InitTemplates() {
 	var err error
 	tmpl = template.New(`assets`).Delims(`[[`, `]]`).Funcs(template.FuncMap{
-		"html": Html,
+		"html":     Html,
+		"time2str": Time2Str,
 	})
 	for _, tpl := range _escDirs["../eonza-assets/themes/default/templates"] {
 		fname := tpl.Name()
@@ -132,15 +143,42 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Develop = cfg.develop
 		render.Playground = cfg.playground
 		render.Tray = isTray
-		render.Lang = GetLangCode(c.(*Auth).User)
 		render.Langs = make(map[string]string)
+		if c.Request().URL.Path == `install` {
+			render.LangRes = make(map[string]map[string]string)
+			render.Lang = LangDefCode
+			for _, item := range strings.Split(c.Request().Header.Get(`Accept-Language`), `,`) {
+				if len(item) >= 2 {
+					if _, ok := langsId[item[:2]]; ok {
+						render.Lang = item[:2]
+						break
+					}
+				}
+			}
+			for i, lang := range langs {
+				render.LangRes[lang] = make(map[string]string)
+				for _, key := range []string{`continue`, `sellang`} {
+					v := langRes[i][key]
+					if len(v) == 0 {
+						v = langRes[0][key]
+					}
+					render.LangRes[lang][key] = v
+				}
+			}
+		} else {
+			render.Lang = GetLangCode(c.(*Auth).User)
+		}
 		for i, lang := range langs {
 			render.Langs[lang] = Lang(i, `native`)
 		}
+
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
 		render.PortShift = cfg.PortShift
 		render.Favs = userSettings[c.(*Auth).User.ID].Favs
+		render.Nfy = NfyList(false)
+		render.Update = nfyData.Update
+		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
 		data = render
 	}
 

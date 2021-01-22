@@ -152,6 +152,9 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				}
 			}
 		}
+		if firstRun && url == `/` {
+			c.Request().URL.Path = `install`
+		}
 		// TODO: JWT user
 		var user *User
 		for _, user = range storage.Users {

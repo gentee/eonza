@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/chroma v0.8.2
 	github.com/alecthomas/colour v0.1.0 // indirect
 	github.com/alecthomas/repr v0.0.0-20201120212035-bb82daffcca2 // indirect
+	github.com/atotto/clipboard v0.1.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/gentee/gentee v1.20.0
@@ -15,6 +16,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/yuin/goldmark v1.3.0

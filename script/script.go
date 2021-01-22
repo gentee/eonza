@@ -22,6 +22,8 @@ type Settings struct {
 	ProgressHandle gentee.ProgressFunc
 }
 
+var scriptTask *Script
+
 func (script *Script) Run(options Settings) (interface{}, error) {
 	var (
 		settings   gentee.Settings
@@ -77,5 +79,6 @@ func (script *Script) Run(options Settings) (interface{}, error) {
 		settings.Playground.SizeLimit = script.Header.Playground.Size
 	}
 	settings.ProgressHandle = options.ProgressHandle
+	scriptTask = script
 	return script.Exec.Run(settings)
 }

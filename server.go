@@ -199,6 +199,23 @@ func reloadHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
+func installHandle(c echo.Context) error {
+	lang := c.FormValue("lang")
+	firstRun = false
+	if _, ok := langsId[lang]; ok {
+		for id, user := range userSettings {
+			if user.Lang != lang {
+				user.Lang = lang
+				userSettings[id] = user
+				if err := SaveUser(id); err != nil {
+					return jsonError(c, err)
+				}
+			}
+		}
+	}
+	return c.JSON(http.StatusOK, Response{Success: true})
+}
+
 func RunServer(options WebSettings) *echo.Echo {
 	InitLang()
 	InitTemplates()
@@ -241,15 +258,20 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/script", getScriptHandle)
 		e.GET("/api/list", listScriptHandle)
 		e.GET("/api/listrun", listRunHandle)
+		e.GET("/api/notifications", nfyHandle)
 		e.GET("/api/tasks", tasksHandle)
 		e.GET("/api/remove/:id", removeTaskHandle)
+		e.GET("/api/removenfy/:id", removeNfyHandle)
 		e.GET("/api/sys", sysTaskHandle)
 		e.GET("/api/settings", settingsHandle)
+		e.GET("/api/latest", latestVerHandle)
+		e.POST("/api/install", installHandle)
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)
 		e.POST("/api/delete", deleteScriptHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)
 		e.POST("/api/import", importHandle)
+		e.POST("/api/notification", notificationHandle)
 		e.POST("/api/settings", saveSettingsHandle)
 		e.POST("/api/setpsw", setPasswordHandle)
 		e.POST("/api/favs", saveFavsHandle)

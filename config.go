@@ -75,6 +75,7 @@ var (
 			JWTKey: lib.UniqueName(12),
 		},
 	}
+	firstRun bool
 )
 
 func defDir(dir, def string) string {
@@ -156,6 +157,8 @@ func LoadConfig() {
 // Install creates config and data file on the first execution
 func Install() {
 	var err error
+
+	firstRun = true
 	scripts = make(map[string]*Script)
 	for _, tpl := range _escDirs["../eonza-assets/init"] {
 		var script Script

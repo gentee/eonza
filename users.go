@@ -200,5 +200,5 @@ func RootUserSettings() UserSettings {
 	for _, user := range storage.Users {
 		return userSettings[user.ID]
 	}
-	return UserSettings{}
+	return UserSettings{Lang: LangDefCode}
 }

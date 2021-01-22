@@ -30,6 +30,7 @@ type Settings struct {
 	NotAskPassword bool              `json:"notaskpassword"`
 	Title          string            `json:"title"`
 	HideTray       bool              `json:"hidetray"`
+	AutoUpdate     string            `json:"autoupdate"`
 }
 
 // Storage contains all application data
@@ -43,8 +44,9 @@ type Storage struct {
 var (
 	storage = Storage{
 		Settings: Settings{
-			LogLevel:  script.LOG_INFO,
-			Constants: make(map[string]string),
+			LogLevel:   script.LOG_INFO,
+			Constants:  make(map[string]string),
+			AutoUpdate: `weekly`,
 		},
 		Users:   make(map[uint32]*User),
 		Scripts: make(map[string]*Script),
