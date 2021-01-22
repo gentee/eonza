@@ -16,6 +16,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/vm"
 	"github.com/kataras/golog"
@@ -129,8 +130,10 @@ var (
 		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `Condition(map.obj) bool`, Object: MapCondition},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
+		{Prototype: `CopyClipboard(str)`, Object: CopyClipboard},
 		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
+		{Prototype: `GetClipboard() str`, Object: GetClipboard},
 		{Prototype: `IsEntry() bool`, Object: IsEntry},
 		{Prototype: `IsVarObj(str) bool`, Object: IsVarObj},
 		{Prototype: `IsVar(str) bool`, Object: IsVar},
@@ -684,4 +687,12 @@ func SendNotification(msg string) error {
 		return err
 	}
 	return nil
+}
+
+func CopyClipboard(data string) error {
+	return clipboard.WriteAll(data)
+}
+
+func GetClipboard() (string, error) {
+	return clipboard.ReadAll()
 }
