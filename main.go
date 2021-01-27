@@ -106,6 +106,7 @@ func main() {
 		LoadNotifications()
 		InitScripts()
 		CreateSysTray()
+		ProInit()
 		RunCron()
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,

@@ -7,3 +7,6 @@
 package main
 
 const Pro = false
+
+func ProInit() {
+}

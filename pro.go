@@ -6,4 +6,12 @@
 
 package main
 
+import (
+	pro "github.com/gentee/eonza-pro"
+)
+
 const Pro = true
+
+func ProInit() {
+	pro.LoadPro()
+}

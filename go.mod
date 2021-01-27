@@ -9,6 +9,7 @@ require (
 	github.com/atotto/clipboard v0.1.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dlclark/regexp2 v1.4.0 // indirect
+	github.com/gentee/eonza-pro v0.0.0-00010101000000-000000000000
 	github.com/gentee/gentee v1.20.0
 	github.com/gentee/systray v1.3.1
 	github.com/gorilla/websocket v1.4.2
@@ -28,3 +29,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
+
+replace github.com/gentee/eonza-pro => ../eonza-pro
