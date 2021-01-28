@@ -20,6 +20,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/xhit/go-simple-mail/v2 v2.7.0
 	github.com/yuin/goldmark v1.3.0
 	github.com/yuin/goldmark-highlighting v0.0.0-20200307114337-60d527fdb691
 	golang.org/x/crypto v0.0.0-20201217014255-9d1352758620

@@ -12,6 +12,7 @@ import (
 	"eonza/script"
 	"io/ioutil"
 	"sync"
+	"time"
 
 	"github.com/kataras/golog"
 	"golang.org/x/crypto/bcrypt"
@@ -31,6 +32,9 @@ type Settings struct {
 	Title          string            `json:"title"`
 	HideTray       bool              `json:"hidetray"`
 	AutoUpdate     string            `json:"autoupdate"`
+	Trial          bool              `json:"trial"`
+	TrialCount     int               `json:"trialcount"`
+	TrialLast      time.Time         `json:"triallast"`
 }
 
 // Storage contains all application data

@@ -5,11 +5,9 @@
 package script
 
 import (
-	"bytes"
 	"encoding/json"
 	"eonza/lib"
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -19,7 +17,6 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/vm"
-	"github.com/kataras/golog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -69,6 +66,7 @@ type ScriptOptions struct {
 	Default  string        `json:"default,omitempty" yaml:"default,omitempty"`
 	Required bool          `json:"required,omitempty" yaml:"required,omitempty"`
 	Optional bool          `json:"optional,omitempty" yaml:"optional,omitempty"`
+	Flags    string        `json:"flags,omitempty" yaml:"flags,omitempty"`
 	Type     string        `json:"type,omitempty" yaml:"type,omitempty"`
 	Items    []ScriptItem  `json:"items,omitempty" yaml:"items,omitempty"`
 	List     []ScriptParam `json:"list,omitempty" yaml:"list,omitempty"`
@@ -152,6 +150,7 @@ var (
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
+		{Prototype: `SendEmail(obj, obj)`, Object: SendEmail},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
@@ -667,26 +666,6 @@ func InitEngine() error {
 	return gentee.Customize(&gentee.Custom{
 		Embedded: customLib,
 	})
-}
-
-func SendNotification(msg string) error {
-	jsonValue, err := json.Marshal(PostNfy{
-		TaskID: scriptTask.Header.TaskID,
-		Text:   msg,
-		Script: scriptTask.Header.Name,
-	})
-	if err == nil {
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/notification",
-			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
-		if err != nil {
-			golog.Error(err)
-		} else {
-			resp.Body.Close()
-		}
-	} else {
-		return err
-	}
-	return nil
 }
 
 func CopyClipboard(data string) error {
