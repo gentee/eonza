@@ -76,7 +76,6 @@ func SaveStorage() error {
 }
 
 func LoadStorage(psw string) {
-	storage.Settings.AutoUpdate = `` // load if autoupdate == never
 	data, err := ioutil.ReadFile(lib.ChangeExt(cfg.path, StorageExt))
 	if err != nil {
 		golog.Fatal(err)
