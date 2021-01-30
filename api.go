@@ -179,6 +179,20 @@ func runHandle(c echo.Context) error {
 	if err != nil {
 		return jsonError(c, err)
 	}
+	if storage.Trial.Mode == TrialOn {
+		now := time.Now()
+		if storage.Trial.Last.Day() != now.Day() {
+			storage.Trial.Count++
+			storage.Trial.Last = now
+			if storage.Trial.Count > TrialDays {
+				storage.Trial.Mode = TrialDisabled
+				SetActive(false)
+			}
+			if err = SaveStorage(); err != nil {
+				return jsonError(c, err)
+			}
+		}
+	}
 	if err = NewTask(header); err != nil {
 		return jsonError(c, err)
 	}
@@ -305,4 +319,30 @@ func removeTaskHandle(c echo.Context) error {
 	delete(tasks, uint32(idTask))
 	RemoveTask(uint32(idTask))
 	return tasksHandle(c)
+}
+
+func trialHandle(c echo.Context) error {
+	var (
+		err  error
+		mode int
+	)
+	mode = storage.Trial.Mode
+	if c.Param("id") == `1` {
+		if storage.Trial.Mode == TrialOff && storage.Trial.Count < TrialDays {
+			storage.Trial.Mode = TrialOn
+		}
+	} else {
+		if storage.Trial.Mode == TrialOn {
+			storage.Trial.Mode = TrialOff
+		}
+	}
+	if mode != storage.Trial.Mode {
+		if err = SetActive(storage.Trial.Mode == TrialOn); err != nil {
+			return jsonError(c, err)
+		}
+		if err = SaveStorage(); err != nil {
+			return jsonError(c, err)
+		}
+	}
+	return proSettingsHandle(c)
 }

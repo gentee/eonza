@@ -6,7 +6,21 @@
 
 package main
 
+import (
+	"fmt"
+
+	"github.com/labstack/echo/v4"
+)
+
 const Pro = false
 
 func ProInit() {
+}
+
+func SetActive(active bool) error {
+	return nil
+}
+
+func proSettingsHandle(c echo.Context) error {
+	return jsonError(c, fmt.Errorf(`Unsupported`))
 }

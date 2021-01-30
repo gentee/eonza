@@ -20,7 +20,18 @@ import (
 
 const (
 	StorageExt = `eox`
+	TrialDays  = 30
+
+	TrialDisabled = -1
+	TrialOff      = 0
+	TrialOn       = 1
 )
+
+type Trial struct {
+	Mode  int       `json:"mode"`
+	Count int       `json:"count"`
+	Last  time.Time `json:"last"`
+}
 
 // Setting contains settings of the application
 type Settings struct {
@@ -32,14 +43,12 @@ type Settings struct {
 	Title          string            `json:"title"`
 	HideTray       bool              `json:"hidetray"`
 	AutoUpdate     string            `json:"autoupdate"`
-	Trial          bool              `json:"trial"`
-	TrialCount     int               `json:"trialcount"`
-	TrialLast      time.Time         `json:"triallast"`
 }
 
 // Storage contains all application data
 type Storage struct {
 	Settings    Settings
+	Trial       Trial
 	PassCounter int64
 	Users       map[uint32]*User
 	Scripts     map[string]*Script
@@ -91,6 +100,9 @@ func LoadStorage(psw string) {
 	}
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
+	}
+	if storage.Trial.Mode >= TrialOff && storage.Trial.Count > TrialDays {
+		storage.Trial.Mode = TrialDisabled
 	}
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)
