@@ -19,7 +19,6 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/xhit/go-simple-mail/v2 v2.7.0
 	github.com/yuin/goldmark v1.3.0
 	github.com/yuin/goldmark-highlighting v0.0.0-20200307114337-60d527fdb691
@@ -28,7 +27,6 @@ require (
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
 
 replace github.com/gentee/eonza-pro => ../eonza-pro
