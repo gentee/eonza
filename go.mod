@@ -12,6 +12,7 @@ require (
 	github.com/gentee/eonza-pro v0.0.0-00010101000000-000000000000
 	github.com/gentee/gentee v1.20.0
 	github.com/gentee/systray v1.3.1
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/kataras/golog v0.1.6
 	github.com/kr/text v0.2.0 // indirect

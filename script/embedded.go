@@ -151,6 +151,8 @@ var (
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
 		{Prototype: `SendEmail(obj, obj)`, Object: SendEmail},
+		{Prototype: `SQLClose(str)`, Object: SQLClose},
+		{Prototype: `SQLConnection(map.str, str)`, Object: SQLConnection},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
