@@ -153,6 +153,7 @@ var (
 		{Prototype: `SendEmail(obj, obj)`, Object: SendEmail},
 		{Prototype: `SQLClose(str)`, Object: SQLClose},
 		{Prototype: `SQLConnection(map.str, str)`, Object: SQLConnection},
+		{Prototype: `SQLExec(str,str,arr.str)`, Object: SQLExec},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
