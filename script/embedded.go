@@ -154,6 +154,9 @@ var (
 		{Prototype: `SQLClose(str)`, Object: SQLClose},
 		{Prototype: `SQLConnection(map.str, str)`, Object: SQLConnection},
 		{Prototype: `SQLExec(str,str,arr.str)`, Object: SQLExec},
+		{Prototype: `SQLQuery(str,str,arr.str,str)`, Object: SQLQuery},
+		{Prototype: `SQLRow(str,str,arr.str,str)`, Object: SQLRow},
+		{Prototype: `SQLValue(str,str,arr.str,str)`, Object: SQLValue},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
