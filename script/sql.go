@@ -87,6 +87,9 @@ func SQLConnection(pars *core.Map, varname string) error {
 		db  *sql.DB
 		err error
 	)
+	if scriptTask.Header.IsPlayground {
+		return fmt.Errorf(`%s [%s]`, `[Playground] access denied`, `SQLConnection`)
+	}
 	spar := pars.Data
 	host := spar["host"].(string)
 	if len(host) == 0 {
