@@ -46,6 +46,7 @@ const (
 type FormResponse struct {
 	FormID uint32                 `json:"formid"`
 	Values map[string]interface{} `json:"values"`
+	Skip   bool                   `json:"skip,omitempty"`
 }
 
 type WsClient struct {
@@ -534,7 +535,7 @@ func formHandle(c echo.Context) error {
 				if err = json.Unmarshal([]byte(item.Options), &options); err != nil {
 					return jsonError(c, err)
 				}
-				if options.Required && len(fmt.Sprint(form.Values[item.Var])) == 0 {
+				if options.Required && !form.Skip && len(fmt.Sprint(form.Values[item.Var])) == 0 {
 					return jsonError(c, fmt.Errorf(Lang(GetLangId(nil), "errreq", item.Text)))
 				}
 			}

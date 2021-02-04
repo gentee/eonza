@@ -12,6 +12,7 @@ import (
 	"eonza/script"
 	"io/ioutil"
 	"sync"
+	"time"
 
 	"github.com/kataras/golog"
 	"golang.org/x/crypto/bcrypt"
@@ -19,7 +20,18 @@ import (
 
 const (
 	StorageExt = `eox`
+	TrialDays  = 30
+
+	TrialDisabled = -1
+	TrialOff      = 0
+	TrialOn       = 1
 )
+
+type Trial struct {
+	Mode  int       `json:"mode"`
+	Count int       `json:"count"`
+	Last  time.Time `json:"last"`
+}
 
 // Setting contains settings of the application
 type Settings struct {
@@ -36,6 +48,7 @@ type Settings struct {
 // Storage contains all application data
 type Storage struct {
 	Settings    Settings
+	Trial       Trial
 	PassCounter int64
 	Users       map[uint32]*User
 	Scripts     map[string]*Script
@@ -87,6 +100,9 @@ func LoadStorage(psw string) {
 	}
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
+	}
+	if storage.Trial.Mode >= TrialOff && storage.Trial.Count > TrialDays {
+		storage.Trial.Mode = TrialDisabled
 	}
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)
