@@ -6,13 +6,14 @@ package main
 
 import (
 	"encoding/hex"
-	"eonza/lib"
-	es "eonza/script"
 	"fmt"
 	"hash/crc32"
 	"io/ioutil"
-	"os"
 	"path/filepath"
+
+	"eonza/lib"
+	es "eonza/script"
+	"eonza/users"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
@@ -38,7 +39,7 @@ type UserSettings struct {
 }
 
 // User stores user's parameters
-type User struct {
+type User struct { // Deprecated
 	ID        uint32
 	Nickname  string
 	PublicKey []byte
@@ -48,34 +49,24 @@ var (
 	userSettings = make(map[uint32]UserSettings)
 )
 
-func LoadUsers() error {
+func LoadUsersSettings() error {
 	var err error
-	for _, item := range storage.Users {
-		userSettings[item.ID] = UserSettings{
-			ID:   item.ID,
-			Lang: appInfo.Lang,
+	for _, item := range users.Users {
+		var (
+			data []byte
+			user UserSettings
+		)
+		user.Lang = appInfo.Lang
+		data, err = ioutil.ReadFile(filepath.Join(cfg.Users.Dir, item.Nickname+UserExt))
+		if err == nil {
+			if err = yaml.Unmarshal(data, &user); err != nil {
+				return err
+			}
 		}
+		user.ID = item.ID
+		userSettings[user.ID] = user
 	}
-
-	err = filepath.Walk(cfg.Users.Dir, func(path string, info os.FileInfo, err error) error {
-		var data []byte
-		if err != nil {
-			return err
-		}
-		if info.IsDir() || filepath.Ext(path) != UserExt {
-			return nil
-		}
-		var user UserSettings
-		data, err = ioutil.ReadFile(path)
-		if err = yaml.Unmarshal(data, &user); err != nil {
-			return err
-		}
-		if _, ok := storage.Users[user.ID]; ok {
-			userSettings[user.ID] = user
-		}
-		return err
-	})
-	return err
+	return nil
 }
 
 func NewUser(nickname string) (uint32, error) {
@@ -193,12 +184,9 @@ func SaveUser(id uint32) error {
 		return err
 	}
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
-		storage.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
+		users.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
 }
 
 func RootUserSettings() UserSettings {
-	for _, user := range storage.Users {
-		return userSettings[user.ID]
-	}
-	return UserSettings{Lang: LangDefCode}
+	return userSettings[users.RootID]
 }

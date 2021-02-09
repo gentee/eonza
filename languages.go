@@ -6,6 +6,7 @@ package main
 
 import (
 	es "eonza/script"
+	"eonza/users"
 	"fmt"
 	"strings"
 
@@ -43,7 +44,7 @@ func InitLang() {
 	}
 }
 
-func GetLangCode(user *User) (ret string) {
+func GetLangCode(user *users.User) (ret string) {
 	if user == nil && IsScript {
 		return scriptTask.Header.Lang
 	}
@@ -53,7 +54,7 @@ func GetLangCode(user *User) (ret string) {
 	return LangDefCode
 }
 
-func GetLangId(user *User) (ret int) {
+func GetLangId(user *users.User) (ret int) {
 	if user == nil && IsScript {
 		return langsId[scriptTask.Header.Lang]
 	}

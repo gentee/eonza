@@ -37,12 +37,6 @@ type Response struct {
 	Error string `json:"error,omitempty"`
 }
 
-type Auth struct {
-	echo.Context
-	User *User
-	Lang string
-}
-
 var (
 	ErrNotFound = errors.New(`Not found`)
 	IsScript    bool // true, if web-server for the script

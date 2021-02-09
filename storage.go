@@ -50,7 +50,7 @@ type Storage struct {
 	Settings    Settings
 	Trial       Trial
 	PassCounter int64
-	Users       map[uint32]*User
+	Users       map[uint32]*User // Deprecated
 	Scripts     map[string]*Script
 }
 

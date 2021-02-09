@@ -261,7 +261,7 @@ JV7py2vJu7m/d2d7v5e345zJTZF2KxDrqbkOqCTiUhlbFuRWw0fp31VMk52358eFKzO4NAhQ6PHUgDAH
 		name:    "test-email.yaml",
 		local:   "../eonza-assets/init/test-email.yaml",
 		size:    1808,
-		modtime: 1611833026,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5SVzW4bNxDH73qKweogG9CHIdQuulgvirZGjaI9We3VoHZHEmsuuSVn1apJADvnPEWe
 IAhgQAgS+xWoNwrI/fCuYDi2Tsvh8P+bGQ5HBom4XJqwByBZhiEQGhphxrjoARAngSEM+pdusz/oAeSM
@@ -348,7 +348,7 @@ AP//hvfjquAKAAA=
 		name:    "test-sql.yaml",
 		local:   "../eonza-assets/init/test-sql.yaml",
 		size:    8167,
-		modtime: 1612346845,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/+xZ627byhH+r6cYUD6gfA5l6xInKE8UQ7GV1o0juZIcNAiChCJHMhGKS+8u7ahpgLZA
 f+Ut+gRp0aD5kz6D/EbFLi8iaVKyfGmK9BiwvRruznxz1X4SQ85td8L0EoBrTFEHjoxX2alTAuA2d1AH
@@ -453,7 +453,7 @@ tE/XQkH677E/AQAA///sgBH0LQYAAA==
 		name:    "tests.yaml",
 		local:   "../eonza-assets/init/tests.yaml",
 		size:    1303,
-		modtime: 1612347246,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5SUsY7bMAyGdz8F4QyefEOHDtoKdC6KQ4GOARvTiQpa8km0767bpWM7delrFAUO6NZX
 sN/oIMkJ4uQQwJvym/x+UmTkSUSbrVcZgMGGFAh58RmAaGFSUKzWQV8VGUCLsgvKTYyJUkV+E4PCISps
@@ -503,7 +503,7 @@ tM82Mx9MOQ2LZxN+0W+K7kKpvfSrPgALfqQPVkG/0nuG+2FqPdavaUQnNEp3k3J5V97PLL39lN683tMf
 		name:    "en.yaml",
 		local:   "../eonza-assets/languages/en.yaml",
 		size:    6802,
-		modtime: 1612235943,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/4xYW2/cuJJ+568oBPCZGWDtvOsl8PhyYqxvx+0kGCz2gS1Vq7mmSIWXvsyvX3xFSi0n
 2csTqz6WSIpkVX1FvfYhNXSJRum1z0XJSek2Ge9iQ5dFEGDHRd+x0l3XDl1Dl11HmhzvqfXDoF1HyVPa
@@ -560,7 +560,7 @@ OUsVo+lpce7+YSd/2sJ3waXYADqvWLH77wAAAP//suoXjJIaAAA=
 		name:    "ru.yaml",
 		local:   "../eonza-assets/languages/ru.yaml",
 		size:    10906,
-		modtime: 1612235960,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5xaX28bSXJ/708xMGDcHRDL73rxQ3BAgGyQzSV5CvLQmmmSAw1nxj0zlHRPImWvvJDO
 yvr2skL2ZNnnS+7pEIoSLYoUqa9Q/Y2Cquqef6R82XvZtbqre6qrq371q2rKnUTn2x5cmkOYmkOYwNiM
@@ -1609,7 +1609,7 @@ fwcAAP//svXImgcDAAA=
 		name:    "send-email.yaml",
 		local:   "../eonza-assets/scripts/send-email.yaml",
 		size:    1157,
-		modtime: 1611837311,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5xTwWrbQBS871cM9iE22CntoYeF9FBoQiGtCw69NMXI1laRkbTqahUIacBxr+kP9FBo
 vyCEupjWcX7h7R+VXUmx5QQCuazNvLfzZt6sMqF1mAQZZ0DixYIjE4nfFbEXRgzQoY4Ex1ZzYIvNLQak
@@ -1745,7 +1745,7 @@ AAA=
 		name:    "smtp-server.yaml",
 		local:   "../eonza-assets/scripts/smtp-server.yaml",
 		size:    1141,
-		modtime: 1611833439,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5yTvWobQRDH+32KQSpsQyRDPlwspErrQOBMmhDM+jSRLuztXvZDwZDCcpcqZaq8gwgR
 KAH7GebeKOzHXe4cXNgqdMtvdv8zO/sfi85Vamk5A1CiRg62ds3MolmjYQCuchI5HEzPQ3R6wAAa4VaB
@@ -1793,7 +1793,7 @@ sJ57xLSIHPL/1dvVTb31uiYV0hVJvspOfsl32Y/b8QvGrfyUw/h53EJ+yw7yR47yI5/HT3KUg+wvwTdi
 		name:    "sql-close.yaml",
 		local:   "../eonza-assets/scripts/sql-close.yaml",
 		size:    424,
-		modtime: 1612364787,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/2SPv0ozQRTF+3mKA1vk+5BEsLCYNq2N+ABhMnvZLExmNvNHECzUVntfw8KFIMRnuPtG
 MjMBE+x2z2/u/Z0bKMbedkEKwKotSYSdmWvjAgkg9tGQxKxZZdbMBDCouMnJIsTW9Ovmslm0Kqq1CpW3
@@ -1807,7 +1807,7 @@ zwce+cB7Hk+3/R0R2rUk8XghkH+L6l+97r8QPwEAAP//wd+UaqgBAAA=
 		name:    "sql-connection.yaml",
 		local:   "../eonza-assets/scripts/sql-connection.yaml",
 		size:    1287,
-		modtime: 1612346632,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5yUz4oTTRTF9/UUl8livg9NBAUXBa7GZRRDliJDJX3pNFSqOlXVkYALs3A1C7dufYNR
 JjiCmWe4/UZSf7rTnckIukmac+rce7rzS1t0rlC55QxAiSVysCs5nGulcO4KrRiAK5xEDueDS39gcM4A
@@ -1825,7 +1825,7 @@ ieOoNkgGpwNtyiTAYu6AYHTjAwxei9N0Mj78EP/5c48P9PzP2O8AAAD///jPas4HBQAA
 		name:    "sql-exec.yaml",
 		local:   "../eonza-assets/scripts/sql-exec.yaml",
 		size:    809,
-		modtime: 1612346664,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/4ySsW7UQBCG+32KX3dFbHE5BBIUK6VMg4JQdJSWoj17uDha7/p2x6cgREMbKp6EggIB
 Ca+w90Zodw+woxRprPE/M9/M/FpPzK3ZeCkAozqS8Ft9TNdUC4Bb1iRxNL+IqfmRAHrFl1FZem50u54/
@@ -1842,7 +1842,7 @@ AAD//4Addl0pAwAA
 		name:    "sql-query.yaml",
 		local:   "../eonza-assets/scripts/sql-query.yaml",
 		size:    896,
-		modtime: 1612346678,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5RSTYsTQRS8968oksPOYDaioIeGPcleJCIhexwInZlndpZO96Q/BhcR1KuevPg3vCmI
 u3+h5x/JdCebSbzoZeip6lf1Xr225Fyt1pYzQIkNcditPN96MrcMcLWTxHE2Xvbc+IwBjXDXPTK1rpL1
@@ -1859,7 +1859,7 @@ FvNZzCNLT3Py8NImUWpyWFg+Yn8CAAD//3DYIlmAAwAA
 		name:    "sql-row.yaml",
 		local:   "../eonza-assets/scripts/sql-row.yaml",
 		size:    885,
-		modtime: 1612346695,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5SSv27bPBTFdz7FgT3Ewuf4Qwu0A4FMRZbCRZEoowCDlm4dBTQpk5SCoCjQZM7euW+Q
 rUGH9hWoNypIOrGUqV0E8Vze3/1zaMm5Wm0sZ4ASW+KwO3ls9DUDXO0kcRxNVyEyPWJAI9xlUBbWVbJe
@@ -1876,7 +1876,7 @@ lhXqS6Hys+W5vp6lNzl/fmLzCJofnMom7E8AAAD//wNCZ2F1AwAA
 		name:    "sql-value.yaml",
 		local:   "../eonza-assets/scripts/sql-value.yaml",
 		size:    903,
-		modtime: 1612346725,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/5SSv2rcQBDG+32Kj7vCEjlfSCApFlwFN8EhGJlUgmNPmpxl9nZ1uyOBCYEkTZr0fg03
 Jm6cvMLqjYJWdz6dSZE0YvXNzm/+fOuJuTIrLwVg1Jok/EYft0o3JACuWJPE0XTRx6ZHAqgVX/bK3HOp
@@ -6154,7 +6154,7 @@ pkwzv14p5QLGWkwn5HwBFM6rGZaYLoC+eOGarWXjUliDKv9c05uKw7+AMYULmMNXHcuMwmt600OZaVHK
 		name:    "dyncomp.tpl",
 		local:   "../eonza-assets/themes/default/templates/dyncomp.tpl",
 		size:    13852,
-		modtime: 1612244101,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/+w6bW/juNHf/Ssmep6s5FtLdnbvVbZ817sWaIHrdYFbFCiCfKAl2mZXolSRdpIm/u/F
 kHqzRDpxdvdQoJcPsU1yhvPOmSEXIi5ZIUHeFzRyJL2T0ztf0qxIiaQOsCRyYj/e0vjDKr9zliMAgMW+
@@ -6387,7 +6387,7 @@ R9VBnCPRfL6JnY9CYbgIw7n9rrOwQHFxvlX+PwAA//9gxnsIdCIAAA==
 		name:    "index.tpl",
 		local:   "../eonza-assets/themes/default/templates/index.tpl",
 		size:    26694,
-		modtime: 1611920962,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/9R9bZfbtrHwd/2KWba2pKwo7Tpum0darp9epz73JU1yrt3m9OzRaSASlLBLAbwEJK3q
 6L/fgzcSICGt1nZv23zIisBgMG+YGQxA+ubi2x/efvjLj3+AlVgXt70b+wej7BZ6ADdrLBCkK1RxLJJo
@@ -6592,7 +6592,7 @@ AP//ZTn8v04GAAA=
 		name:    "pro.tpl",
 		local:   "../eonza-assets/themes/default/templates/pro.tpl",
 		size:    3285,
-		modtime: 1612019873,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/9xWz5Pbtg6++6/AKk/Pdp5p2VkneSNZmnba7vTYQ6fnUCJscUKJLElpvbPx/94hJduS
 12l+TE/NJRYIfAA+fAR3awrNlQX7pDANLB5sdCAWKyWoxQA4SwOlZZBNALYtKWRtKa9Rg7FPAtOgogfy
@@ -6621,7 +6621,7 @@ lpyGfUwml2f8rwAAAP//T1+tsdUMAAA=
 		name:    "script.tpl",
 		local:   "../eonza-assets/themes/default/templates/script.tpl",
 		size:    14354,
-		modtime: 1611830040,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/9Q7f2/buJL/+1NMtOvI3kS2kxbFO9nyvvfaLV4P3bZoerdYGAaWlmibG4nUkpQTX+rv
 fiCpH9QPO0n3FofXArVIzgxnhjPDGZKdnb35+PrLr59+gq1M4nlvVvxgFM2hBzBLsEQQbhEXWAZOJtfe
@@ -6697,7 +6697,7 @@ VRmoakHrOiwCgW/iTdFdhDEfHMcK64w34IpYXlnIoXfo2Y9TZmPzf8JmY/1///43AAD//wA8NGwSOAAA
 		name:    "settings.tpl",
 		local:   "../eonza-assets/themes/default/templates/settings.tpl",
 		size:    9958,
-		modtime: 1611918708,
+		modtime: 1612438635,
 		compressed: `
 H4sIAAAAAAAC/9w5S48iu9V7fsXp+j4uhURB98xopFR3kUizyZVGySJXkaJWK2OqDuC0sSu2eYXLf49s
 15NyQc9rk94A9nm/j/tJpZLmGvQxxyTQeNCzQ6RxkzOiMQCaJYFCrSlfqWA+AHjaRangmlCOEpQ+MkyC

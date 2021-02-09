@@ -5,16 +5,24 @@
 package main
 
 import (
-	"eonza/lib"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"eonza/lib"
+	"eonza/users"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type Auth struct {
+	echo.Context
+	User *users.User
+	Lang string
+}
 
 type Claims struct {
 	Counter  int64
@@ -156,10 +164,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Request().URL.Path = `install`
 		}
 		// TODO: JWT user
-		var user *User
-		for _, user = range storage.Users {
-			break
-		}
+		user := users.Users[users.RootID]
 		lang := LangDefCode
 		if IsScript {
 			lang = scriptTask.Header.Lang
@@ -170,7 +175,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		auth := &Auth{
 			Context: c,
-			User:    user,
+			User:    &user,
 			Lang:    lang,
 		}
 		err = next(auth)

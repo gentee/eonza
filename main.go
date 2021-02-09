@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"eonza/script"
+	"eonza/users"
 
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
@@ -98,7 +99,8 @@ func main() {
 			return
 		}
 		hideConsole()
-		LoadUsers()
+		users.InitRoot(storage.Settings.PasswordHash)
+		LoadUsersSettings()
 		defer CloseLog()
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
