@@ -5,13 +5,9 @@
 package main
 
 import (
-	"encoding/hex"
-	"fmt"
-	"hash/crc32"
 	"io/ioutil"
 	"path/filepath"
 
-	"eonza/lib"
 	es "eonza/script"
 	"eonza/users"
 
@@ -67,37 +63,6 @@ func LoadUsersSettings() error {
 		userSettings[user.ID] = user
 	}
 	return nil
-}
-
-func NewUser(nickname string) (uint32, error) {
-	user := User{
-		Nickname: nickname,
-	}
-	if !lib.ValidateSysName(nickname) {
-		return 0, fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
-	}
-	for _, item := range storage.Users {
-		if item.Nickname == nickname {
-			return 0, fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
-		}
-
-	}
-	private, public, err := lib.GenerateKeys()
-	if err != nil {
-		return 0, err
-	}
-	user.PublicKey = public
-	user.ID = crc32.ChecksumIEEE(private)
-	if err = ioutil.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
-		[]byte(hex.EncodeToString(private)), 0777 /*os.ModePerm*/); err != nil {
-		return 0, err
-	}
-	storage.Users[user.ID] = &user
-	userSettings[user.ID] = UserSettings{
-		ID:   user.ID,
-		Lang: appInfo.Lang,
-	}
-	return user.ID, nil
 }
 
 // AddHistoryEditor adds the history item to the user's settings

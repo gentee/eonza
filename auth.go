@@ -25,8 +25,8 @@ type Auth struct {
 }
 
 type Claims struct {
-	Counter  int64
-	Username string
+	Counter int64
+	UserID  uint32
 	jwt.StandardClaims
 }
 
@@ -64,8 +64,8 @@ func accessIP(curIP, originalIP string) bool {
 func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		var (
-			access   string
-			isAccess bool
+			access       string
+			isAccess, ok bool
 		)
 		ip := c.RealIP()
 		if len(cfg.Whitelist) > 0 {
@@ -114,6 +114,8 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		mutex.Lock()
 		defer mutex.Unlock()
 
+		userID := uint32(users.RootID)
+
 		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
 			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
 			hashid := getCookie(c, "hashid")
@@ -149,6 +151,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				if err == nil {
 					if claims.Counter == storage.PassCounter {
 						valid = token.Valid
+						userID = claims.UserID
 					}
 				}
 			}
@@ -163,8 +166,10 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		if firstRun && url == `/` {
 			c.Request().URL.Path = `install`
 		}
-		// TODO: JWT user
-		user := users.Users[users.RootID]
+		var user users.User
+		if user, ok = users.Users[userID]; !ok {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+		}
 		lang := LangDefCode
 		if IsScript {
 			lang = scriptTask.Header.Lang
@@ -192,28 +197,34 @@ func clearSessions() {
 }
 
 func loginHandle(c echo.Context) error {
-	var response ResponseLogin
+	var (
+		response ResponseLogin
+		err      error
+	)
 
-	err := bcrypt.CompareHashAndPassword(storage.Settings.PasswordHash, []byte(c.FormValue("password")))
-	if err == nil {
-		expirationTime := time.Now().Add(30 * 24 * time.Hour)
-		claims := &Claims{
-			Counter:  storage.PassCounter,
-			Username: `root`,
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: expirationTime.Unix(),
-			},
-		}
-		var token string
-		tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		token, err = tok.SignedString([]byte(cfg.HTTP.JWTKey + sessionKey))
+	for _, user := range users.Users {
+		err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(c.FormValue("password")))
 		if err == nil {
-			response.ID = lib.UniqueName(12)
-			clearSessions()
-			sessions[response.ID] = session{
-				Token:   token,
-				Created: time.Now(),
+			expirationTime := time.Now().Add(30 * 24 * time.Hour)
+			claims := &Claims{
+				Counter: storage.PassCounter,
+				UserID:  user.ID,
+				StandardClaims: jwt.StandardClaims{
+					ExpiresAt: expirationTime.Unix(),
+				},
 			}
+			var token string
+			tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+			token, err = tok.SignedString([]byte(cfg.HTTP.JWTKey + sessionKey))
+			if err == nil {
+				response.ID = lib.UniqueName(12)
+				clearSessions()
+				sessions[response.ID] = session{
+					Token:   token,
+					Created: time.Now(),
+				}
+			}
+			break
 		}
 	}
 	if err != nil {

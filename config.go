@@ -6,6 +6,7 @@ package main
 
 import (
 	"eonza/lib"
+	"eonza/users"
 	"io/ioutil"
 	"os"
 	"path"
@@ -183,21 +184,20 @@ func Install() {
 	if err != nil {
 		golog.Fatal(err)
 	}
-	var userid uint32
-	if userid, err = NewUser(`root`); err != nil {
-		golog.Fatal(err)
+	users.InitRoot(nil)
+	userSettings[users.RootID] = UserSettings{
+		ID:   users.RootID,
+		Lang: appInfo.Lang,
+		Favs: []Fav{
+			{Name: `welcome`},
+			{Name: `tests`},
+			{Name: `Tools`, IsFolder: true, Children: []Fav{
+				{Name: `copy-files`},
+				{Name: `create-archive`},
+			}},
+		},
 	}
-	rootSettings := userSettings[userid]
-	rootSettings.Favs = []Fav{
-		{Name: `welcome`},
-		{Name: `tests`},
-		{Name: `Tools`, IsFolder: true, Children: []Fav{
-			{Name: `copy-files`},
-			{Name: `create-archive`},
-		}},
-	}
-	userSettings[userid] = rootSettings
-	if err = SaveUser(userid); err != nil {
+	if err = SaveUser(users.RootID); err != nil {
 		golog.Fatal(err)
 	}
 	if err = SaveStorage(); err != nil {
