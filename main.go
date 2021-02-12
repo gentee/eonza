@@ -65,6 +65,7 @@ func main() {
 		if err = LoadCustomAsset(scriptTask.Header.AssetsDir, scriptTask.Header.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
+		ProInit(nil)
 		e = RunServer(WebSettings{
 			Port: scriptTask.Header.HTTP.Port,
 			Open: scriptTask.Header.HTTP.Open,

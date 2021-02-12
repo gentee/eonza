@@ -40,6 +40,14 @@ func SetActive(active bool) error {
 	return nil
 }
 
+func SetUserPassword(id uint32, hash []byte) error {
+	if user, ok := GetUser(id); ok {
+		user.PasswordHash = hash
+		Users[id] = user
+	}
+	return nil
+}
+
 func proSettingsHandle(c echo.Context) error {
 	return jsonError(c, fmt.Errorf(`Unsupported`))
 }

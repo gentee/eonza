@@ -116,7 +116,12 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		mutex.Lock()
 		defer mutex.Unlock()
 
-		userID := uint32(users.XRootID)
+		var userID uint32
+		if IsScript {
+			userID = scriptTask.Header.UserID
+		} else {
+			userID = uint32(users.XRootID)
+		}
 
 		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
 			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {

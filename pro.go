@@ -32,6 +32,10 @@ func GetUser(id uint32) (user users.User, ok bool) {
 	return pro.GetUser(id)
 }
 
+func SetUserPassword(id uint32, hash []byte) error {
+	return pro.SetUserPassword(id, hash)
+}
+
 func ProInit(psw []byte) {
 	pro.LoadPro(storage.Trial.Mode > 0)
 
