@@ -31,7 +31,7 @@ type User struct {
 	ID           uint32
 	Nickname     string
 	PasswordHash []byte
-	Role         uint32
+	RoleID       uint32
 }
 
 type Auth struct {
@@ -45,7 +45,7 @@ func InitUsers(psw []byte) (map[uint32]Role, map[uint32]User) {
 		XAdminID: {ID: XAdminID, Name: RootRole},
 	}
 	Users := map[uint32]User{
-		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, Role: XAdminID},
+		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, RoleID: XAdminID},
 	}
 	return Roles, Users
 }

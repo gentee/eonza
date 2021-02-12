@@ -29,6 +29,7 @@ type Auth = users.Auth
 type Claims struct {
 	Counter int64
 	UserID  uint32
+	RoleID  uint32
 	jwt.StandardClaims
 }
 
@@ -177,6 +178,9 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		if user, ok = GetUser(userID); !ok {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 		}
+		if IsScript && userID != scriptTask.Header.UserID && user.RoleID != users.XAdminID {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+		}
 		lang := LangDefCode
 		if IsScript {
 			lang = scriptTask.Header.Lang
@@ -216,6 +220,7 @@ func loginHandle(c echo.Context) error {
 			claims := &Claims{
 				Counter: storage.PassCounter,
 				UserID:  user.ID,
+				RoleID:  user.RoleID,
 				StandardClaims: jwt.StandardClaims{
 					ExpiresAt: expirationTime.Unix(),
 				},

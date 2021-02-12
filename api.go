@@ -133,6 +133,7 @@ func runHandle(c echo.Context) error {
 			title = val
 		}
 	}
+	user := c.(*Auth).User
 	header := script.Header{
 		Name:         name,
 		Title:        title,
@@ -142,7 +143,10 @@ func runHandle(c echo.Context) error {
 		Console:      console,
 		IsPlayground: cfg.playground,
 		IP:           c.RealIP(),
-		UserID:       c.(*Auth).User.ID,
+		UserID:       user.ID,
+		RoleID:       user.RoleID,
+		PasswordHash: user.PasswordHash,
+		IsPro:        storage.Trial.Mode > TrialOff,
 		Constants:    storage.Settings.Constants,
 		Lang:         langCode,
 		TaskID:       lib.RndNum(),

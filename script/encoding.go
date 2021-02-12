@@ -28,6 +28,9 @@ type Header struct {
 	Constants    map[string]string
 	Lang         string
 	UserID       uint32
+	RoleID       uint32
+	PasswordHash []byte
+	IsPro        bool
 	IP           string
 	TaskID       uint32
 	ServerPort   int
