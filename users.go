@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
@@ -47,7 +48,7 @@ var (
 
 func LoadUsersSettings() error {
 	var err error
-	for _, item := range users.Users {
+	for _, item := range GetUsers() {
 		var (
 			data []byte
 			user UserSettings
@@ -148,10 +149,14 @@ func SaveUser(id uint32) error {
 	if err != nil {
 		return err
 	}
+	user, ok := GetUser(id)
+	if !ok {
+		return fmt.Errorf(`Access denied`)
+	}
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
-		users.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
+		user.Nickname+UserExt), data, 0777 /*os.ModePerm*/)
 }
 
 func RootUserSettings() UserSettings {
-	return userSettings[users.RootID]
+	return userSettings[users.XRootID]
 }

@@ -18,11 +18,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Auth struct {
+/*type Auth struct {
 	echo.Context
 	User *users.User
 	Lang string
-}
+}*/
+
+type Auth = users.Auth
 
 type Claims struct {
 	Counter int64
@@ -114,7 +116,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		mutex.Lock()
 		defer mutex.Unlock()
 
-		userID := uint32(users.RootID)
+		userID := uint32(users.XRootID)
 
 		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
 			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
@@ -167,7 +169,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			c.Request().URL.Path = `install`
 		}
 		var user users.User
-		if user, ok = users.Users[userID]; !ok {
+		if user, ok = GetUser(userID); !ok {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 		}
 		lang := LangDefCode
@@ -202,7 +204,7 @@ func loginHandle(c echo.Context) error {
 		err      error
 	)
 
-	for _, user := range users.Users {
+	for _, user := range GetUsers() {
 		err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(c.FormValue("password")))
 		if err == nil {
 			expirationTime := time.Now().Add(30 * 24 * time.Hour)

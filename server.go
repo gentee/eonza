@@ -271,6 +271,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/settings", saveSettingsHandle)
 		e.POST("/api/setpsw", setPasswordHandle)
 		e.POST("/api/favs", saveFavsHandle)
+		ProApi(e)
 	}
 	go func() {
 		if IsScript {

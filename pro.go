@@ -7,6 +7,7 @@
 package main
 
 import (
+	"eonza/users"
 	"net/http"
 
 	pro "github.com/gentee/eonza-pro"
@@ -27,8 +28,13 @@ func SetActive(active bool) error {
 	return pro.SetActive(active)
 }
 
-func ProInit() {
+func GetUser(id uint32) (user users.User, ok bool) {
+	return pro.GetUser(id)
+}
+
+func ProInit(psw []byte) {
 	pro.LoadPro(storage.Trial.Mode > 0)
+
 }
 
 func proSettingsHandle(c echo.Context) error {
@@ -37,4 +43,8 @@ func proSettingsHandle(c echo.Context) error {
 	response.Active = pro.Active
 	response.Trial = storage.Trial
 	return c.JSON(http.StatusOK, &response)
+}
+
+func ProApi(e *echo.Echo) {
+	pro.ProApi(e)
 }

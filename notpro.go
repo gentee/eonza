@@ -7,6 +7,7 @@
 package main
 
 import (
+	"eonza/users"
 	"fmt"
 
 	"github.com/labstack/echo/v4"
@@ -14,7 +15,25 @@ import (
 
 const Pro = false
 
-func ProInit() {
+var (
+	Users map[uint32]users.User
+	Roles map[uint32]users.Role
+)
+
+func ProInit(psw []byte) {
+	Roles, Users = users.InitUsers(psw)
+}
+
+func GetUser(id uint32) (user users.User, ok bool) {
+	user, ok = Users[id]
+	return
+}
+
+func GetUsers() []users.User {
+	user := Users[users.XRootID]
+	return []users.User{
+		user,
+	}
 }
 
 func SetActive(active bool) error {
@@ -23,4 +42,7 @@ func SetActive(active bool) error {
 
 func proSettingsHandle(c echo.Context) error {
 	return jsonError(c, fmt.Errorf(`Unsupported`))
+}
+
+func ProApi(e *echo.Echo) {
 }

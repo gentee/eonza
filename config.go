@@ -184,9 +184,9 @@ func Install() {
 	if err != nil {
 		golog.Fatal(err)
 	}
-	users.InitRoot(nil)
-	userSettings[users.RootID] = UserSettings{
-		ID:   users.RootID,
+	users.InitUsers(nil)
+	userSettings[users.XRootID] = UserSettings{
+		ID:   users.XRootID,
 		Lang: appInfo.Lang,
 		Favs: []Fav{
 			{Name: `welcome`},
@@ -197,7 +197,7 @@ func Install() {
 			}},
 		},
 	}
-	if err = SaveUser(users.RootID); err != nil {
+	if err = SaveUser(users.XRootID); err != nil {
 		golog.Fatal(err)
 	}
 	if err = SaveStorage(); err != nil {

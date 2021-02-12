@@ -4,10 +4,15 @@
 
 package users
 
+import (
+	echo "github.com/labstack/echo/v4"
+)
+
 const (
 	RootUser = `root`
-	RootID   = 0 // Don't change. Must be zero
 	RootRole = `admin`
+	XRootID  = 1
+	XAdminID = 1
 )
 
 type Role struct {
@@ -29,18 +34,20 @@ type User struct {
 	Role         uint32
 }
 
-var (
-	Users map[uint32]User
-	Roles []Role
-)
+type Auth struct {
+	echo.Context
+	User *User
+	Lang string
+}
 
-func InitRoot(psw []byte) {
-	Roles = []Role{
-		{ID: RootID, Name: RootRole},
+func InitUsers(psw []byte) (map[uint32]Role, map[uint32]User) {
+	Roles := map[uint32]Role{
+		XAdminID: {ID: XAdminID, Name: RootRole},
 	}
-	Users = map[uint32]User{
-		RootID: {ID: RootID, Nickname: RootUser, PasswordHash: psw, Role: RootID},
+	Users := map[uint32]User{
+		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, Role: XAdminID},
 	}
+	return Roles, Users
 }
 
 /*
