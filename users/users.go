@@ -29,9 +29,10 @@ type Role struct {
 
 type User struct {
 	ID           uint32
+	RoleID       uint32
+	PassCounter  uint32
 	Nickname     string
 	PasswordHash []byte
-	RoleID       uint32
 }
 
 type Auth struct {
@@ -40,12 +41,13 @@ type Auth struct {
 	Lang string
 }
 
-func InitUsers(psw []byte) (map[uint32]Role, map[uint32]User) {
+func InitUsers(psw []byte, counter uint32) (map[uint32]Role, map[uint32]User) {
 	Roles := map[uint32]Role{
 		XAdminID: {ID: XAdminID, Name: RootRole},
 	}
 	Users := map[uint32]User{
-		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, RoleID: XAdminID},
+		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, RoleID: XAdminID,
+			PassCounter: counter},
 	}
 	return Roles, Users
 }

@@ -40,8 +40,12 @@ func SetUserPassword(id uint32, hash []byte) error {
 	return pro.SetUserPassword(id, hash)
 }
 
-func ProInit(psw []byte) {
-	pro.LoadPro(storage.Trial.Mode > TrialOff, psw, cfg.path)
+func IncPassCounter(id uint32) error {
+	return pro.IncPassCounter(id)
+}
+
+func ProInit(psw []byte, counter uint32) {
+	pro.LoadPro(storage.Trial.Mode > TrialOff, psw, counter, cfg.path)
 }
 
 func proSettingsHandle(c echo.Context) error {

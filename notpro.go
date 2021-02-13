@@ -9,6 +9,7 @@ package main
 import (
 	"eonza/users"
 	"fmt"
+	"sync"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,12 +17,13 @@ import (
 const Pro = false
 
 var (
-	Users map[uint32]users.User
-	Roles map[uint32]users.Role
+	Users    map[uint32]users.User
+	Roles    map[uint32]users.Role
+	proMutex = &sync.Mutex{}
 )
 
-func ProInit(psw []byte) {
-	Roles, Users = users.InitUsers(psw)
+func ProInit(psw []byte, counter uint32) {
+	Roles, Users = users.InitUsers(psw, counter)
 }
 
 func GetUser(id uint32) (user users.User, ok bool) {
@@ -41,8 +43,21 @@ func SetActive(active bool) error {
 }
 
 func SetUserPassword(id uint32, hash []byte) error {
+	proMutex.Lock()
+	defer proMutex.Unlock()
 	if user, ok := GetUser(id); ok {
+		user.PassCounter++
 		user.PasswordHash = hash
+		Users[id] = user
+	}
+	return nil
+}
+
+func IncPassCounter(id uint32) error {
+	proMutex.Lock()
+	defer proMutex.Unlock()
+	if user, ok := GetUser(id); ok {
+		user.PassCounter++
 		Users[id] = user
 	}
 	return nil

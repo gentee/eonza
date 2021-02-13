@@ -183,7 +183,7 @@ func initTask() script.Settings {
 
 	task = Task{
 		ID:        scriptTask.Header.TaskID,
-		UserID:    scriptTask.Header.UserID,
+		UserID:    scriptTask.Header.User.ID,
 		Status:    TaskActive,
 		Name:      scriptTask.Header.Name,
 		StartTime: time.Now().Unix(),

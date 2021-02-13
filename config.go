@@ -184,7 +184,7 @@ func Install() {
 	if err != nil {
 		golog.Fatal(err)
 	}
-	ProInit(nil)
+	ProInit(nil, 0)
 	userSettings[users.XRootID] = UserSettings{
 		ID:   users.XRootID,
 		Lang: appInfo.Lang,

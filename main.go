@@ -65,7 +65,6 @@ func main() {
 		if err = LoadCustomAsset(scriptTask.Header.AssetsDir, scriptTask.Header.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
-		ProInit(nil)
 		e = RunServer(WebSettings{
 			Port: scriptTask.Header.HTTP.Port,
 			Open: scriptTask.Header.HTTP.Open,
@@ -99,7 +98,7 @@ func main() {
 			return
 		}
 		hideConsole()
-		ProInit(storage.Settings.PasswordHash)
+		ProInit(storage.Settings.PasswordHash, uint32(storage.PassCounter))
 		LoadUsersSettings()
 		defer CloseLog()
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {

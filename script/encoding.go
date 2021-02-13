@@ -11,6 +11,7 @@ import (
 	"os/exec"
 
 	"eonza/lib"
+	"eonza/users"
 
 	"github.com/gentee/gentee"
 )
@@ -27,9 +28,8 @@ type Header struct {
 	SourceCode   []byte
 	Constants    map[string]string
 	Lang         string
-	UserID       uint32
-	RoleID       uint32
-	PasswordHash []byte
+	User         users.User
+	ClaimKey     string
 	IsPro        bool
 	IP           string
 	TaskID       uint32

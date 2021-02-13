@@ -27,7 +27,7 @@ import (
 type Auth = users.Auth
 
 type Claims struct {
-	Counter int64
+	Counter uint32
 	UserID  uint32
 	RoleID  uint32
 	jwt.StandardClaims
@@ -117,74 +117,88 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		mutex.Lock()
 		defer mutex.Unlock()
 
-		var userID uint32
+		var (
+			userID uint32
+			user   users.User
+			valid  bool
+		)
+		lang := LangDefCode
+		claims := &Claims{}
 		if IsScript {
-			userID = scriptTask.Header.UserID
-		} else {
-			userID = uint32(users.XRootID)
-		}
-
-		if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
-			strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
-			hashid := getCookie(c, "hashid")
-			jwtData := getCookie(c, "jwt")
-			if len(hashid) > 0 {
-				if item, ok := sessions[hashid]; ok {
-					c.SetCookie(&http.Cookie{
-						Name:     "jwt",
-						Value:    item.Token,
-						Expires:  time.Now().Add(30 * 24 * time.Hour),
-						HttpOnly: true,
-					})
-					jwtData = item.Token
-					delete(sessions, hashid)
-				}
-				c.SetCookie(&http.Cookie{
-					Name:    "hashid",
-					Value:   "",
-					Path:    "/",
-					Expires: time.Unix(0, 0),
-				})
-			}
-			var valid bool
-			if len(jwtData) > 0 {
-				claims := &Claims{}
-				token, err := jwt.ParseWithClaims(jwtData, claims,
-					func(token *jwt.Token) (interface{}, error) {
-						/*	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-							return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-						*/
-						return []byte(cfg.HTTP.JWTKey + sessionKey), nil
-					})
-				if err == nil {
-					if claims.Counter == storage.PassCounter {
-						valid = token.Valid
-						userID = claims.UserID
+			user = scriptTask.Header.User
+			if len(user.PasswordHash) > 0 {
+				jwtData := getCookie(c, "jwt")
+				if len(jwtData) > 0 {
+					token, err := jwt.ParseWithClaims(jwtData, claims,
+						func(token *jwt.Token) (interface{}, error) {
+							return []byte(scriptTask.Header.ClaimKey), nil
+						})
+					if err == nil {
+						if (claims.UserID == user.ID && claims.Counter == user.PassCounter) ||
+							claims.RoleID == users.XAdminID {
+							valid = token.Valid
+						}
 					}
 				}
-			}
-			if !valid {
-				if url == `/` {
-					c.Request().URL.Path = `login`
-				} else if url != `/api/login` && url != `/api/taskstatus` && url != `/api/sys` {
+				if !valid {
 					return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 				}
 			}
-		}
-		if firstRun && url == `/` {
-			c.Request().URL.Path = `install`
-		}
-		var user users.User
-		if user, ok = GetUser(userID); !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-		}
-		if IsScript && userID != scriptTask.Header.UserID && user.RoleID != users.XAdminID {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-		}
-		lang := LangDefCode
-		if IsScript {
 			lang = scriptTask.Header.Lang
 		} else {
+			userID = uint32(users.XRootID)
+			if len(storage.Settings.PasswordHash) > 0 && (url == `/` || strings.HasPrefix(url, `/api`) ||
+				strings.HasPrefix(url, `/ws`) || strings.HasPrefix(url, `/task`)) {
+				hashid := getCookie(c, "hashid")
+				jwtData := getCookie(c, "jwt")
+				if len(hashid) > 0 {
+					if item, ok := sessions[hashid]; ok {
+						c.SetCookie(&http.Cookie{
+							Name:     "jwt",
+							Value:    item.Token,
+							Expires:  time.Now().Add(30 * 24 * time.Hour),
+							HttpOnly: true,
+						})
+						jwtData = item.Token
+						delete(sessions, hashid)
+					}
+					c.SetCookie(&http.Cookie{
+						Name:    "hashid",
+						Value:   "",
+						Path:    "/",
+						Expires: time.Unix(0, 0),
+					})
+				}
+				if len(jwtData) > 0 {
+					token, err := jwt.ParseWithClaims(jwtData, claims,
+						func(token *jwt.Token) (interface{}, error) {
+							/*	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+								return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+							*/
+							return []byte(cfg.HTTP.JWTKey + sessionKey), nil
+						})
+					if err == nil {
+						if user, ok = GetUser(claims.UserID); ok && claims.Counter == user.PassCounter {
+							valid = token.Valid
+							userID = claims.UserID
+						}
+					}
+				}
+				if !valid {
+					if url == `/` {
+						c.Request().URL.Path = `login`
+					} else if url != `/api/login` && url != `/api/taskstatus` && url != `/api/sys` &&
+						url != `/api/notification` {
+						return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+					}
+				}
+			}
+			if firstRun && url == `/` {
+				c.Request().URL.Path = `install`
+			}
+			if user, ok = GetUser(userID); !ok {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+			}
 			if u, ok := userSettings[user.ID]; ok {
 				lang = u.Lang
 			}
@@ -218,7 +232,7 @@ func loginHandle(c echo.Context) error {
 		if err == nil {
 			expirationTime := time.Now().Add(30 * 24 * time.Hour)
 			claims := &Claims{
-				Counter: storage.PassCounter,
+				Counter: user.PassCounter,
 				UserID:  user.ID,
 				RoleID:  user.RoleID,
 				StandardClaims: jwt.StandardClaims{
