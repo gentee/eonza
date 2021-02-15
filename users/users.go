@@ -28,11 +28,11 @@ type Role struct {
 }
 
 type User struct {
-	ID           uint32
-	RoleID       uint32
-	PassCounter  uint32
-	Nickname     string
-	PasswordHash []byte
+	ID           uint32 `json:"id"`
+	RoleID       uint32 `json:"roleid"`
+	PassCounter  uint32 `json:"-"`
+	Nickname     string `json:"nickname"`
+	PasswordHash []byte `json:"-"`
 }
 
 type Auth struct {
