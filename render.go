@@ -36,6 +36,7 @@ type Render struct {
 	Nfy         *NfyResponse
 	Update      VerUpdate
 	Pro         bool
+	DefLists    []DefList
 	//	ProSettings ProSettings
 	//	Port    int
 	/*	Params   map[string]string
@@ -182,6 +183,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Update = nfyData.Update
 		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
 		render.Pro = Pro
+		render.DefLists = defaultList
 		data = render
 	}
 

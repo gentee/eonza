@@ -157,6 +157,7 @@ var (
 		{Prototype: `SQLQuery(str,str,arr.str,str)`, Object: SQLQuery},
 		{Prototype: `SQLRow(str,str,arr.str,str)`, Object: SQLRow},
 		{Prototype: `SQLValue(str,str,arr.str,str)`, Object: SQLValue},
+		{Prototype: `ConvertText(str,str,str) str`, Object: ConvertText},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
