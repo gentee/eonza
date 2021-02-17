@@ -6,7 +6,6 @@ package script
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -25,7 +24,6 @@ func ConvertText(source, from, to string) (string, error) {
 		decBytes, _ := ioutil.ReadAll(toutf8)
 		source = string(decBytes)
 	}
-	fmt.Printf("FROM: %s\n", source)
 	if to != `utf-8` {
 		e, err := ianaindex.IANA.Encoding(to)
 		if err != nil {
@@ -36,7 +34,6 @@ func ConvertText(source, from, to string) (string, error) {
 		toutf.Close()
 		source = b.String()
 	}
-	fmt.Printf("TO: %s\n", source)
 
 	return source, nil
 }

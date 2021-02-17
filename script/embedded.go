@@ -147,6 +147,7 @@ var (
 		{Prototype: `SetVar(str,obj)`, Object: SetVarObj},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
+		{Prototype: `GetVarBytes(str) str`, Object: GetVarBytes},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
@@ -307,6 +308,18 @@ func GetVar(name string) (ret string, err error) {
 	if IsVar(name) != 0 {
 		id := len(dataScript.Vars) - 1
 		ret, err = Macro(dataScript.Vars[id][name])
+	} else if strings.ContainsAny(name, `[.`) {
+		var found bool
+		if ret, found = ReplaceObj(name); !found {
+			ret = ``
+		}
+	}
+	return
+}
+
+func GetVarBytes(name string) (ret string, err error) {
+	if IsVar(name) != 0 {
+		ret = dataScript.Vars[len(dataScript.Vars)-1][name]
 	}
 	return
 }
