@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"eonza/lib"
+	"eonza/users"
 
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
@@ -35,12 +36,6 @@ type Response struct {
 	Success bool `json:"success"`
 	//	Message string `json:"message,omitempty"`
 	Error string `json:"error,omitempty"`
-}
-
-type Auth struct {
-	echo.Context
-	User *User
-	Lang string
 }
 
 var (
@@ -184,9 +179,16 @@ func fileHandle(c echo.Context) error {
 }
 
 func logoutHandle(c echo.Context) error {
-	storage.PassCounter++
-	if err := SaveStorage(); err != nil {
+	var err error
+	user := c.(*Auth).User
+	if err = IncPassCounter(user.ID); err != nil {
 		return jsonError(c, err)
+	}
+	if user.ID == users.XRootID {
+		storage.PassCounter++
+		if err = SaveStorage(); err != nil {
+			return jsonError(c, err)
+		}
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
@@ -277,6 +279,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/settings", saveSettingsHandle)
 		e.POST("/api/setpsw", setPasswordHandle)
 		e.POST("/api/favs", saveFavsHandle)
+		ProApi(e)
 	}
 	go func() {
 		if IsScript {

@@ -138,7 +138,7 @@ func NewTask(header script.Header) (err error) {
 		Status:    TaskActive,
 		Name:      header.Name,
 		StartTime: time.Now().Unix(),
-		UserID:    header.UserID,
+		UserID:    header.User.ID,
 		Port:      header.HTTP.Port,
 	}
 	if err = SaveTrace(&task); err != nil {

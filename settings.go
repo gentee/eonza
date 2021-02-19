@@ -5,6 +5,7 @@
 package main
 
 import (
+	"eonza/users"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -62,16 +63,17 @@ func setPasswordHandle(c echo.Context) error {
 		err  error
 		hash []byte
 	)
+	user := c.(*Auth).User
 	if cfg.playground {
-		return jsonError(c, Lang(GetLangId(c.(*Auth).User), `errplaypsw`))
+		return jsonError(c, Lang(GetLangId(user), `errplaypsw`))
 	}
 	if err = c.Bind(&psw); err != nil {
 		return jsonError(c, err)
 	}
-	if len(storage.Settings.PasswordHash) > 0 {
-		err = bcrypt.CompareHashAndPassword(storage.Settings.PasswordHash, []byte(psw.CurPassword))
+	if len(user.PasswordHash) > 0 {
+		err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(psw.CurPassword))
 		if err != nil {
-			return jsonError(c, Lang(GetLangId(c.(*Auth).User), `invalidpsw`))
+			return jsonError(c, Lang(GetLangId(user), `invalidpsw`))
 		}
 	}
 	if len(psw.Password) > 0 {
@@ -80,10 +82,15 @@ func setPasswordHandle(c echo.Context) error {
 			return jsonError(c, err)
 		}
 	}
-	storage.Settings.PasswordHash = hash
-	storage.PassCounter++
-	if err = SaveStorage(); err != nil {
+	if err = SetUserPassword(user.ID, hash); err != nil {
 		return jsonError(c, err)
+	}
+	if user.ID == users.XRootID {
+		storage.Settings.PasswordHash = hash
+		storage.PassCounter++
+		if err = SaveStorage(); err != nil {
+			return jsonError(c, err)
+		}
 	}
 	return jsonSuccess(c)
 }

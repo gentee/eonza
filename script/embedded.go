@@ -147,6 +147,7 @@ var (
 		{Prototype: `SetVar(str,obj)`, Object: SetVarObj},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
+		{Prototype: `GetVarBytes(str) str`, Object: GetVarBytes},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
@@ -157,9 +158,11 @@ var (
 		{Prototype: `SQLQuery(str,str,arr.str,str)`, Object: SQLQuery},
 		{Prototype: `SQLRow(str,str,arr.str,str)`, Object: SQLRow},
 		{Prototype: `SQLValue(str,str,arr.str,str)`, Object: SQLValue},
+		{Prototype: `ConvertText(str,str,str) str`, Object: ConvertText},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
+		{Prototype: `YamlToObj(str) obj`, Object: YamlToObj},
 		{Prototype: `CopyName(str) str`, Object: CopyName},
 		{Prototype: `CloseLines(handle)`, Object: CloseLines},
 		{Prototype: `GetLine(handle) str`, Object: GetLine},
@@ -306,6 +309,18 @@ func GetVar(name string) (ret string, err error) {
 	if IsVar(name) != 0 {
 		id := len(dataScript.Vars) - 1
 		ret, err = Macro(dataScript.Vars[id][name])
+	} else if strings.ContainsAny(name, `[.`) {
+		var found bool
+		if ret, found = ReplaceObj(name); !found {
+			ret = ``
+		}
+	}
+	return
+}
+
+func GetVarBytes(name string) (ret string, err error) {
+	if IsVar(name) != 0 {
+		ret = dataScript.Vars[len(dataScript.Vars)-1][name]
 	}
 	return
 }

@@ -7,20 +7,65 @@
 package main
 
 import (
+	"eonza/users"
 	"fmt"
+	"sync"
 
 	"github.com/labstack/echo/v4"
 )
 
 const Pro = false
 
-func ProInit() {
+var (
+	Users    map[uint32]users.User
+	Roles    map[uint32]users.Role
+	proMutex = &sync.Mutex{}
+)
+
+func ProInit(psw []byte, counter uint32) {
+	Roles, Users = users.InitUsers(psw, counter)
+}
+
+func GetUser(id uint32) (user users.User, ok bool) {
+	user, ok = Users[id]
+	return
+}
+
+func GetUsers() []users.User {
+	user := Users[users.XRootID]
+	return []users.User{
+		user,
+	}
 }
 
 func SetActive(active bool) error {
 	return nil
 }
 
+func SetUserPassword(id uint32, hash []byte) error {
+	proMutex.Lock()
+	defer proMutex.Unlock()
+	if user, ok := GetUser(id); ok {
+		user.PassCounter++
+		user.PasswordHash = hash
+		Users[id] = user
+	}
+	return nil
+}
+
+func IncPassCounter(id uint32) error {
+	proMutex.Lock()
+	defer proMutex.Unlock()
+	if user, ok := GetUser(id); ok {
+		user.PassCounter++
+		Users[id] = user
+	}
+	return nil
+}
+
 func proSettingsHandle(c echo.Context) error {
 	return jsonError(c, fmt.Errorf(`Unsupported`))
+}
+
+func ProApi(e *echo.Echo) {
 }

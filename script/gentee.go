@@ -95,6 +95,74 @@ func ScanLines(flines *FileLines) int64 {
 	return 0
 }
 
+func ifaceToObj(val interface{}) (*core.Obj, error) {
+	ret := core.NewObj()
+	switch v := val.(type) {
+	case bool:
+		ret.Data = v
+	case string:
+		ret.Data = v
+	case int:
+		ret.Data = v
+	case int64:
+		ret.Data = v
+	case float64:
+		ret.Data = v
+	case []interface{}:
+		data := core.NewArray()
+		data.Data = make([]interface{}, len(v))
+		for i, item := range v {
+			iobj, err := ifaceToObj(item)
+			if err != nil {
+				return nil, err
+			}
+			data.Data[i] = iobj
+		}
+		ret.Data = data
+	case map[string]interface{}:
+		var i int
+		data := core.NewMap()
+		data.Keys = make([]string, len(v))
+		for key, vi := range v {
+			data.Keys[i] = key
+			iobj, err := ifaceToObj(vi)
+			if err != nil {
+				return nil, err
+			}
+			data.Data[key] = iobj
+			i++
+		}
+		ret.Data = data
+	case map[interface{}]interface{}:
+		var i int
+		data := core.NewMap()
+		data.Keys = make([]string, len(v))
+		for key, vi := range v {
+			ikey := fmt.Sprint(key)
+			data.Keys[i] = ikey
+			iobj, err := ifaceToObj(vi)
+			if err != nil {
+				return nil, err
+			}
+			data.Data[ikey] = iobj
+			i++
+		}
+		ret.Data = data
+	default:
+		return nil, fmt.Errorf("unsupported object type %T", val)
+	}
+	return ret, nil
+}
+
+// YamlToObj converts json to object
+func YamlToObj(input string) (ret *core.Obj, err error) {
+	var v interface{}
+	if err = yaml.Unmarshal([]byte(input), &v); err != nil {
+		return
+	}
+	return ifaceToObj(v)
+}
+
 /*
 // Subbuf(buf, int, int) buf
 func Subbuf(buf *core.Buffer, off int64, size int64) (*core.Buffer, error) {

@@ -5,14 +5,12 @@
 package main
 
 import (
-	"encoding/hex"
-	"eonza/lib"
-	es "eonza/script"
 	"fmt"
-	"hash/crc32"
 	"io/ioutil"
-	"os"
 	"path/filepath"
+
+	es "eonza/script"
+	"eonza/users"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/yaml.v2"
@@ -38,7 +36,7 @@ type UserSettings struct {
 }
 
 // User stores user's parameters
-type User struct {
+type User struct { // Deprecated
 	ID        uint32
 	Nickname  string
 	PublicKey []byte
@@ -48,65 +46,24 @@ var (
 	userSettings = make(map[uint32]UserSettings)
 )
 
-func LoadUsers() error {
+func LoadUsersSettings() error {
 	var err error
-	for _, item := range storage.Users {
-		userSettings[item.ID] = UserSettings{
-			ID:   item.ID,
-			Lang: appInfo.Lang,
+	for _, item := range GetUsers() {
+		var (
+			data []byte
+			user UserSettings
+		)
+		user.Lang = appInfo.Lang
+		data, err = ioutil.ReadFile(filepath.Join(cfg.Users.Dir, item.Nickname+UserExt))
+		if err == nil {
+			if err = yaml.Unmarshal(data, &user); err != nil {
+				return err
+			}
 		}
+		user.ID = item.ID
+		userSettings[user.ID] = user
 	}
-
-	err = filepath.Walk(cfg.Users.Dir, func(path string, info os.FileInfo, err error) error {
-		var data []byte
-		if err != nil {
-			return err
-		}
-		if info.IsDir() || filepath.Ext(path) != UserExt {
-			return nil
-		}
-		var user UserSettings
-		data, err = ioutil.ReadFile(path)
-		if err = yaml.Unmarshal(data, &user); err != nil {
-			return err
-		}
-		if _, ok := storage.Users[user.ID]; ok {
-			userSettings[user.ID] = user
-		}
-		return err
-	})
-	return err
-}
-
-func NewUser(nickname string) (uint32, error) {
-	user := User{
-		Nickname: nickname,
-	}
-	if !lib.ValidateSysName(nickname) {
-		return 0, fmt.Errorf(Lang(DefLang, `invalidfield`), Lang(DefLang, `nickname`))
-	}
-	for _, item := range storage.Users {
-		if item.Nickname == nickname {
-			return 0, fmt.Errorf(Lang(DefLang, `errnickname`), nickname)
-		}
-
-	}
-	private, public, err := lib.GenerateKeys()
-	if err != nil {
-		return 0, err
-	}
-	user.PublicKey = public
-	user.ID = crc32.ChecksumIEEE(private)
-	if err = ioutil.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
-		[]byte(hex.EncodeToString(private)), 0777 /*os.ModePerm*/); err != nil {
-		return 0, err
-	}
-	storage.Users[user.ID] = &user
-	userSettings[user.ID] = UserSettings{
-		ID:   user.ID,
-		Lang: appInfo.Lang,
-	}
-	return user.ID, nil
+	return nil
 }
 
 // AddHistoryEditor adds the history item to the user's settings
@@ -192,13 +149,14 @@ func SaveUser(id uint32) error {
 	if err != nil {
 		return err
 	}
+	user, ok := GetUser(id)
+	if !ok {
+		return fmt.Errorf(`Access denied`)
+	}
 	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
-		storage.Users[id].Nickname+UserExt), data, 0777 /*os.ModePerm*/)
+		user.Nickname+UserExt), data, 0777 /*os.ModePerm*/)
 }
 
 func RootUserSettings() UserSettings {
-	for _, user := range storage.Users {
-		return userSettings[user.ID]
-	}
-	return UserSettings{Lang: LangDefCode}
+	return userSettings[users.XRootID]
 }

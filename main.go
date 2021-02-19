@@ -98,7 +98,8 @@ func main() {
 			return
 		}
 		hideConsole()
-		LoadUsers()
+		ProInit(storage.Settings.PasswordHash, uint32(storage.PassCounter))
+		LoadUsersSettings()
 		defer CloseLog()
 		if err := LoadCustomAsset(cfg.AssetsDir, cfg.HTTP.Theme); err != nil {
 			golog.Fatal(err)
@@ -106,7 +107,6 @@ func main() {
 		LoadNotifications()
 		InitScripts()
 		CreateSysTray()
-		ProInit()
 		RunCron()
 		e = RunServer(WebSettings{
 			Port: cfg.HTTP.Port,
