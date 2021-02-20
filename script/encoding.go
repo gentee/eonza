@@ -29,6 +29,7 @@ type Header struct {
 	Constants    map[string]string
 	Lang         string
 	User         users.User
+	Role         users.Role
 	ClaimKey     string
 	IsPro        bool
 	IP           string

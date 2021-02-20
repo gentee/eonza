@@ -135,6 +135,7 @@ func runHandle(c echo.Context) error {
 		}
 	}
 	user := c.(*Auth).User
+	role, _ := GetRole(user.RoleID)
 	header := script.Header{
 		Name:         name,
 		Title:        title,
@@ -145,6 +146,7 @@ func runHandle(c echo.Context) error {
 		IsPlayground: cfg.playground,
 		IP:           c.RealIP(),
 		User:         *user,
+		Role:         role,
 		ClaimKey:     cfg.HTTP.JWTKey + sessionKey,
 		IsPro:        storage.Trial.Mode > TrialOff,
 		Constants:    storage.Settings.Constants,

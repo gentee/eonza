@@ -122,7 +122,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Task = task
 			renderScript.Title = scriptTask.Header.Title
 			renderScript.CDN = scriptTask.Header.CDN
-			userid, roleid = scriptTask.Header.User.ID, scriptTask.Header.User.RoleID
+			renderScript.Nickname = scriptTask.Header.User.Nickname
+			renderScript.Role = scriptTask.Header.Role.Name
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
@@ -131,16 +132,16 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Logout = out2html(files[TExtLog], true)
 			renderScript.Task.SourceCode = files[TExtSrc]
 			userid, roleid = renderScript.Task.UserID, renderScript.Task.RoleID
-		}
-		if user, ok := GetUser(userid); ok {
-			renderScript.Nickname = user.Nickname
-		} else {
-			renderScript.Nickname = fmt.Sprint(userid)
-		}
-		if role, ok := GetRole(roleid); ok {
-			renderScript.Role = role.Name
-		} else {
-			renderScript.Role = fmt.Sprint(roleid)
+			if user, ok := GetUser(userid); ok {
+				renderScript.Nickname = user.Nickname
+			} else {
+				renderScript.Nickname = fmt.Sprint(userid)
+			}
+			if role, ok := GetRole(roleid); ok {
+				renderScript.Role = role.Name
+			} else {
+				renderScript.Role = fmt.Sprint(roleid)
+			}
 		}
 		if len(renderScript.Task.SourceCode) > 0 {
 			if out, err := lib.Markdown("```go\r\n" + renderScript.Task.SourceCode +
