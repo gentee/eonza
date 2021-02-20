@@ -45,6 +45,7 @@ type TaskInfo struct {
 	StartTime  string `json:"start"`
 	FinishTime string `json:"finish"`
 	UserID     uint32 `json:"userid"`
+	RoleID     uint32 `json:"roleid"`
 	Port       int    `json:"port"`
 	Message    string `json:"message,omitempty"`
 }
@@ -237,6 +238,7 @@ func taskStatusHandle(c echo.Context) error {
 			StartTime:  task.StartTime,
 			FinishTime: task.FinishTime,
 			UserID:     task.UserID,
+			RoleID:     task.RoleID,
 			Port:       task.Port,
 		}
 	}
@@ -305,6 +307,7 @@ func tasksHandle(c echo.Context) error {
 			StartTime:  time.Unix(item.StartTime, 0).Format(TimeFormat),
 			FinishTime: finish,
 			UserID:     item.UserID,
+			RoleID:     item.RoleID,
 			Port:       item.Port,
 			Message:    item.Message,
 		}

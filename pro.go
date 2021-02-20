@@ -28,6 +28,10 @@ func SetActive(active bool) error {
 	return pro.SetActive(active)
 }
 
+func GetRole(id uint32) (role users.Role, ok bool) {
+	return pro.GetRole(id)
+}
+
 func GetUser(id uint32) (user users.User, ok bool) {
 	return pro.GetUser(id)
 }

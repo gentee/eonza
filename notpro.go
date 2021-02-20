@@ -26,6 +26,11 @@ func ProInit(psw []byte, counter uint32) {
 	Roles, Users = users.InitUsers(psw, counter)
 }
 
+func GetRole(id uint32) (role users.Role, ok bool) {
+	role, ok = Roles[id]
+	return
+}
+
 func GetUser(id uint32) (user users.User, ok bool) {
 	user, ok = Users[id]
 	return
