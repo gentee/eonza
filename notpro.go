@@ -47,6 +47,10 @@ func CheckAdmin(c echo.Context) error {
 	return nil
 }
 
+func ScriptAccess(name, ipath string, roleid uint32) error {
+	return nil
+}
+
 func SetActive(active bool) error {
 	return nil
 }

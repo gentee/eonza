@@ -66,6 +66,9 @@ func deleteScriptHandle(c echo.Context) error {
 func getScriptHandle(c echo.Context) error {
 	var response ScriptResponse
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	name := c.QueryParam(`name`)
 	if len(name) == 0 {
 		name = LatestHistoryEditor(c)
@@ -175,10 +178,12 @@ func listScriptHandle(c echo.Context) error {
 	}
 
 	if c.QueryParam(`cache`) != fmt.Sprint(hotVersion) {
+		user := c.(*Auth).User
 		list := make(map[string]ScriptItem)
-
 		for _, item := range scripts {
-			list[item.Settings.Name] = ScriptToItem(c, item)
+			if ScriptAccess(item.Settings.Name, item.Settings.Path, user.RoleID) == nil {
+				list[item.Settings.Name] = ScriptToItem(c, item)
+			}
 		}
 		resp.Map = list
 	}
@@ -188,12 +193,11 @@ func listScriptHandle(c echo.Context) error {
 func listRunHandle(c echo.Context) error {
 	list := make([]ScriptItem, 0)
 	userId := c.(*Auth).User.ID
-	if _, ok := userSettings[userId]; !ok {
-		return jsonError(c, Lang(DefLang, `unknownuser`, userId))
-	}
-	for _, name := range userSettings[userId].History.Run {
-		if item := getScript(name); item != nil {
-			list = append(list, ScriptToItem(c, item))
+	if _, ok := userSettings[userId]; ok {
+		for _, name := range userSettings[userId].History.Run {
+			if item := getScript(name); item != nil {
+				list = append(list, ScriptToItem(c, item))
+			}
 		}
 	}
 	return c.JSON(http.StatusOK, &ListResponse{

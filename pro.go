@@ -32,6 +32,10 @@ func CheckAdmin(c echo.Context) error {
 	return pro.AdminAccess(c.(*Auth).User.ID)
 }
 
+func ScriptAccess(name, ipath string, roleid uint32) error {
+	return pro.ScriptAccess(name, ipath, roleid)
+}
+
 func GetRole(id uint32) (role users.Role, ok bool) {
 	return pro.GetRole(id)
 }

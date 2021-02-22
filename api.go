@@ -119,13 +119,17 @@ func runHandle(c echo.Context) error {
 	if item = getScript(name); item == nil {
 		return jsonError(c, Lang(DefLang, `erropen`, name))
 	}
+	user := c.(*Auth).User
+	if err = ScriptAccess(item.Settings.Name, item.Settings.Path, user.RoleID); err != nil {
+		return jsonError(c, err)
+	}
 	if item.Settings.Unrun {
 		return jsonError(c, Lang(DefLang, `errnorun`, name))
 	}
-	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
+	if err = AddHistoryRun(user.ID, name); err != nil {
 		return jsonError(c, err)
 	}
-	langCode := GetLangCode(c.(*Auth).User)
+	langCode := GetLangCode(user)
 	title := item.Settings.Title
 	if langTitle := strings.Trim(title, `#`); langTitle != title {
 		if val, ok := item.Langs[langCode][langTitle]; ok {
@@ -134,7 +138,6 @@ func runHandle(c echo.Context) error {
 			title = val
 		}
 	}
-	user := c.(*Auth).User
 	role, _ := GetRole(user.RoleID)
 	header := script.Header{
 		Name:         name,
