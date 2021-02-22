@@ -43,6 +43,10 @@ func GetUsers() []users.User {
 	}
 }
 
+func CheckAdmin(c echo.Context) error {
+	return nil
+}
+
 func SetActive(active bool) error {
 	return nil
 }

@@ -28,6 +28,10 @@ func SetActive(active bool) error {
 	return pro.SetActive(active)
 }
 
+func CheckAdmin(c echo.Context) error {
+	return pro.AdminAccess(c.(*Auth).User.ID)
+}
+
 func GetRole(id uint32) (role users.Role, ok bool) {
 	return pro.GetRole(id)
 }

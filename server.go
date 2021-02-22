@@ -163,6 +163,9 @@ func exitHandle(c echo.Context) error {
 	if cfg.playground {
 		return jsonError(c, `Access denied`)
 	}
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	golog.Info(`Shutdown`)
 	stopchan <- os.Interrupt
 	return c.JSON(http.StatusOK, Response{Success: true})
@@ -194,6 +197,9 @@ func logoutHandle(c echo.Context) error {
 }
 
 func reloadHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	ClearAsset()
 	InitTemplates()
 	InitLang()
@@ -252,9 +258,9 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/ws", wsMainHandle)
 		e.GET("/task/:id", showTaskHandle)
 		e.GET("/api/compile", compileHandle)
-		e.GET("/api/exit", exitHandle)
+		e.GET("/api/exit", exitHandle) // +
 		e.GET("/api/export", exportHandle)
-		e.GET("/api/reload", reloadHandle)
+		e.GET("/api/reload", reloadHandle) // +
 		e.GET("/api/logout", logoutHandle)
 		e.GET("/api/run", runHandle)
 		e.GET("/api/script", getScriptHandle)

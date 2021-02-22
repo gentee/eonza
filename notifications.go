@@ -272,6 +272,7 @@ func GetNewVersion(lang string) (ret string) {
 }
 
 func CheckUpdates() error {
+	fmt.Println(`CHECK UPDATES`, time.Now())
 	resp, err := http.Get(appInfo.Homepage + `latest`)
 	if err != nil {
 		return err
