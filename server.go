@@ -257,10 +257,10 @@ func RunServer(options WebSettings) *echo.Echo {
 	} else {
 		e.GET("/ws", wsMainHandle)
 		e.GET("/task/:id", showTaskHandle)
-		e.GET("/api/compile", compileHandle)
-		e.GET("/api/exit", exitHandle) // +
-		e.GET("/api/export", exportHandle)
-		e.GET("/api/reload", reloadHandle) // +
+		e.GET("/api/compile", compileHandle) // +
+		e.GET("/api/exit", exitHandle)       // +
+		e.GET("/api/export", exportHandle)   // +
+		e.GET("/api/reload", reloadHandle)   // +
 		e.GET("/api/logout", logoutHandle)
 		e.GET("/api/run", runHandle)          // +
 		e.GET("/api/script", getScriptHandle) // +
@@ -277,10 +277,10 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/trial/:id", trialHandle)
 		e.POST("/api/install", installHandle)
 		e.POST("/api/login", loginHandle)
-		e.POST("/api/script", saveScriptHandle)
-		e.POST("/api/delete", deleteScriptHandle)
+		e.POST("/api/script", saveScriptHandle)   // +
+		e.POST("/api/delete", deleteScriptHandle) // +
 		e.POST("/api/taskstatus", taskStatusHandle)
-		e.POST("/api/import", importHandle)
+		e.POST("/api/import", importHandle) // +
 		e.POST("/api/notification", notificationHandle)
 		e.POST("/api/settings", saveSettingsHandle)
 		e.POST("/api/setpsw", setPasswordHandle)

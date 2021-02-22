@@ -69,6 +69,9 @@ func compileHandle(c echo.Context) error {
 		src  string
 		err  error
 	)
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	name := c.QueryParam(`name`)
 	if item = getScript(name); item == nil {
 		return jsonError(c, Lang(DefLang, `erropen`, name))

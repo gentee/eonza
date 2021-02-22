@@ -54,6 +54,9 @@ var (
 func deleteScriptHandle(c echo.Context) error {
 	var response Response
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	if err := DeleteScript(c, c.QueryParam(`name`)); err != nil {
 		response.Error = fmt.Sprint(err)
 	} else {
@@ -103,6 +106,9 @@ func saveScriptHandle(c echo.Context) error {
 	)
 	errResult := func() error {
 		return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
+	}
+	if err = CheckAdmin(c); err != nil {
+		return errResult()
 	}
 	if err = c.Bind(&script); err != nil {
 		return errResult()
@@ -208,6 +214,9 @@ func listRunHandle(c echo.Context) error {
 func exportHandle(c echo.Context) error {
 	var response Response
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	name := c.QueryParam(`name`)
 	script := getScript(name)
 	if script == nil {
@@ -233,6 +242,11 @@ func importHandle(c echo.Context) error {
 		response                       ScriptResponse
 		errFormat, errExists, errEmbed []string
 	)
+
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+
 	overwrite := c.FormValue("overwrite") == `true`
 
 	form, err := c.MultipartForm()
