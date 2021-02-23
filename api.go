@@ -13,6 +13,7 @@ import (
 
 	"eonza/lib"
 	"eonza/script"
+	"eonza/users"
 
 	"github.com/gentee/gentee"
 	"github.com/labstack/echo/v4"
@@ -46,6 +47,7 @@ type TaskInfo struct {
 	FinishTime string `json:"finish"`
 	UserID     uint32 `json:"userid"`
 	RoleID     uint32 `json:"roleid"`
+	ToDel      bool   `json:"todel"`
 	Port       int    `json:"port"`
 	Message    string `json:"message,omitempty"`
 }
@@ -298,26 +300,41 @@ func sysTaskHandle(c echo.Context) error {
 
 func tasksHandle(c echo.Context) error {
 	list := ListTasks()
-	/*	for i := len(list)/2 - 1; i >= 0; i-- {
-		opp := len(list) - 1 - i
-		list[i], list[opp] = list[opp], list[i]
-	}*/
-	listInfo := make([]TaskInfo, len(list))
-	for i, item := range list {
+	listInfo := make([]TaskInfo, 0, len(list))
+	user := c.(*Auth).User
+	var (
+		taskFlag int
+	)
+	if user.RoleID != users.XAdminID {
+		if role, ok := GetRole(user.RoleID); ok {
+			taskFlag = role.Tasks
+		}
+	}
+	for _, item := range list {
 		var finish string
 		if item.FinishTime > 0 {
 			finish = time.Unix(item.FinishTime, 0).Format(TimeFormat)
+		} else if user.RoleID != users.XAdminID && user.ID != item.UserID {
+			continue
 		}
-		listInfo[i] = TaskInfo{
-			ID:         item.ID,
-			Status:     item.Status,
-			Name:       item.Name,
-			StartTime:  time.Unix(item.StartTime, 0).Format(TimeFormat),
-			FinishTime: finish,
-			UserID:     item.UserID,
-			RoleID:     item.RoleID,
-			Port:       item.Port,
-			Message:    item.Message,
+		if user.RoleID == users.XAdminID || (taskFlag&4 == 4) ||
+			(taskFlag&1 == 1 && user.ID == item.UserID) ||
+			(taskFlag&2 == 2 && user.RoleID == item.RoleID) {
+			todel := user.RoleID == users.XAdminID || (taskFlag&0x400 == 0x400) ||
+				(taskFlag&0x100 == 0x100 && user.ID == item.UserID) ||
+				(taskFlag&0x200 == 0x200 && user.RoleID == item.RoleID)
+			listInfo = append(listInfo, TaskInfo{
+				ID:         item.ID,
+				Status:     item.Status,
+				Name:       item.Name,
+				StartTime:  time.Unix(item.StartTime, 0).Format(TimeFormat),
+				FinishTime: finish,
+				UserID:     item.UserID,
+				RoleID:     item.RoleID,
+				Port:       item.Port,
+				ToDel:      todel,
+				Message:    item.Message,
+			})
 		}
 	}
 	return c.JSON(http.StatusOK, &TasksResponse{
@@ -326,9 +343,26 @@ func tasksHandle(c echo.Context) error {
 }
 
 func removeTaskHandle(c echo.Context) error {
+	var (
+		ptask *Task
+		ok    bool
+	)
 	idTask, _ := strconv.ParseUint(c.Param("id"), 10, 32)
-	if _, ok := tasks[uint32(idTask)]; !ok {
+	if ptask, ok = tasks[uint32(idTask)]; !ok {
 		return jsonError(c, fmt.Errorf(`task %d has not been found`, idTask))
+	}
+	user := c.(*Auth).User
+	if user.RoleID != users.XAdminID {
+		var access bool
+		if role, ok := GetRole(user.RoleID); ok {
+			taskFlag := role.Tasks
+			access = (taskFlag&0x400 == 0x400) ||
+				(taskFlag&0x100 == 0x100 && user.ID == ptask.UserID) ||
+				(taskFlag&0x200 == 0x200 && user.RoleID == ptask.RoleID)
+		}
+		if !access {
+			return jsonError(c, fmt.Errorf(`Access denied`))
+		}
 	}
 	delete(tasks, uint32(idTask))
 	RemoveTask(uint32(idTask))

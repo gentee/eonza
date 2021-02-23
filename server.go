@@ -256,7 +256,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/form", formHandle)
 	} else {
 		e.GET("/ws", wsMainHandle)
-		e.GET("/task/:id", showTaskHandle)
+		e.GET("/task/:id", showTaskHandle)   // +
 		e.GET("/api/compile", compileHandle) // +
 		e.GET("/api/exit", exitHandle)       // +
 		e.GET("/api/export", exportHandle)   // +
@@ -267,9 +267,9 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/list", listScriptHandle)  // +
 		e.GET("/api/listrun", listRunHandle)  // +
 		e.GET("/api/notifications", nfyHandle)
-		e.GET("/api/tasks", tasksHandle)
+		e.GET("/api/tasks", tasksHandle) // +
 		e.GET("/api/prosettings", proSettingsHandle)
-		e.GET("/api/remove/:id", removeTaskHandle)
+		e.GET("/api/remove/:id", removeTaskHandle) // +
 		e.GET("/api/removenfy/:id", removeNfyHandle)
 		e.GET("/api/sys", sysTaskHandle)
 		e.GET("/api/settings", settingsHandle)

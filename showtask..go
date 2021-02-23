@@ -5,6 +5,7 @@
 package main
 
 import (
+	"eonza/users"
 	"fmt"
 	"strconv"
 
@@ -12,13 +13,27 @@ import (
 )
 
 func showTaskHandle(c echo.Context) error {
+
 	idtask, _ := strconv.ParseUint(c.Param(`id`), 10, 32)
 	ptask := tasks[uint32(idtask)]
 	if ptask == nil {
 		return jsonError(c, fmt.Errorf(`task %d has not been found`, idtask))
 	}
+	user := c.(*Auth).User
+	if user.RoleID != users.XAdminID {
+		var access bool
+		if role, ok := GetRole(user.RoleID); ok {
+			taskFlag := role.Tasks
+			access = (taskFlag&4 == 4) ||
+				(taskFlag&1 == 1 && user.ID == ptask.UserID) ||
+				(taskFlag&2 == 2 && user.RoleID == ptask.RoleID)
+		}
+		if !access {
+			return jsonError(c, fmt.Errorf(`Access denied`))
+		}
+	}
 	if item := getScript(ptask.Name); item != nil {
-		c.Set(`Title`, ScriptLang(item, GetLangCode(c.(*Auth).User), item.Settings.Title))
+		c.Set(`Title`, ScriptLang(item, GetLangCode(user), item.Settings.Title))
 	} else {
 		c.Set(`Title`, ptask.Name)
 	}
