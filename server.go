@@ -262,15 +262,15 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/export", exportHandle)   // +
 		e.GET("/api/reload", reloadHandle)   // +
 		e.GET("/api/logout", logoutHandle)
-		e.GET("/api/run", runHandle)          // +
-		e.GET("/api/script", getScriptHandle) // +
-		e.GET("/api/list", listScriptHandle)  // +
-		e.GET("/api/listrun", listRunHandle)  // +
-		e.GET("/api/notifications", nfyHandle)
-		e.GET("/api/tasks", tasksHandle) // +
+		e.GET("/api/run", runHandle)           // +
+		e.GET("/api/script", getScriptHandle)  // +
+		e.GET("/api/list", listScriptHandle)   // +
+		e.GET("/api/listrun", listRunHandle)   // +
+		e.GET("/api/notifications", nfyHandle) // +
+		e.GET("/api/tasks", tasksHandle)       // +
 		e.GET("/api/prosettings", proSettingsHandle)
-		e.GET("/api/remove/:id", removeTaskHandle) // +
-		e.GET("/api/removenfy/:id", removeNfyHandle)
+		e.GET("/api/remove/:id", removeTaskHandle)   // +
+		e.GET("/api/removenfy/:id", removeNfyHandle) // +
 		e.GET("/api/sys", sysTaskHandle)
 		e.GET("/api/settings", settingsHandle)
 		e.GET("/api/latest", latestVerHandle)

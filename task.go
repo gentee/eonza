@@ -53,6 +53,8 @@ type WsClient struct {
 	StdoutCount int
 	LogoutCount int
 	Conn        *websocket.Conn
+	UserID      uint32
+	RoleID      uint32
 }
 
 type WsCmd struct {
@@ -397,8 +399,11 @@ func wsTaskHandle(c echo.Context) error {
 		Cmd:    WcStatus,
 		Status: task.Status,
 	}); err == nil {
+		user := c.(*Auth).User
 		client := WsClient{
-			Conn: ws,
+			Conn:   ws,
+			UserID: user.ID,
+			RoleID: user.RoleID,
 		}
 		if err = sendStdout(client); err == nil {
 			client.StdoutCount = iStdout

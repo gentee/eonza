@@ -156,6 +156,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		renderScript.IsScript = IsScript
 		data = renderScript
 	} else {
+		user := c.(*Auth).User
 		render.App = appInfo
 		render.AppPath = strings.Join(os.Args, ` `)
 		render.Version = GetVersion()
@@ -187,7 +188,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 				}
 			}
 		} else {
-			render.Lang = GetLangCode(c.(*Auth).User)
+			render.Lang = GetLangCode(user)
 		}
 		for i, lang := range langs {
 			render.Langs[lang] = Lang(i, `native`)
@@ -196,8 +197,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
 		render.PortShift = cfg.PortShift
-		render.Favs = userSettings[c.(*Auth).User.ID].Favs
-		render.Nfy = NfyList(false)
+		render.Favs = userSettings[user.ID].Favs
+		render.Nfy = NfyList(false, user.ID, user.RoleID)
 		render.Update = nfyData.Update
 		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
 		render.Pro = Pro && !cfg.playground

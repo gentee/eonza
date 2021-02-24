@@ -294,8 +294,11 @@ func wsMainHandle(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	user := c.(*Auth).User
 	clients[lib.RndNum()] = WsClient{
-		Conn: ws,
+		Conn:   ws,
+		UserID: user.ID,
+		RoleID: user.RoleID,
 	}
 	return nil
 }
