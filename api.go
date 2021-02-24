@@ -282,9 +282,12 @@ func sysTaskHandle(c echo.Context) error {
 	if taskid, err = strconv.ParseUint(c.QueryParam(`taskid`), 10, 32); err != nil {
 		return jsonError(c, err)
 	}
-
+	user := c.(*Auth).User
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
+			if user.RoleID != users.XAdminID && user.ID != item.UserID {
+				return jsonError(c, fmt.Errorf(`Access denied`))
+			}
 			url := fmt.Sprintf("http://%s:%d/sys?cmd=%s&taskid=%d", Localhost, item.Port, cmd, taskid)
 			go func() {
 				resp, err := http.Get(url)

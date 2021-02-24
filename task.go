@@ -10,6 +10,7 @@ import (
 	"eonza/lib"
 	"eonza/script"
 	es "eonza/script"
+	"eonza/users"
 	"fmt"
 	"net/http"
 	"os"
@@ -422,6 +423,9 @@ func wsTaskHandle(c echo.Context) error {
 }
 
 func infoHandle(c echo.Context) error {
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
 	return c.JSON(http.StatusOK, task)
 }
 
@@ -451,11 +455,26 @@ func sendCmdStatus(status int, timeStamp int64, message string) {
 	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status, Message: message, Time: finish}
 }
 
+func taskAccess(c echo.Context) error {
+	user := c.(*Auth).User
+	if user.RoleID != users.XAdminID && user.ID != task.UserID {
+		return fmt.Errorf(`Access denied`)
+	}
+	return nil
+}
+
 func sysHandle(c echo.Context) error {
 	cmd, _ := strconv.ParseInt(c.QueryParam(`cmd`), 10, 64)
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))
+	}
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
+	user := c.(*Auth).User
+	if user.RoleID != users.XAdminID && user.ID != task.UserID {
+		return jsonError(c, fmt.Errorf(`Access denied`))
 	}
 	if cmd == gentee.SysTerminate {
 		go func() {
@@ -496,6 +515,9 @@ func stdinHandle(c echo.Context) error {
 		form StdinForm
 		err  error
 	)
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))
@@ -514,6 +536,9 @@ func formHandle(c echo.Context) error {
 		form FormResponse
 		err  error
 	)
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))

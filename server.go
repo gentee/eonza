@@ -249,11 +249,11 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/webfonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if IsScript {
-		e.GET("/ws", wsTaskHandle)
-		e.GET("/sys", sysHandle)
-		e.GET("/info", infoHandle)
-		e.POST("/stdin", stdinHandle)
-		e.POST("/form", formHandle)
+		e.GET("/ws", wsTaskHandle)    // +
+		e.GET("/sys", sysHandle)      // +
+		e.GET("/info", infoHandle)    // +
+		e.POST("/stdin", stdinHandle) // +
+		e.POST("/form", formHandle)   // +
 	} else {
 		e.GET("/ws", wsMainHandle)
 		e.GET("/task/:id", showTaskHandle)   // +
@@ -262,16 +262,16 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/export", exportHandle)   // +
 		e.GET("/api/reload", reloadHandle)   // +
 		e.GET("/api/logout", logoutHandle)
-		e.GET("/api/run", runHandle)           // +
-		e.GET("/api/script", getScriptHandle)  // +
-		e.GET("/api/list", listScriptHandle)   // +
-		e.GET("/api/listrun", listRunHandle)   // +
-		e.GET("/api/notifications", nfyHandle) // +
-		e.GET("/api/tasks", tasksHandle)       // +
-		e.GET("/api/prosettings", proSettingsHandle)
+		e.GET("/api/run", runHandle)                 // +
+		e.GET("/api/script", getScriptHandle)        // +
+		e.GET("/api/list", listScriptHandle)         // +
+		e.GET("/api/listrun", listRunHandle)         // +
+		e.GET("/api/notifications", nfyHandle)       // +
+		e.GET("/api/tasks", tasksHandle)             // +
+		e.GET("/api/prosettings", proSettingsHandle) // +
 		e.GET("/api/remove/:id", removeTaskHandle)   // +
 		e.GET("/api/removenfy/:id", removeNfyHandle) // +
-		e.GET("/api/sys", sysTaskHandle)
+		e.GET("/api/sys", sysTaskHandle)             // +
 		e.GET("/api/settings", settingsHandle)
 		e.GET("/api/latest", latestVerHandle)
 		e.GET("/api/trial/:id", trialHandle)

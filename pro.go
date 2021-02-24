@@ -63,6 +63,9 @@ func ProInit(psw []byte, counter uint32) {
 func proSettingsHandle(c echo.Context) error {
 	var response ProOptions
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	response.Active = pro.Active
 	response.Trial = storage.Trial
 	return c.JSON(http.StatusOK, &response)
