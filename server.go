@@ -208,6 +208,9 @@ func reloadHandle(c echo.Context) error {
 }
 
 func installHandle(c echo.Context) error {
+	if c.(*Auth).User.ID != users.XRootID {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
 	lang := c.FormValue("lang")
 	firstRun = false
 	if _, ok := langsId[lang]; ok {
@@ -250,7 +253,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/favicon.ico", fileHandle)
 	if IsScript {
 		e.GET("/ws", wsTaskHandle)    // +
-		e.GET("/sys", sysHandle)      // +
+		e.GET("/sys", sysHandle)      //
 		e.GET("/info", infoHandle)    // +
 		e.POST("/stdin", stdinHandle) // +
 		e.POST("/form", formHandle)   // +
@@ -271,17 +274,17 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/prosettings", proSettingsHandle) // +
 		e.GET("/api/remove/:id", removeTaskHandle)   // +
 		e.GET("/api/removenfy/:id", removeNfyHandle) // +
-		e.GET("/api/sys", sysTaskHandle)             // +
+		e.GET("/api/sys", sysTaskHandle)             //
 		e.GET("/api/settings", settingsHandle)
-		e.GET("/api/latest", latestVerHandle)
-		e.GET("/api/trial/:id", trialHandle)
-		e.POST("/api/install", installHandle)
+		e.GET("/api/latest", latestVerHandle) //
+		e.GET("/api/trial/:id", trialHandle)  // +
+		e.POST("/api/install", installHandle) // +
 		e.POST("/api/login", loginHandle)
-		e.POST("/api/script", saveScriptHandle)   // +
-		e.POST("/api/delete", deleteScriptHandle) // +
-		e.POST("/api/taskstatus", taskStatusHandle)
-		e.POST("/api/import", importHandle) // +
-		e.POST("/api/notification", notificationHandle)
+		e.POST("/api/script", saveScriptHandle)         // +
+		e.POST("/api/delete", deleteScriptHandle)       // +
+		e.POST("/api/taskstatus", taskStatusHandle)     //
+		e.POST("/api/import", importHandle)             // +
+		e.POST("/api/notification", notificationHandle) //
 		e.POST("/api/settings", saveSettingsHandle)
 		e.POST("/api/setpsw", setPasswordHandle)
 		e.POST("/api/favs", saveFavsHandle)

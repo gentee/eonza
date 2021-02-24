@@ -469,13 +469,12 @@ func sysHandle(c echo.Context) error {
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))
 	}
-	if err := taskAccess(c); err != nil {
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
+	/*	if err := taskAccess(c); err != nil {
 		return jsonError(c, err)
-	}
-	user := c.(*Auth).User
-	if user.RoleID != users.XAdminID && user.ID != task.UserID {
-		return jsonError(c, fmt.Errorf(`Access denied`))
-	}
+	}*/
 	if cmd == gentee.SysTerminate {
 		go func() {
 			setStatus(TaskTerminated)

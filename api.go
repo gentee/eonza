@@ -226,6 +226,10 @@ func taskStatusHandle(c echo.Context) error {
 		err        error
 		finish     string
 	)
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
+
 	if err = c.Bind(&taskStatus); err != nil {
 		return jsonError(c, err)
 	}
@@ -282,6 +286,9 @@ func sysTaskHandle(c echo.Context) error {
 	if taskid, err = strconv.ParseUint(c.QueryParam(`taskid`), 10, 32); err != nil {
 		return jsonError(c, err)
 	}
+	/*if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}*/
 	user := c.(*Auth).User
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
@@ -377,6 +384,9 @@ func trialHandle(c echo.Context) error {
 		err  error
 		mode int
 	)
+	if c.(*Auth).User.RoleID != users.XAdminID {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
 	mode = storage.Trial.Mode
 	if c.Param("id") == `1` {
 		if storage.Trial.Mode == TrialOff && storage.Trial.Count < TrialDays {

@@ -140,7 +140,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 						}
 					}
 				}
-				if !valid {
+				if !valid && !strings.HasPrefix(url, `/sys`) {
 					return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 				}
 			}
