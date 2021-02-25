@@ -275,18 +275,18 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/remove/:id", removeTaskHandle)   // +
 		e.GET("/api/removenfy/:id", removeNfyHandle) // +
 		e.GET("/api/sys", sysTaskHandle)             //
-		e.GET("/api/settings", settingsHandle)
-		e.GET("/api/latest", latestVerHandle) //
-		e.GET("/api/trial/:id", trialHandle)  // +
-		e.POST("/api/install", installHandle) // +
+		e.GET("/api/settings", settingsHandle)       // +
+		e.GET("/api/latest", latestVerHandle)        //
+		e.GET("/api/trial/:id", trialHandle)         // +
+		e.POST("/api/install", installHandle)        // +
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)         // +
 		e.POST("/api/delete", deleteScriptHandle)       // +
 		e.POST("/api/taskstatus", taskStatusHandle)     //
 		e.POST("/api/import", importHandle)             // +
 		e.POST("/api/notification", notificationHandle) //
-		e.POST("/api/settings", saveSettingsHandle)
-		e.POST("/api/setpsw", setPasswordHandle)
+		e.POST("/api/settings", saveSettingsHandle)     // +
+		e.POST("/api/setpsw", setPasswordHandle)        //
 		e.POST("/api/favs", saveFavsHandle)
 		ProApi(e)
 	}
