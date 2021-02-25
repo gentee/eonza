@@ -24,6 +24,10 @@ const (
 	Pro = true
 )
 
+func IsProActive() bool {
+	return pro.Active
+}
+
 func SetActive(active bool) error {
 	return pro.SetActive(active)
 }

@@ -45,11 +45,13 @@ type TaskInfo struct {
 	Name       string `json:"name"`
 	StartTime  string `json:"start"`
 	FinishTime string `json:"finish"`
-	UserID     uint32 `json:"userid"`
-	RoleID     uint32 `json:"roleid"`
-	ToDel      bool   `json:"todel"`
-	Port       int    `json:"port"`
-	Message    string `json:"message,omitempty"`
+	//	UserID     uint32 `json:"userid"`
+	//	RoleID     uint32 `json:"roleid"`
+	User    string `json:"user"`
+	Role    string `json:"role"`
+	ToDel   bool   `json:"todel"`
+	Port    int    `json:"port"`
+	Message string `json:"message,omitempty"`
 }
 
 type TasksResponse struct {
@@ -333,14 +335,23 @@ func tasksHandle(c echo.Context) error {
 			todel := user.RoleID == users.XAdminID || (taskFlag&0x400 == 0x400) ||
 				(taskFlag&0x100 == 0x100 && user.ID == item.UserID) ||
 				(taskFlag&0x200 == 0x200 && user.RoleID == item.RoleID)
+			var userName, roleName string
+			if IsProActive() {
+				if user, ok := GetUser(item.UserID); ok {
+					userName = user.Nickname
+				}
+				if role, ok := GetRole(item.RoleID); ok {
+					roleName = role.Name
+				}
+			}
 			listInfo = append(listInfo, TaskInfo{
 				ID:         item.ID,
 				Status:     item.Status,
 				Name:       item.Name,
 				StartTime:  time.Unix(item.StartTime, 0).Format(TimeFormat),
 				FinishTime: finish,
-				UserID:     item.UserID,
-				RoleID:     item.RoleID,
+				User:       userName,
+				Role:       roleName,
 				Port:       item.Port,
 				ToDel:      todel,
 				Message:    item.Message,

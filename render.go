@@ -37,6 +37,7 @@ type Render struct {
 	Nfy         *NfyResponse
 	Update      VerUpdate
 	Pro         bool
+	ProActive   bool
 	DefLists    []DefList
 	User        *users.User
 	//	ProSettings ProSettings
@@ -202,6 +203,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Update = nfyData.Update
 		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
 		render.Pro = Pro && !cfg.playground
+		render.ProActive = IsProActive()
 		render.DefLists = defaultList
 		render.User = c.(*Auth).User
 		data = render

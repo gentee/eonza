@@ -22,6 +22,10 @@ var (
 	proMutex = &sync.Mutex{}
 )
 
+func IsProActive() bool {
+	return false
+}
+
 func ProInit(psw []byte, counter uint32) {
 	Roles, Users = users.InitUsers(psw, counter)
 }
