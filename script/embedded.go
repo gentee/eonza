@@ -168,6 +168,10 @@ var (
 		{Prototype: `GetLine(handle) str`, Object: GetLine},
 		{Prototype: `ReadLines(str) handle`, Object: ReadLines},
 		{Prototype: `ScanLines(handle) bool`, Object: ScanLines},
+		{Prototype: `OpenCSV(str,str,str) handle`, Object: OpenCSV},
+		{Prototype: `CloseCSV(handle)`, Object: CloseCSV},
+		{Prototype: `ReadCSV(handle) bool`, Object: ReadCSV},
+		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
 	}
 )
 
