@@ -159,6 +159,16 @@ var (
 		{Prototype: `SQLRow(str,str,arr.str,str)`, Object: SQLRow},
 		{Prototype: `SQLValue(str,str,arr.str,str)`, Object: SQLValue},
 		{Prototype: `ConvertText(str,str,str) str`, Object: ConvertText},
+		// Windows functions
+		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
+		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
+		{Prototype: `CloseRegistryKey(handle)`, Object: CloseRegistryKey},
+		{Prototype: `SetRegistryValue(handle,str,int,str)`, Object: SetRegistryValue},
+		{Prototype: `RegistryValues(int,str,int) arr.str`, Object: RegistryValues},
+		{Prototype: `DeleteRegistryKey(int,str,int)`, Object: DeleteRegistryKey},
+		{Prototype: `DeleteRegistryValue(handle,str)`, Object: DeleteRegistryValue},
+		{Prototype: `GetRegistryValue(handle,str,str) str`, Object: GetRegistryValue},
+		{Prototype: `OpenRegistryKey(int,str,int) handle`, Object: OpenRegistryKey},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
@@ -699,4 +709,8 @@ func CopyClipboard(data string) error {
 
 func GetClipboard() (string, error) {
 	return clipboard.ReadAll()
+}
+
+func Unsupported(name string) error {
+	return fmt.Errorf(`The '%s' function is unsupported`, name)
 }
