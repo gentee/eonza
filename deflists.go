@@ -21,9 +21,9 @@ var (
 		{
 			Name: `regtype`,
 			Items: []DefItem{
-				{`SZ`, `1`},
-				{`EXPAND_SZ`, `2`},
-				{`DWORD`, `4`},
+				{`String (SZ)`, `1`},
+				{`Expand String (EXPAND_SZ)`, `2`},
+				{`Number (DWORD)`, `4`},
 			},
 		},
 		{

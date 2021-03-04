@@ -9,7 +9,6 @@ package script
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/gentee/gentee/core"
 	"golang.org/x/sys/windows/registry"
@@ -104,25 +103,26 @@ func RegistryValues(root int64, subkey string, access int64) (*core.Array, error
 }
 
 func DeleteRegistryKey(root int64, subkey string, access int64) error {
-	var (
-		key string
-		err error
-		k   registry.Key
-	)
-	subkey = strings.Trim(subkey, `\`)
-	off := strings.LastIndexByte(subkey, '\\')
-	if off > 0 {
-		key = subkey[off+1:]
-		k, err = registry.OpenKey(RootKey(root), subkey[:off], registry.ALL_ACCESS|uint32(access))
-		if err != nil {
-			return err
+	/*	var (
+			key string
+			err error
+			k   registry.Key
+		)
+		subkey = strings.Trim(subkey, `\`)
+		off := strings.LastIndexByte(subkey, '\\')
+		if off > 0 {
+			key = subkey[off+1:]
+			k, err = registry.OpenKey(RootKey(root), subkey[:off], registry.ALL_ACCESS|uint32(access))
+			if err != nil {
+				return err
+			}
+			defer k.Close()
+		} else {
+			key = subkey
+			k = RootKey(root)
 		}
-		defer k.Close()
-	} else {
-		key = subkey
-		k = RootKey(root)
-	}
-	return registry.DeleteKey(k, key)
+		return registry.DeleteKey(k, key)*/
+	return registry.DeleteKey(RootKey(root), subkey)
 }
 
 func DeleteRegistryValue(key *RegKey, name string) error {
