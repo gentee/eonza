@@ -13,6 +13,7 @@ import (
 
 	"eonza/lib"
 	"eonza/script"
+	"eonza/users"
 
 	"github.com/gentee/gentee"
 	"github.com/labstack/echo/v4"
@@ -44,9 +45,13 @@ type TaskInfo struct {
 	Name       string `json:"name"`
 	StartTime  string `json:"start"`
 	FinishTime string `json:"finish"`
-	UserID     uint32 `json:"userid"`
-	Port       int    `json:"port"`
-	Message    string `json:"message,omitempty"`
+	//	UserID     uint32 `json:"userid"`
+	//	RoleID     uint32 `json:"roleid"`
+	User    string `json:"user"`
+	Role    string `json:"role"`
+	ToDel   bool   `json:"todel"`
+	Port    int    `json:"port"`
+	Message string `json:"message,omitempty"`
 }
 
 type TasksResponse struct {
@@ -68,6 +73,9 @@ func compileHandle(c echo.Context) error {
 		src  string
 		err  error
 	)
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	name := c.QueryParam(`name`)
 	if item = getScript(name); item == nil {
 		return jsonError(c, Lang(DefLang, `erropen`, name))
@@ -118,13 +126,17 @@ func runHandle(c echo.Context) error {
 	if item = getScript(name); item == nil {
 		return jsonError(c, Lang(DefLang, `erropen`, name))
 	}
+	user := c.(*Auth).User
+	if err = ScriptAccess(item.Settings.Name, item.Settings.Path, user.RoleID); err != nil {
+		return jsonError(c, err)
+	}
 	if item.Settings.Unrun {
 		return jsonError(c, Lang(DefLang, `errnorun`, name))
 	}
-	if err = AddHistoryRun(c.(*Auth).User.ID, name); err != nil {
+	if err = AddHistoryRun(user.ID, name); err != nil {
 		return jsonError(c, err)
 	}
-	langCode := GetLangCode(c.(*Auth).User)
+	langCode := GetLangCode(user)
 	title := item.Settings.Title
 	if langTitle := strings.Trim(title, `#`); langTitle != title {
 		if val, ok := item.Langs[langCode][langTitle]; ok {
@@ -133,7 +145,7 @@ func runHandle(c echo.Context) error {
 			title = val
 		}
 	}
-	user := c.(*Auth).User
+	role, _ := GetRole(user.RoleID)
 	header := script.Header{
 		Name:         name,
 		Title:        title,
@@ -144,6 +156,7 @@ func runHandle(c echo.Context) error {
 		IsPlayground: cfg.playground,
 		IP:           c.RealIP(),
 		User:         *user,
+		Role:         role,
 		ClaimKey:     cfg.HTTP.JWTKey + sessionKey,
 		IsPro:        storage.Trial.Mode > TrialOff,
 		Constants:    storage.Settings.Constants,
@@ -215,6 +228,10 @@ func taskStatusHandle(c echo.Context) error {
 		err        error
 		finish     string
 	)
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
+
 	if err = c.Bind(&taskStatus); err != nil {
 		return jsonError(c, err)
 	}
@@ -237,6 +254,7 @@ func taskStatusHandle(c echo.Context) error {
 			StartTime:  task.StartTime,
 			FinishTime: task.FinishTime,
 			UserID:     task.UserID,
+			RoleID:     task.RoleID,
 			Port:       task.Port,
 		}
 	}
@@ -270,9 +288,15 @@ func sysTaskHandle(c echo.Context) error {
 	if taskid, err = strconv.ParseUint(c.QueryParam(`taskid`), 10, 32); err != nil {
 		return jsonError(c, err)
 	}
-
+	/*if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}*/
+	user := c.(*Auth).User
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
+			if user.RoleID != users.XAdminID && user.ID != item.UserID {
+				return jsonError(c, fmt.Errorf(`Access denied`))
+			}
 			url := fmt.Sprintf("http://%s:%d/sys?cmd=%s&taskid=%d", Localhost, item.Port, cmd, taskid)
 			go func() {
 				resp, err := http.Get(url)
@@ -288,25 +312,50 @@ func sysTaskHandle(c echo.Context) error {
 
 func tasksHandle(c echo.Context) error {
 	list := ListTasks()
-	/*	for i := len(list)/2 - 1; i >= 0; i-- {
-		opp := len(list) - 1 - i
-		list[i], list[opp] = list[opp], list[i]
-	}*/
-	listInfo := make([]TaskInfo, len(list))
-	for i, item := range list {
+	listInfo := make([]TaskInfo, 0, len(list))
+	user := c.(*Auth).User
+	var (
+		taskFlag int
+	)
+	if user.RoleID != users.XAdminID {
+		if role, ok := GetRole(user.RoleID); ok {
+			taskFlag = role.Tasks
+		}
+	}
+	for _, item := range list {
 		var finish string
 		if item.FinishTime > 0 {
 			finish = time.Unix(item.FinishTime, 0).Format(TimeFormat)
+		} else if user.RoleID != users.XAdminID && user.ID != item.UserID {
+			continue
 		}
-		listInfo[i] = TaskInfo{
-			ID:         item.ID,
-			Status:     item.Status,
-			Name:       item.Name,
-			StartTime:  time.Unix(item.StartTime, 0).Format(TimeFormat),
-			FinishTime: finish,
-			UserID:     item.UserID,
-			Port:       item.Port,
-			Message:    item.Message,
+		if user.RoleID == users.XAdminID || (taskFlag&4 == 4) ||
+			(taskFlag&1 == 1 && user.ID == item.UserID) ||
+			(taskFlag&2 == 2 && user.RoleID == item.RoleID) {
+			todel := user.RoleID == users.XAdminID || (taskFlag&0x400 == 0x400) ||
+				(taskFlag&0x100 == 0x100 && user.ID == item.UserID) ||
+				(taskFlag&0x200 == 0x200 && user.RoleID == item.RoleID)
+			var userName, roleName string
+			if IsProActive() {
+				if user, ok := GetUser(item.UserID); ok {
+					userName = user.Nickname
+				}
+				if role, ok := GetRole(item.RoleID); ok {
+					roleName = role.Name
+				}
+			}
+			listInfo = append(listInfo, TaskInfo{
+				ID:         item.ID,
+				Status:     item.Status,
+				Name:       item.Name,
+				StartTime:  time.Unix(item.StartTime, 0).Format(TimeFormat),
+				FinishTime: finish,
+				User:       userName,
+				Role:       roleName,
+				Port:       item.Port,
+				ToDel:      todel,
+				Message:    item.Message,
+			})
 		}
 	}
 	return c.JSON(http.StatusOK, &TasksResponse{
@@ -315,9 +364,26 @@ func tasksHandle(c echo.Context) error {
 }
 
 func removeTaskHandle(c echo.Context) error {
+	var (
+		ptask *Task
+		ok    bool
+	)
 	idTask, _ := strconv.ParseUint(c.Param("id"), 10, 32)
-	if _, ok := tasks[uint32(idTask)]; !ok {
+	if ptask, ok = tasks[uint32(idTask)]; !ok {
 		return jsonError(c, fmt.Errorf(`task %d has not been found`, idTask))
+	}
+	user := c.(*Auth).User
+	if user.RoleID != users.XAdminID {
+		var access bool
+		if role, ok := GetRole(user.RoleID); ok {
+			taskFlag := role.Tasks
+			access = (taskFlag&0x400 == 0x400) ||
+				(taskFlag&0x100 == 0x100 && user.ID == ptask.UserID) ||
+				(taskFlag&0x200 == 0x200 && user.RoleID == ptask.RoleID)
+		}
+		if !access {
+			return jsonError(c, fmt.Errorf(`Access denied`))
+		}
 	}
 	delete(tasks, uint32(idTask))
 	RemoveTask(uint32(idTask))
@@ -329,6 +395,9 @@ func trialHandle(c echo.Context) error {
 		err  error
 		mode int
 	)
+	if c.(*Auth).User.RoleID != users.XAdminID {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
 	mode = storage.Trial.Mode
 	if c.Param("id") == `1` {
 		if storage.Trial.Mode == TrialOff && storage.Trial.Count < TrialDays {

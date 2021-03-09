@@ -10,6 +10,7 @@ import (
 	"eonza/lib"
 	"eonza/script"
 	es "eonza/script"
+	"eonza/users"
 	"fmt"
 	"net/http"
 	"os"
@@ -53,6 +54,8 @@ type WsClient struct {
 	StdoutCount int
 	LogoutCount int
 	Conn        *websocket.Conn
+	UserID      uint32
+	RoleID      uint32
 }
 
 type WsCmd struct {
@@ -184,6 +187,7 @@ func initTask() script.Settings {
 	task = Task{
 		ID:        scriptTask.Header.TaskID,
 		UserID:    scriptTask.Header.User.ID,
+		RoleID:    scriptTask.Header.User.RoleID,
 		Status:    TaskActive,
 		Name:      scriptTask.Header.Name,
 		StartTime: time.Now().Unix(),
@@ -396,8 +400,11 @@ func wsTaskHandle(c echo.Context) error {
 		Cmd:    WcStatus,
 		Status: task.Status,
 	}); err == nil {
+		user := c.(*Auth).User
 		client := WsClient{
-			Conn: ws,
+			Conn:   ws,
+			UserID: user.ID,
+			RoleID: user.RoleID,
 		}
 		if err = sendStdout(client); err == nil {
 			client.StdoutCount = iStdout
@@ -416,6 +423,9 @@ func wsTaskHandle(c echo.Context) error {
 }
 
 func infoHandle(c echo.Context) error {
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
 	return c.JSON(http.StatusOK, task)
 }
 
@@ -445,12 +455,26 @@ func sendCmdStatus(status int, timeStamp int64, message string) {
 	wsChan <- WsCmd{TaskID: task.ID, Cmd: WcStatus, Status: status, Message: message, Time: finish}
 }
 
+func taskAccess(c echo.Context) error {
+	user := c.(*Auth).User
+	if user.RoleID != users.XAdminID && user.ID != task.UserID {
+		return fmt.Errorf(`Access denied`)
+	}
+	return nil
+}
+
 func sysHandle(c echo.Context) error {
 	cmd, _ := strconv.ParseInt(c.QueryParam(`cmd`), 10, 64)
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))
 	}
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
+	/*	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}*/
 	if cmd == gentee.SysTerminate {
 		go func() {
 			setStatus(TaskTerminated)
@@ -490,6 +514,9 @@ func stdinHandle(c echo.Context) error {
 		form StdinForm
 		err  error
 	)
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))
@@ -508,6 +535,9 @@ func formHandle(c echo.Context) error {
 		form FormResponse
 		err  error
 	)
+	if err := taskAccess(c); err != nil {
+		return jsonError(c, err)
+	}
 	id, _ := strconv.ParseInt(c.QueryParam(`taskid`), 10, 64)
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))

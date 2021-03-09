@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"eonza/lib"
+	"eonza/users"
 	"fmt"
 	"html/template"
 	"os"
@@ -36,7 +37,9 @@ type Render struct {
 	Nfy         *NfyResponse
 	Update      VerUpdate
 	Pro         bool
+	ProActive   bool
 	DefLists    []DefList
+	User        *users.User
 	//	ProSettings ProSettings
 	//	Port    int
 	/*	Params   map[string]string
@@ -52,6 +55,8 @@ type RenderScript struct {
 	Start    string
 	Finish   string
 	CDN      string
+	Nickname string
+	Role     string
 	Source   template.HTML
 	Stdout   template.HTML
 	Logout   template.HTML
@@ -113,10 +118,13 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		return template.HTML(out)
 	}
 	if url == `script` {
+		var userid, roleid uint32
 		if IsScript {
 			renderScript.Task = task
 			renderScript.Title = scriptTask.Header.Title
 			renderScript.CDN = scriptTask.Header.CDN
+			renderScript.Nickname = scriptTask.Header.User.Nickname
+			renderScript.Role = scriptTask.Header.Role.Name
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
@@ -124,6 +132,17 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Stdout = out2html(files[TExtOut], false)
 			renderScript.Logout = out2html(files[TExtLog], true)
 			renderScript.Task.SourceCode = files[TExtSrc]
+			userid, roleid = renderScript.Task.UserID, renderScript.Task.RoleID
+			if user, ok := GetUser(userid); ok {
+				renderScript.Nickname = user.Nickname
+			} else {
+				renderScript.Nickname = fmt.Sprint(userid)
+			}
+			if role, ok := GetRole(roleid); ok {
+				renderScript.Role = role.Name
+			} else {
+				renderScript.Role = fmt.Sprint(roleid)
+			}
 		}
 		if len(renderScript.Task.SourceCode) > 0 {
 			if out, err := lib.Markdown("```go\r\n" + renderScript.Task.SourceCode +
@@ -138,6 +157,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		renderScript.IsScript = IsScript
 		data = renderScript
 	} else {
+		user := c.(*Auth).User
 		render.App = appInfo
 		render.AppPath = strings.Join(os.Args, ` `)
 		render.Version = GetVersion()
@@ -169,7 +189,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 				}
 			}
 		} else {
-			render.Lang = GetLangCode(c.(*Auth).User)
+			render.Lang = GetLangCode(user)
 		}
 		for i, lang := range langs {
 			render.Langs[lang] = Lang(i, `native`)
@@ -178,12 +198,14 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
 		render.PortShift = cfg.PortShift
-		render.Favs = userSettings[c.(*Auth).User.ID].Favs
-		render.Nfy = NfyList(false)
+		render.Favs = userSettings[user.ID].Favs
+		render.Nfy = NfyList(false, user.ID, user.RoleID)
 		render.Update = nfyData.Update
 		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
-		render.Pro = Pro
+		render.Pro = Pro && !cfg.playground
+		render.ProActive = IsProActive()
 		render.DefLists = defaultList
+		render.User = c.(*Auth).User
 		data = render
 	}
 

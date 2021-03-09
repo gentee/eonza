@@ -5,6 +5,9 @@
 package main
 
 import (
+	"fmt"
+	"math/rand"
+
 	"github.com/kataras/golog"
 	"github.com/robfig/cron/v3"
 )
@@ -14,7 +17,7 @@ var (
 )
 
 func RunCron() {
-	if _, err := cronJobs.AddFunc(`0 * * * *`, AutoCheckUpdate); err != nil {
+	if _, err := cronJobs.AddFunc(fmt.Sprintf(`%d * * * *`, rand.Intn(60)), AutoCheckUpdate); err != nil {
 		golog.Error(err)
 	}
 	cronJobs.Start()

@@ -6,7 +6,9 @@ package script
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -20,6 +22,13 @@ import (
 type FileLines struct {
 	File    *os.File
 	Scanner *bufio.Scanner
+}
+
+type CSV struct {
+	File    *os.File
+	Reader  *csv.Reader
+	Row     []string
+	Columns []string
 }
 
 func YamlToMap(in string) (*core.Map, error) {
@@ -108,6 +117,15 @@ func ifaceToObj(val interface{}) (*core.Obj, error) {
 		ret.Data = v
 	case float64:
 		ret.Data = v
+	case []string:
+		data := core.NewArray()
+		data.Data = make([]interface{}, len(v))
+		for i, item := range v {
+			iobj := core.NewObj()
+			iobj.Data = item
+			data.Data[i] = iobj
+		}
+		ret.Data = data
 	case []interface{}:
 		data := core.NewArray()
 		data.Data = make([]interface{}, len(v))
@@ -174,3 +192,61 @@ func Subbuf(buf *core.Buffer, off int64, size int64) (*core.Buffer, error) {
 	return ret, nil
 }
 */
+
+func CloseCSV(hcsv *CSV) error {
+	return hcsv.File.Close()
+}
+
+func GetCSV(hcsv *CSV) (ret *core.Obj, err error) {
+	if len(hcsv.Columns) > 0 {
+		ret = core.NewObj()
+		data := core.NewMap()
+		data.Keys = make([]string, len(hcsv.Columns))
+		for i, column := range hcsv.Columns {
+			var val string
+			if len(column) == 0 {
+				continue
+			}
+			data.Keys[i] = column
+			iobj := core.NewObj()
+			if i < len(hcsv.Row) {
+				val = hcsv.Row[i]
+			}
+			iobj.Data = val
+			data.Data[column] = iobj
+		}
+		ret.Data = data
+		return
+	}
+	return ifaceToObj(hcsv.Row)
+}
+
+func OpenCSV(filename, delim, columns string) (*CSV, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	csvReader := csv.NewReader(file)
+	delim = strings.TrimSpace(delim)
+	if len(delim) != 0 {
+		rdelim := []rune(delim)
+		csvReader.Comma = rdelim[0]
+	}
+	var icolumns []string
+	if len(columns) > 0 {
+		icolumns = strings.Split(columns, `,`)
+	}
+	return &CSV{File: file, Reader: csvReader, Columns: icolumns}, nil
+}
+
+func ReadCSV(hcsv *CSV) (int64, error) {
+	var err error
+	hcsv.Row, err = hcsv.Reader.Read()
+	if err != nil {
+		if err == io.EOF {
+			return 0, nil
+		}
+		return 0, err
+	}
+	return 1, nil
+}

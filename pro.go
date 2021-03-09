@@ -24,8 +24,24 @@ const (
 	Pro = true
 )
 
+func IsProActive() bool {
+	return pro.Active
+}
+
 func SetActive(active bool) error {
 	return pro.SetActive(active)
+}
+
+func CheckAdmin(c echo.Context) error {
+	return pro.AdminAccess(c.(*Auth).User.ID)
+}
+
+func ScriptAccess(name, ipath string, roleid uint32) error {
+	return pro.ScriptAccess(name, ipath, roleid)
+}
+
+func GetRole(id uint32) (role users.Role, ok bool) {
+	return pro.GetRole(id)
 }
 
 func GetUser(id uint32) (user users.User, ok bool) {
@@ -51,6 +67,9 @@ func ProInit(psw []byte, counter uint32) {
 func proSettingsHandle(c echo.Context) error {
 	var response ProOptions
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	response.Active = pro.Active
 	response.Trial = storage.Trial
 	return c.JSON(http.StatusOK, &response)

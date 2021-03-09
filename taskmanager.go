@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"eonza/lib"
 	"eonza/script"
+	"eonza/users"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -43,6 +44,7 @@ type Task struct {
 	StartTime  int64  `json:"start"`
 	FinishTime int64  `json:"finish"`
 	UserID     uint32 `json:"userid"`
+	RoleID     uint32 `json:"roleid"`
 	Port       int    `json:"port"`
 	Message    string `json:"message,omitempty"`
 	SourceCode string `json:"sourcecode,omitempty"`
@@ -55,7 +57,7 @@ var (
 )
 
 func (task *Task) Head() string {
-	return fmt.Sprintf("%x,%x,%d,%s,%d\r\n", task.ID, task.UserID, task.Port, task.Name, task.StartTime)
+	return fmt.Sprintf("%x,%x/%x,%d,%s,%d\r\n", task.ID, task.UserID, task.RoleID, task.Port, task.Name, task.StartTime)
 }
 
 func taskTrace(unixTime int64, status int, message string) {
@@ -139,6 +141,7 @@ func NewTask(header script.Header) (err error) {
 		Name:      header.Name,
 		StartTime: time.Now().Unix(),
 		UserID:    header.User.ID,
+		RoleID:    header.User.RoleID,
 		Port:      header.HTTP.Port,
 	}
 	if err = SaveTrace(&task); err != nil {
@@ -152,7 +155,7 @@ func NewTask(header script.Header) (err error) {
 }
 
 func (task *Task) String() string {
-	return fmt.Sprintf("%x,%x,%d,%s,%d,%d,%d,%s", task.ID, task.UserID, task.Port, task.Name,
+	return fmt.Sprintf("%x,%x/%x,%d,%s,%d,%d,%d,%s", task.ID, task.UserID, task.RoleID, task.Port, task.Name,
 		task.StartTime, task.FinishTime, task.Status, task.Message)
 }
 
@@ -167,10 +170,19 @@ func LogToTask(input string) (task Task, err error) {
 			return
 		}
 		task.ID = uint32(uival)
-		if uival, err = strconv.ParseUint(vals[1], 16, 32); err != nil {
+		ur := strings.Split(vals[1], `/`)
+		if uival, err = strconv.ParseUint(ur[0], 16, 32); err != nil {
 			return
 		}
 		task.UserID = uint32(uival)
+		if len(ur) > 1 {
+			if uival, err = strconv.ParseUint(ur[1], 16, 32); err != nil {
+				return
+			}
+			task.RoleID = uint32(uival)
+		} else {
+			task.RoleID = users.XAdminID
+		}
 		if uival, err = strconv.ParseUint(vals[2], 10, 32); err != nil {
 			return
 		}
@@ -282,8 +294,11 @@ func wsMainHandle(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	user := c.(*Auth).User
 	clients[lib.RndNum()] = WsClient{
-		Conn: ws,
+		Conn:   ws,
+		UserID: user.ID,
+		RoleID: user.RoleID,
 	}
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"eonza/lib"
+	"eonza/users"
 	"fmt"
 	"hash/crc64"
 	"io/ioutil"
@@ -45,15 +46,22 @@ type LatestResponse struct {
 }
 
 type Nfy struct {
-	Text string `json:"text"`
-	Time string `json:"time"`
-	Hash string `json:"hash"`
+	Text   string `json:"text"`
+	Time   string `json:"time"`
+	Hash   string `json:"hash"`
+	ToDel  bool   `json:"todel"`
+	Script string `json:"script"`
+	User   string `json:"user"`
+	Role   string `json:"role"`
 }
 
 type Notification struct {
-	Hash uint64
-	Text string
-	Time time.Time
+	Hash   uint64
+	Text   string
+	Time   time.Time
+	UserID uint32
+	RoleID uint32
+	Script string
 }
 
 type VerUpdate struct {
@@ -66,13 +74,14 @@ type VerUpdate struct {
 }
 
 type Notifications struct {
-	Unread int
-	List   []*Notification
-	Update VerUpdate
+	Unread   int // deprecated
+	ReadTime map[uint32]time.Time
+	List     []*Notification
+	Update   VerUpdate
 }
 
 var (
-	nfyData  Notifications
+	nfyData  = Notifications{ReadTime: make(map[uint32]time.Time)}
 	nfyMutex = &sync.Mutex{}
 	CRCTable = crc64.MakeTable(crc64.ISO)
 )
@@ -102,25 +111,20 @@ func NewNotification(nfy *Notification) (err error) {
 	nfyMutex.Lock()
 	defer nfyMutex.Unlock()
 	nfy.Time = time.Now()
-	nfy.Hash = crc64.Checksum([]byte(nfy.Text), CRCTable)
+	nfy.Hash = crc64.Checksum([]byte(fmt.Sprintf(`%s%d`, nfy.Text, nfy.UserID)), CRCTable)
 	shift := 0
 	if len(nfyData.List) >= NfyLimit {
 		shift = 1
 	}
-	unread := 1
 	for i, item := range nfyData.List {
 		if item.Hash == nfy.Hash {
 			shift++
-			if i >= len(nfyData.List)-nfyData.Unread {
-				unread = 0
-			}
 			continue
 		}
 		if shift > 0 && i >= shift {
 			nfyData.List[i-shift] = item
 		}
 	}
-	nfyData.Unread += unread
 	if shift > 0 {
 		off := len(nfyData.List) - shift
 		nfyData.List[off] = nfy
@@ -133,10 +137,10 @@ func NewNotification(nfy *Notification) (err error) {
 	} else {
 		nfyData.List = append(nfyData.List, nfy)
 	}
-	return saveNotifications()
+	return saveNotifications(true)
 }
 
-func saveNotifications() error {
+func saveNotifications(update bool) error {
 	var (
 		data bytes.Buffer
 		err  error
@@ -149,14 +153,18 @@ func saveNotifications() error {
 		0777 /*os.ModePerm*/); err != nil {
 		return err
 	}
+	if !update {
+		return nil
+	}
 	var out []byte
-	if out, err = json.Marshal(NfyList(false)); err == nil {
-		cmd := WsCmd{
-			//		    TaskID:   postNfy.TaskID,
-			Cmd:     WcNotify,
-			Message: string(out),
-		}
-		for id, client := range clients {
+	for id, client := range clients {
+		resp := NfyList(false, client.UserID, client.RoleID)
+		if out, err = json.Marshal(resp); err == nil {
+			cmd := WsCmd{
+				//		    TaskID:   postNfy.TaskID,
+				Cmd:     WcNotify,
+				Message: string(out),
+			}
 			err := client.Conn.WriteJSON(cmd)
 			if err != nil {
 				client.Conn.Close()
@@ -167,27 +175,66 @@ func saveNotifications() error {
 	return err
 }
 
-func NfyList(clear bool) *NfyResponse {
+func NfyList(clear bool, userid, roleid uint32) *NfyResponse {
+	var (
+		nfyFlag int
+	)
+	if roleid != users.XAdminID {
+		if role, ok := GetRole(roleid); ok {
+			nfyFlag = role.Notifications
+		}
+	}
+
 	nlen := len(nfyData.List)
 	slen := nlen
 	if slen > NfyPageLimit {
 		slen = NfyPageLimit
 	}
-	ret := make([]Nfy, slen)
+	ret := make([]Nfy, 0, slen)
+	var unread int
 	for i := 0; i < slen; i++ {
 		item := nfyData.List[nlen-i-1]
-		ret[i] = Nfy{
-			Hash: strconv.FormatUint(item.Hash, 10),
-			Text: strings.ReplaceAll(item.Text, "\n", "<br>"),
-			Time: item.Time.Format(TimeFormat),
+		if roleid == users.XAdminID || (nfyFlag&4 == 4) ||
+			(nfyFlag&1 == 1 && userid == item.UserID) ||
+			(nfyFlag&2 == 2 && roleid == item.RoleID) {
+			todel := roleid == users.XAdminID || (nfyFlag&0x400 == 0x400) ||
+				(nfyFlag&0x100 == 0x100 && userid == item.UserID) ||
+				(nfyFlag&0x200 == 0x200 && roleid == item.RoleID)
+			var userName, roleName string
+
+			if item.RoleID != users.XAdminID {
+				if role, ok := GetRole(item.RoleID); ok {
+					roleName = role.Name
+				}
+			} else if item.UserID != users.XRootID {
+				roleName = users.RootRole
+			}
+			if item.UserID != users.XRootID {
+				if user, ok := GetUser(item.UserID); ok {
+					userName = user.Nickname
+				}
+			}
+
+			ret = append(ret, Nfy{
+				Hash:   strconv.FormatUint(item.Hash, 10),
+				Text:   strings.ReplaceAll(item.Text, "\n", "<br>"),
+				Time:   item.Time.Format(TimeFormat),
+				ToDel:  todel,
+				Script: item.Script,
+				User:   userName,
+				Role:   roleName,
+			})
+			if item.Time.After(nfyData.ReadTime[userid]) {
+				unread++
+			}
 		}
 	}
 	resp := NfyResponse{
 		List:   ret,
-		Unread: nfyData.Unread,
+		Unread: unread,
 	}
 	if clear {
-		nfyData.Unread = 0
+		nfyData.ReadTime[userid] = time.Now()
 	}
 	return &resp
 }
@@ -195,10 +242,10 @@ func NfyList(clear bool) *NfyResponse {
 func nfyHandle(c echo.Context) error {
 	nfyMutex.Lock()
 	defer nfyMutex.Unlock()
-	prev := nfyData.Unread
-	resp := NfyList(true)
-	if nfyData.Unread != prev {
-		saveNotifications()
+	user := c.(*Auth).User
+	resp := NfyList(true, user.ID, user.RoleID)
+	if resp.Unread != 0 {
+		saveNotifications(false)
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -214,9 +261,17 @@ func notificationHandle(c echo.Context) error {
 	if err = c.Bind(&postNfy); err != nil {
 		return jsonError(c, err)
 	}
-	if err = NewNotification(&Notification{
-		Text: postNfy.Text,
-	}); err != nil {
+	nfy := Notification{
+		Text:   postNfy.Text,
+		UserID: users.XRootID,
+		RoleID: users.XAdminID,
+		Script: postNfy.Script,
+	}
+	if ptask, ok := tasks[postNfy.TaskID]; ok {
+		nfy.UserID = ptask.UserID
+		nfy.RoleID = ptask.RoleID
+	}
+	if err = NewNotification(&nfy); err != nil {
 		return jsonError(c, err)
 	}
 	return jsonSuccess(c)
@@ -224,12 +279,32 @@ func notificationHandle(c echo.Context) error {
 
 func removeNfyHandle(c echo.Context) error {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	isAccess := func(item *Notification) bool {
+		user := c.(*Auth).User
+		if user.RoleID != users.XAdminID {
+			var access bool
+			if role, ok := GetRole(user.RoleID); ok {
+				nfyFlag := role.Notifications
+				access = (nfyFlag&0x400 == 0x400) ||
+					(nfyFlag&0x100 == 0x100 && user.ID == item.UserID) ||
+					(nfyFlag&0x200 == 0x200 && user.RoleID == item.RoleID)
+			}
+			if !access {
+				return false
+			}
+		}
+		return true
+	}
+
 	nfyMutex.Lock()
 	defer nfyMutex.Unlock()
 	shift := 0
 	for i, item := range nfyData.List {
 		if item.Hash == id {
 			shift++
+			if !isAccess(item) {
+				return jsonError(c, fmt.Errorf(`Access denied`))
+			}
 			continue
 		}
 		if shift > 0 {
@@ -243,7 +318,7 @@ func removeNfyHandle(c echo.Context) error {
 		}
 		nfyData.List = nfyData.List[:off]
 	}
-	if err := saveNotifications(); err != nil {
+	if err := saveNotifications(true); err != nil {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, Response{Success: true})
@@ -291,7 +366,7 @@ func CheckUpdates() error {
 	nfyMutex.Lock()
 	defer nfyMutex.Unlock()
 	nfyData.Update.LastChecked = time.Now()
-	return saveNotifications()
+	return saveNotifications(true)
 }
 
 func AutoCheckUpdate() {
@@ -314,7 +389,7 @@ func AutoCheckUpdate() {
 		return
 	}
 	if nfy := GetNewVersion(RootUserSettings().Lang); len(nfy) > 0 {
-		NewNotification(&Notification{Text: nfy})
+		NewNotification(&Notification{Text: nfy, UserID: users.XRootID, RoleID: users.XAdminID})
 	}
 	return
 }

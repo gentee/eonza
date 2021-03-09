@@ -25,8 +25,11 @@ type Psw struct {
 func settingsHandle(c echo.Context) error {
 	var response Options
 
-	response.Common = storage.Settings
-	response.User = userSettings[c.(*Auth).User.ID]
+	user := c.(*Auth).User
+	if user.RoleID == users.XAdminID {
+		response.Common = storage.Settings
+	}
+	response.User = userSettings[user.ID]
 	return c.JSON(http.StatusOK, &response)
 }
 
@@ -39,19 +42,21 @@ func saveSettingsHandle(c echo.Context) error {
 	if err = c.Bind(&options); err != nil {
 		return jsonError(c, err)
 	}
-	hideTray = storage.Settings.HideTray
-	storage.Settings = options.Common
-	if err = SaveStorage(); err != nil {
-		return jsonError(c, err)
+	user := c.(*Auth).User
+	if user.RoleID == users.XAdminID {
+		hideTray = storage.Settings.HideTray
+		storage.Settings = options.Common
+		if err = SaveStorage(); err != nil {
+			return jsonError(c, err)
+		}
+		if isTray && !hideTray && storage.Settings.HideTray {
+			HideTray()
+		}
 	}
-	id := c.(*Auth).User.ID
-	user := userSettings[id]
-	user.Lang = options.User.Lang
-	userSettings[id] = user
-	if isTray && !hideTray && storage.Settings.HideTray {
-		HideTray()
-	}
-	if err = SaveUser(id); err != nil {
+	userSets := userSettings[user.ID]
+	userSets.Lang = options.User.Lang
+	userSettings[user.ID] = userSets
+	if err = SaveUser(user.ID); err != nil {
 		return jsonError(c, err)
 	}
 	return jsonSuccess(c)

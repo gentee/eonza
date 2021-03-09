@@ -163,6 +163,9 @@ func exitHandle(c echo.Context) error {
 	if cfg.playground {
 		return jsonError(c, `Access denied`)
 	}
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	golog.Info(`Shutdown`)
 	stopchan <- os.Interrupt
 	return c.JSON(http.StatusOK, Response{Success: true})
@@ -194,6 +197,9 @@ func logoutHandle(c echo.Context) error {
 }
 
 func reloadHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	ClearAsset()
 	InitTemplates()
 	InitLang()
@@ -202,6 +208,9 @@ func reloadHandle(c echo.Context) error {
 }
 
 func installHandle(c echo.Context) error {
+	if c.(*Auth).User.ID != users.XRootID {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
 	lang := c.FormValue("lang")
 	firstRun = false
 	if _, ok := langsId[lang]; ok {
@@ -243,41 +252,41 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/webfonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
 	if IsScript {
-		e.GET("/ws", wsTaskHandle)
-		e.GET("/sys", sysHandle)
-		e.GET("/info", infoHandle)
-		e.POST("/stdin", stdinHandle)
-		e.POST("/form", formHandle)
+		e.GET("/ws", wsTaskHandle)    // +
+		e.GET("/sys", sysHandle)      //
+		e.GET("/info", infoHandle)    // +
+		e.POST("/stdin", stdinHandle) // +
+		e.POST("/form", formHandle)   // +
 	} else {
 		e.GET("/ws", wsMainHandle)
-		e.GET("/task/:id", showTaskHandle)
-		e.GET("/api/compile", compileHandle)
-		e.GET("/api/exit", exitHandle)
-		e.GET("/api/export", exportHandle)
-		e.GET("/api/reload", reloadHandle)
+		e.GET("/task/:id", showTaskHandle)   // +
+		e.GET("/api/compile", compileHandle) // +
+		e.GET("/api/exit", exitHandle)       // +
+		e.GET("/api/export", exportHandle)   // +
+		e.GET("/api/reload", reloadHandle)   // +
 		e.GET("/api/logout", logoutHandle)
-		e.GET("/api/run", runHandle)
-		e.GET("/api/script", getScriptHandle)
-		e.GET("/api/list", listScriptHandle)
-		e.GET("/api/listrun", listRunHandle)
-		e.GET("/api/notifications", nfyHandle)
-		e.GET("/api/tasks", tasksHandle)
-		e.GET("/api/prosettings", proSettingsHandle)
-		e.GET("/api/remove/:id", removeTaskHandle)
-		e.GET("/api/removenfy/:id", removeNfyHandle)
-		e.GET("/api/sys", sysTaskHandle)
-		e.GET("/api/settings", settingsHandle)
-		e.GET("/api/latest", latestVerHandle)
-		e.GET("/api/trial/:id", trialHandle)
-		e.POST("/api/install", installHandle)
+		e.GET("/api/run", runHandle)                 // +
+		e.GET("/api/script", getScriptHandle)        // +
+		e.GET("/api/list", listScriptHandle)         // +
+		e.GET("/api/listrun", listRunHandle)         // +
+		e.GET("/api/notifications", nfyHandle)       // +
+		e.GET("/api/tasks", tasksHandle)             // +
+		e.GET("/api/prosettings", proSettingsHandle) // +
+		e.GET("/api/remove/:id", removeTaskHandle)   // +
+		e.GET("/api/removenfy/:id", removeNfyHandle) // +
+		e.GET("/api/sys", sysTaskHandle)             //
+		e.GET("/api/settings", settingsHandle)       // +
+		e.GET("/api/latest", latestVerHandle)        //
+		e.GET("/api/trial/:id", trialHandle)         // +
+		e.POST("/api/install", installHandle)        // +
 		e.POST("/api/login", loginHandle)
-		e.POST("/api/script", saveScriptHandle)
-		e.POST("/api/delete", deleteScriptHandle)
-		e.POST("/api/taskstatus", taskStatusHandle)
-		e.POST("/api/import", importHandle)
-		e.POST("/api/notification", notificationHandle)
-		e.POST("/api/settings", saveSettingsHandle)
-		e.POST("/api/setpsw", setPasswordHandle)
+		e.POST("/api/script", saveScriptHandle)         // +
+		e.POST("/api/delete", deleteScriptHandle)       // +
+		e.POST("/api/taskstatus", taskStatusHandle)     //
+		e.POST("/api/import", importHandle)             // +
+		e.POST("/api/notification", notificationHandle) //
+		e.POST("/api/settings", saveSettingsHandle)     // +
+		e.POST("/api/setpsw", setPasswordHandle)        //
 		e.POST("/api/favs", saveFavsHandle)
 		ProApi(e)
 	}

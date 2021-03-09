@@ -105,6 +105,9 @@ func LoadStorage(psw string) {
 	if storage.Trial.Mode < Licensed && storage.Trial.Count > TrialDays {
 		storage.Trial.Mode = TrialDisabled
 	}
+	if cfg.playground {
+		SetActive(false)
+	}
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)
 	}

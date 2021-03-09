@@ -54,6 +54,9 @@ var (
 func deleteScriptHandle(c echo.Context) error {
 	var response Response
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	if err := DeleteScript(c, c.QueryParam(`name`)); err != nil {
 		response.Error = fmt.Sprint(err)
 	} else {
@@ -66,6 +69,9 @@ func deleteScriptHandle(c echo.Context) error {
 func getScriptHandle(c echo.Context) error {
 	var response ScriptResponse
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	name := c.QueryParam(`name`)
 	if len(name) == 0 {
 		name = LatestHistoryEditor(c)
@@ -100,6 +106,9 @@ func saveScriptHandle(c echo.Context) error {
 	)
 	errResult := func() error {
 		return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
+	}
+	if err = CheckAdmin(c); err != nil {
+		return errResult()
 	}
 	if err = c.Bind(&script); err != nil {
 		return errResult()
@@ -175,10 +184,12 @@ func listScriptHandle(c echo.Context) error {
 	}
 
 	if c.QueryParam(`cache`) != fmt.Sprint(hotVersion) {
+		user := c.(*Auth).User
 		list := make(map[string]ScriptItem)
-
 		for _, item := range scripts {
-			list[item.Settings.Name] = ScriptToItem(c, item)
+			if ScriptAccess(item.Settings.Name, item.Settings.Path, user.RoleID) == nil {
+				list[item.Settings.Name] = ScriptToItem(c, item)
+			}
 		}
 		resp.Map = list
 	}
@@ -188,12 +199,11 @@ func listScriptHandle(c echo.Context) error {
 func listRunHandle(c echo.Context) error {
 	list := make([]ScriptItem, 0)
 	userId := c.(*Auth).User.ID
-	if _, ok := userSettings[userId]; !ok {
-		return jsonError(c, Lang(DefLang, `unknownuser`, userId))
-	}
-	for _, name := range userSettings[userId].History.Run {
-		if item := getScript(name); item != nil {
-			list = append(list, ScriptToItem(c, item))
+	if _, ok := userSettings[userId]; ok {
+		for _, name := range userSettings[userId].History.Run {
+			if item := getScript(name); item != nil {
+				list = append(list, ScriptToItem(c, item))
+			}
 		}
 	}
 	return c.JSON(http.StatusOK, &ListResponse{
@@ -204,6 +214,9 @@ func listRunHandle(c echo.Context) error {
 func exportHandle(c echo.Context) error {
 	var response Response
 
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
 	name := c.QueryParam(`name`)
 	script := getScript(name)
 	if script == nil {
@@ -229,6 +242,11 @@ func importHandle(c echo.Context) error {
 		response                       ScriptResponse
 		errFormat, errExists, errEmbed []string
 	)
+
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+
 	overwrite := c.FormValue("overwrite") == `true`
 
 	form, err := c.MultipartForm()

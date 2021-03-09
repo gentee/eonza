@@ -22,8 +22,17 @@ var (
 	proMutex = &sync.Mutex{}
 )
 
+func IsProActive() bool {
+	return false
+}
+
 func ProInit(psw []byte, counter uint32) {
 	Roles, Users = users.InitUsers(psw, counter)
+}
+
+func GetRole(id uint32) (role users.Role, ok bool) {
+	role, ok = Roles[id]
+	return
 }
 
 func GetUser(id uint32) (user users.User, ok bool) {
@@ -36,6 +45,14 @@ func GetUsers() []users.User {
 	return []users.User{
 		user,
 	}
+}
+
+func CheckAdmin(c echo.Context) error {
+	return nil
+}
+
+func ScriptAccess(name, ipath string, roleid uint32) error {
+	return nil
 }
 
 func SetActive(active bool) error {
