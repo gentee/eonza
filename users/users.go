@@ -19,6 +19,10 @@ const (
 	XAdminID = 1
 )
 
+type ProSettings struct {
+	Twofa bool `json:"twofa"`
+}
+
 type Role struct {
 	ID            uint32 `json:"id"`
 	Name          string `json:"name"`

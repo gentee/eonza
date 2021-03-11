@@ -15,9 +15,9 @@ import (
 )
 
 type ProOptions struct {
-	Active   bool         `json:"active"`
-	Settings pro.Settings `json:"settings"`
-	Trial    Trial        `json:"trial"`
+	Active   bool              `json:"active"`
+	Settings users.ProSettings `json:"settings"`
+	Trial    Trial             `json:"trial"`
 }
 
 const (
@@ -61,6 +61,7 @@ func IncPassCounter(id uint32) error {
 }
 
 func ProInit(psw []byte, counter uint32) {
+	pro.CallbackPassCounter = StoragePassCounter
 	pro.LoadPro(storage.Trial.Mode > TrialOff, psw, counter, cfg.path)
 }
 
@@ -72,6 +73,7 @@ func proSettingsHandle(c echo.Context) error {
 	}
 	response.Active = pro.Active
 	response.Trial = storage.Trial
+	response.Settings = pro.Settings()
 	return c.JSON(http.StatusOK, &response)
 }
 

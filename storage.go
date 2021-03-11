@@ -126,3 +126,8 @@ func LoadStorage(psw string) {
 		}
 	}
 }
+
+func StoragePassCounter() error {
+	storage.PassCounter++
+	return SaveStorage()
+}
