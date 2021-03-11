@@ -30,6 +30,7 @@ type Claims struct {
 	Counter uint32
 	UserID  uint32
 	RoleID  uint32
+	Twofa   bool
 	jwt.StandardClaims
 }
 
@@ -40,6 +41,8 @@ type session struct {
 
 type ResponseLogin struct {
 	Success bool   `json:"success"`
+	Twofa   bool   `json:"twofa"`
+	TwofaQR string `json:"twofaqr"`
 	ID      string `json:"id,omitempty"`
 	Error   string `json:"error,omitempty"`
 }
@@ -230,11 +233,27 @@ func loginHandle(c echo.Context) error {
 	for _, user := range GetUsers() {
 		err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(c.FormValue("password")))
 		if err == nil {
+			if IsTwofa() {
+				otp := c.FormValue("otp")
+				if len(otp) > 0 {
+					err = ValidateOTP(user, otp)
+				}
+				if len(otp) == 0 || err != nil {
+					var errqr error
+					response.Twofa = true
+					response.TwofaQR, errqr = TwofaQR(user.ID)
+					if err == nil {
+						err = errqr
+					}
+					break
+				}
+			}
 			expirationTime := time.Now().Add(30 * 24 * time.Hour)
 			claims := &Claims{
 				Counter: user.PassCounter,
 				UserID:  user.ID,
 				RoleID:  user.RoleID,
+				Twofa:   IsTwofa(),
 				StandardClaims: jwt.StandardClaims{
 					ExpiresAt: expirationTime.Unix(),
 				},

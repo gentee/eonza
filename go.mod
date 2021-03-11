@@ -19,6 +19,7 @@ require (
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/lib/pq v1.9.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/pquerna/otp v1.3.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/xhit/go-simple-mail/v2 v2.7.0

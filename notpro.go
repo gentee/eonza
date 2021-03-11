@@ -84,5 +84,17 @@ func proSettingsHandle(c echo.Context) error {
 	return jsonError(c, fmt.Errorf(`Unsupported`))
 }
 
+func IsTwofa() bool {
+	return false
+}
+
+func TwofaQR(id uint32) (string, error) {
+	return ``, fmt.Errorf(`Unsupported`)
+}
+
+func ValidateOTP(user users.User, otp string) error {
+	return fmt.Errorf(`Unsupported`)
+}
+
 func ProApi(e *echo.Echo) {
 }

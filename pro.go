@@ -60,8 +60,31 @@ func IncPassCounter(id uint32) error {
 	return pro.IncPassCounter(id)
 }
 
+func IsTwofa() bool {
+	return pro.IsTwofa()
+}
+
+func TwofaQR(id uint32) (string, error) {
+	return pro.TwofaQR(id)
+}
+
+func ValidateOTP(user users.User, otp string) error {
+	return pro.ValidateOTP(user, otp)
+}
+
+func GetTitle() string {
+	ret := storage.Settings.Title
+	if len(ret) == 0 {
+		ret = appInfo.Title
+	} else {
+		ret += `/eonza`
+	}
+	return ret
+}
+
 func ProInit(psw []byte, counter uint32) {
 	pro.CallbackPassCounter = StoragePassCounter
+	pro.CallbackTitle = GetTitle
 	pro.LoadPro(storage.Trial.Mode > TrialOff, psw, counter, cfg.path)
 }
 
