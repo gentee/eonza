@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"eonza/lib"
@@ -50,7 +51,23 @@ type ResponseLogin struct {
 var (
 	sessionKey string
 	sessions   = make(map[string]session)
+	failTime   = time.Now()
+	loginList  = make(map[string]bool)
+	loginMutex = sync.Mutex{}
 )
+
+func AccessDenied(code int) *echo.HTTPError {
+	var msg string
+	switch code {
+	case http.StatusUnauthorized:
+		msg = "Unauthorized"
+	default:
+		//	case http.StatusForbidden:
+		code = http.StatusForbidden
+		msg = "Access denied"
+	}
+	return echo.NewHTTPError(code, msg)
+}
 
 func getCookie(c echo.Context, name string) string {
 	cookie, err := c.Cookie(name)
@@ -85,7 +102,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				}
 			}
 			if !matched {
-				return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+				return AccessDenied(http.StatusForbidden)
 			}
 		}
 		url := c.Request().URL.String()
@@ -115,11 +132,12 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			isAccess = lib.IsLocalhost(host, ip)
 		}
 		if !isAccess {
-			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+			return AccessDenied(http.StatusForbidden)
 		}
-		mutex.Lock()
-		defer mutex.Unlock()
-
+		if url != `/api/login` {
+			mutex.Lock()
+			defer mutex.Unlock()
+		}
 		var (
 			userID uint32
 			user   users.User
@@ -144,7 +162,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 					}
 				}
 				if !valid && !strings.HasPrefix(url, `/sys`) {
-					return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+					return AccessDenied(http.StatusUnauthorized)
 				}
 			}
 			lang = scriptTask.Header.Lang
@@ -192,7 +210,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 						c.Request().URL.Path = `login`
 					} else if url != `/api/login` && url != `/api/taskstatus` && url != `/api/sys` &&
 						url != `/api/notification` {
-						return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+						return AccessDenied(http.StatusUnauthorized)
 					}
 				}
 			}
@@ -200,7 +218,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				c.Request().URL.Path = `install`
 			}
 			if user, ok = GetUser(userID); !ok {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+				return AccessDenied(http.StatusUnauthorized)
 			}
 			if u, ok := userSettings[user.ID]; ok {
 				lang = u.Lang
@@ -229,7 +247,15 @@ func loginHandle(c echo.Context) error {
 		response ResponseLogin
 		err      error
 	)
-
+	ip := c.RealIP()
+	loginMutex.Lock()
+	if _, ok := loginList[ip]; ok {
+		loginMutex.Unlock()
+		response.Error = `Too many requests`
+		return c.JSON(http.StatusOK, response)
+	}
+	loginList[ip] = true
+	loginMutex.Unlock()
 	for _, user := range GetUsers() {
 		err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(c.FormValue("password")))
 		if err == nil {
@@ -274,7 +300,15 @@ func loginHandle(c echo.Context) error {
 	}
 	if err != nil {
 		response.Error = err.Error()
+		if pause := time.Since(failTime).Milliseconds(); pause < 3000 {
+			time.Sleep(time.Duration(3000-pause) * time.Millisecond)
+		}
+		failTime = time.Now()
 	}
+	loginMutex.Lock()
+	delete(loginList, ip)
+	loginMutex.Unlock()
+
 	response.Success = err == nil
 	return c.JSON(http.StatusOK, response)
 }
