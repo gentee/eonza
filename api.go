@@ -336,14 +336,15 @@ func tasksHandle(c echo.Context) error {
 				(taskFlag&0x100 == 0x100 && user.ID == item.UserID) ||
 				(taskFlag&0x200 == 0x200 && user.RoleID == item.RoleID)
 			var userName, roleName string
-			if IsProActive() {
-				if user, ok := GetUser(item.UserID); ok {
-					userName = user.Nickname
-				}
-				if role, ok := GetRole(item.RoleID); ok {
-					roleName = role.Name
-				}
+			/*if IsProActive() {
+			if user, ok := GetUser(item.UserID); ok {
+				userName = user.Nickname
 			}
+			if role, ok := GetRole(item.RoleID); ok {
+				roleName = role.Name
+			}
+			}*/
+			userName, roleName = GetUserRole(item.UserID)
 			listInfo = append(listInfo, TaskInfo{
 				ID:         item.ID,
 				Status:     item.Status,

@@ -40,6 +40,16 @@ func GetUser(id uint32) (user users.User, ok bool) {
 	return
 }
 
+func GetUserRole(id uint32) (uname string, rname string) {
+	if user, ok := Users[id]; ok {
+		uname = user.Nickname
+		if role, ok := Roles[user.RoleID]; ok {
+			rname = role.Name
+		}
+	}
+	return
+}
+
 func GetUsers() []users.User {
 	user := Users[users.XRootID]
 	return []users.User{

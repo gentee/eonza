@@ -48,6 +48,10 @@ func GetUser(id uint32) (user users.User, ok bool) {
 	return pro.GetUser(id)
 }
 
+func GetUserRole(id uint32) (string, string) {
+	return pro.GetUserRole(id)
+}
+
 func GetUsers() []users.User {
 	return pro.GetUsers()
 }
