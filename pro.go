@@ -8,6 +8,7 @@ package main
 
 import (
 	"eonza/users"
+	"fmt"
 	"net/http"
 
 	pro "github.com/gentee/eonza-pro"
@@ -48,8 +49,19 @@ func GetUser(id uint32) (user users.User, ok bool) {
 	return pro.GetUser(id)
 }
 
-func GetUserRole(id uint32) (string, string) {
-	return pro.GetUserRole(id)
+func GetUserRole(id, idrole uint32) (uname string, rname string) {
+	if idrole >= users.ResRoleID {
+		uname, rname = GetSchedulerName(id, idrole)
+	} else {
+		uname, rname = pro.GetUserRole(id)
+	}
+	if len(uname) == 0 {
+		uname = fmt.Sprintf("%x", id)
+	}
+	if len(rname) == 0 {
+		rname = fmt.Sprintf("%x", idrole)
+	}
+	return
 }
 
 func GetUsers() []users.User {

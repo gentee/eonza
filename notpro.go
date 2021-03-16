@@ -40,12 +40,22 @@ func GetUser(id uint32) (user users.User, ok bool) {
 	return
 }
 
-func GetUserRole(id uint32) (uname string, rname string) {
-	if user, ok := Users[id]; ok {
-		uname = user.Nickname
-		if role, ok := Roles[user.RoleID]; ok {
-			rname = role.Name
+func GetUserRole(id, idrole uint32) (uname string, rname string) {
+	if idrole >= users.ResRoleID {
+		uname, rname = GetSchedulerName(id, idrole)
+	} else {
+		if user, ok := Users[id]; ok {
+			uname = user.Nickname
+			if role, ok := Roles[user.RoleID]; ok {
+				rname = role.Name
+			}
 		}
+	}
+	if len(uname) == 0 {
+		uname = fmt.Sprintf("%x", id)
+	}
+	if len(rname) == 0 {
+		rname = fmt.Sprintf("%x", idrole)
 	}
 	return
 }

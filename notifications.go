@@ -202,19 +202,9 @@ func NfyList(clear bool, userid, roleid uint32) *NfyResponse {
 				(nfyFlag&0x200 == 0x200 && roleid == item.RoleID)
 			var userName, roleName string
 
-			if item.RoleID != users.XAdminID {
-				if role, ok := GetRole(item.RoleID); ok {
-					roleName = role.Name
-				}
-			} else if item.UserID != users.XRootID {
-				roleName = users.RootRole
-			}
 			if item.UserID != users.XRootID {
-				if user, ok := GetUser(item.UserID); ok {
-					userName = user.Nickname
-				}
+				userName, roleName = GetUserRole(item.UserID, item.RoleID)
 			}
-
 			ret = append(ret, Nfy{
 				Hash:   strconv.FormatUint(item.Hash, 10),
 				Text:   strings.ReplaceAll(item.Text, "\n", "<br>"),
