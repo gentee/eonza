@@ -265,20 +265,22 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/export", exportHandle)   // +
 		e.GET("/api/reload", reloadHandle)   // +
 		e.GET("/api/logout", logoutHandle)
-		e.GET("/api/run", runHandle)                 // +
-		e.GET("/api/script", getScriptHandle)        // +
-		e.GET("/api/list", listScriptHandle)         // +
-		e.GET("/api/listrun", listRunHandle)         // +
-		e.GET("/api/notifications", nfyHandle)       // +
-		e.GET("/api/tasks", tasksHandle)             // +
-		e.GET("/api/prosettings", proSettingsHandle) // +
-		e.GET("/api/remove/:id", removeTaskHandle)   // +
-		e.GET("/api/removenfy/:id", removeNfyHandle) // +
-		e.GET("/api/sys", sysTaskHandle)             //
-		e.GET("/api/settings", settingsHandle)       // +
-		e.GET("/api/latest", latestVerHandle)        //
-		e.GET("/api/trial/:id", trialHandle)         // +
-		e.POST("/api/install", installHandle)        // +
+		e.GET("/api/run", runHandle)                     // +
+		e.GET("/api/script", getScriptHandle)            // +
+		e.GET("/api/list", listScriptHandle)             // +
+		e.GET("/api/listrun", listRunHandle)             // +
+		e.GET("/api/notifications", nfyHandle)           // +
+		e.GET("/api/tasks", tasksHandle)                 // +
+		e.GET("/api/timers", timersHandle)               // +
+		e.GET("/api/prosettings", proSettingsHandle)     // +
+		e.GET("/api/remove/:id", removeTaskHandle)       // +
+		e.GET("/api/removenfy/:id", removeNfyHandle)     // +
+		e.GET("/api/removetimer/:id", removeTimerHandle) // +
+		e.GET("/api/sys", sysTaskHandle)                 //
+		e.GET("/api/settings", settingsHandle)           // +
+		e.GET("/api/latest", latestVerHandle)            //
+		e.GET("/api/trial/:id", trialHandle)             // +
+		e.POST("/api/install", installHandle)            // +
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)         // +
 		e.POST("/api/delete", deleteScriptHandle)       // +
@@ -287,6 +289,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/notification", notificationHandle) //
 		e.POST("/api/settings", saveSettingsHandle)     // +
 		e.POST("/api/setpsw", setPasswordHandle)        //
+		e.POST("/api/timer", saveTimerHandle)           // +
 		e.POST("/api/favs", saveFavsHandle)
 		ProApi(e)
 	}
