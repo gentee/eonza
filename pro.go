@@ -38,6 +38,9 @@ func CheckAdmin(c echo.Context) error {
 }
 
 func ScriptAccess(name, ipath string, roleid uint32) error {
+	if roleid >= users.ResRoleID {
+		return nil
+	}
 	return pro.ScriptAccess(name, ipath, roleid)
 }
 

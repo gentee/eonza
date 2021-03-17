@@ -205,6 +205,7 @@ func NfyList(clear bool, userid, roleid uint32) *NfyResponse {
 			if item.UserID != users.XRootID {
 				userName, roleName = GetUserRole(item.UserID, item.RoleID)
 			}
+
 			ret = append(ret, Nfy{
 				Hash:   strconv.FormatUint(item.Hash, 10),
 				Text:   strings.ReplaceAll(item.Text, "\n", "<br>"),

@@ -106,116 +106,34 @@ func compileHandle(c echo.Context) error {
 }
 
 func runHandle(c echo.Context) error {
-	var (
-		item    *Script
-		src     string
-		console bool
-	)
+	var console bool
 	open := true
-	name := c.QueryParam(`name`)
 	if len(c.QueryParam(`silent`)) > 0 || cfg.HTTP.Host != Localhost {
 		open = false
 	}
 	if len(c.QueryParam(`console`)) > 0 {
 		console = true
 	}
-	port, err := getPort()
-	if err != nil {
-		return jsonError(c, err)
-	}
-	if item = getScript(name); item == nil {
-		return jsonError(c, Lang(DefLang, `erropen`, name))
-	}
 	user := c.(*Auth).User
-	if err = ScriptAccess(item.Settings.Name, item.Settings.Path, user.RoleID); err != nil {
-		return jsonError(c, err)
-	}
-	if item.Settings.Unrun {
-		return jsonError(c, Lang(DefLang, `errnorun`, name))
-	}
-	if err = AddHistoryRun(user.ID, name); err != nil {
-		return jsonError(c, err)
-	}
-	langCode := GetLangCode(user)
-	title := item.Settings.Title
-	if langTitle := strings.Trim(title, `#`); langTitle != title {
-		if val, ok := item.Langs[langCode][langTitle]; ok {
-			title = val
-		} else if val, ok := item.Langs[LangDefCode][langTitle]; ok {
-			title = val
-		}
-	}
 	role, _ := GetRole(user.RoleID)
-	header := script.Header{
-		Name:         name,
-		Title:        title,
-		AssetsDir:    cfg.AssetsDir,
-		LogDir:       cfg.Log.Dir,
-		CDN:          cfg.CDN,
-		Console:      console,
-		IsPlayground: cfg.playground,
-		IP:           c.RealIP(),
-		User:         *user,
-		Role:         role,
-		ClaimKey:     cfg.HTTP.JWTKey + sessionKey,
-		IsPro:        storage.Trial.Mode > TrialOff,
-		Constants:    storage.Settings.Constants,
-		Lang:         langCode,
-		TaskID:       lib.RndNum(),
-		ServerPort:   cfg.HTTP.Port,
-		HTTP: &lib.HTTPConfig{
-			Host:   cfg.HTTP.Host,
-			Port:   port,
-			Open:   open,
-			Theme:  cfg.HTTP.Theme,
-			Access: cfg.HTTP.Access,
-		},
+	rs := RunScript{
+		Name:    c.QueryParam(`name`),
+		Open:    open,
+		Console: console,
+		User:    *user,
+		Role:    role,
+		IP:      c.RealIP(),
 	}
-	if header.IsPlayground {
-		header.Playground = &cfg.Playground
-		tasksLimit := cfg.Playground.Tasks
-		for _, item := range tasks {
-			if item.Status < TaskFinished {
-				tasksLimit--
-			}
-		}
-		if tasksLimit <= 0 {
-			return jsonError(c, Lang(GetLangId(c.(*Auth).User), `errtasklimit`, cfg.Playground.Tasks))
-		}
-	}
-	if src, err = GenSource(item, &header); err != nil {
+	if err := systemRun(&rs); err != nil {
 		return jsonError(c, err)
 	}
-	if storage.Settings.IncludeSrc {
-		if header.SourceCode, err = lib.GzipCompress([]byte(src)); err != nil {
-			return jsonError(c, err)
-		}
-	}
-	data, err := script.Encode(header, src)
-	if err != nil {
-		return jsonError(c, err)
-	}
-	if storage.Trial.Mode == TrialOn {
-		now := time.Now()
-		if storage.Trial.Last.Day() != now.Day() {
-			storage.Trial.Count++
-			storage.Trial.Last = now
-			if storage.Trial.Count > TrialDays {
-				storage.Trial.Mode = TrialDisabled
-				SetActive(false)
-			}
-			if err = SaveStorage(); err != nil {
-				return jsonError(c, err)
-			}
-		}
-	}
-	if err = NewTask(header); err != nil {
+	if err := AddHistoryRun(user.ID, rs.Name); err != nil {
 		return jsonError(c, err)
 	}
 	if console {
-		return c.Blob(http.StatusOK, ``, data.Bytes())
+		return c.Blob(http.StatusOK, ``, rs.Data)
 	}
-	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: header.HTTP.Port, ID: header.TaskID})
+	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
 }
 
 func pingHandle(c echo.Context) error {
