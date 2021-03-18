@@ -55,6 +55,15 @@ func GetSchedulerName(id, idrole uint32) (uname string, rname string) {
 }
 
 func (timer *Timer) Run() {
+	if cfg.playground {
+		NewNotification(&Notification{
+			Text:   `Scheduler can't run scripts in playground mode`,
+			UserID: timer.ID,
+			RoleID: users.TimersID,
+			Script: timer.Script,
+		})
+		return
+	}
 	rs := RunScript{
 		Name: timer.Script,
 		User: users.User{
@@ -68,7 +77,6 @@ func (timer *Timer) Run() {
 		},
 		IP: Localhost,
 	}
-	fmt.Println(`RUN`, timer)
 	if err := systemRun(&rs); err != nil {
 		NewNotification(&Notification{
 			Text:   fmt.Sprintf(`Scheduler error: %s`, err.Error()),
@@ -94,9 +102,12 @@ func timersResponse(c echo.Context) error {
 	sort.Slice(listInfo, func(i, j int) bool {
 		if !listInfo[i].Active {
 			if listInfo[j].Active {
-				return true
+				return false
 			}
-			return listInfo[i].Name < listInfo[j].Name
+			return strings.ToLower(listInfo[i].Name) < strings.ToLower(listInfo[j].Name)
+		}
+		if !listInfo[j].Active {
+			return true
 		}
 		return listInfo[i].next.Before(listInfo[j].next)
 	})
