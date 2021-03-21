@@ -159,6 +159,7 @@ var (
 		{Prototype: `SQLRow(str,str,arr.str,str)`, Object: SQLRow},
 		{Prototype: `SQLValue(str,str,arr.str,str)`, Object: SQLValue},
 		{Prototype: `ConvertText(str,str,str) str`, Object: ConvertText},
+		{Prototype: `MarkdownToHTML(str) str`, Object: lib.Markdown},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
