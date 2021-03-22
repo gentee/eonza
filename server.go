@@ -38,6 +38,11 @@ type Response struct {
 	Error string `json:"error,omitempty"`
 }
 
+type DataResponse struct {
+	Data  string `json:"data"`
+	Error string `json:"error,omitempty"`
+}
+
 var (
 	ErrNotFound = errors.New(`Not found`)
 	IsScript    bool // true, if web-server for the script
@@ -227,6 +232,21 @@ func installHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
+func markdownHandle(c echo.Context) error {
+	var (
+		data DataResponse
+		err  error
+	)
+	if err = c.Bind(&data); err != nil {
+		return jsonError(c, err)
+	}
+	ret, err := lib.Markdown(data.Data)
+	if err != nil {
+		return jsonError(c, err)
+	}
+	return c.JSON(http.StatusOK, DataResponse{Data: ret})
+}
+
 func RunServer(options WebSettings) *echo.Echo {
 	InitLang()
 	InitTemplates()
@@ -251,6 +271,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/images/*", fileHandle)
 	e.GET("/webfonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
+	e.POST("/tools/md", markdownHandle)
 	if IsScript {
 		e.GET("/ws", wsTaskHandle)    // +
 		e.GET("/sys", sysHandle)      //
