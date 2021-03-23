@@ -8,6 +8,7 @@ package main
 
 import (
 	"eonza/users"
+	"fmt"
 	"net/http"
 
 	pro "github.com/gentee/eonza-pro"
@@ -15,9 +16,9 @@ import (
 )
 
 type ProOptions struct {
-	Active   bool         `json:"active"`
-	Settings pro.Settings `json:"settings"`
-	Trial    Trial        `json:"trial"`
+	Active   bool              `json:"active"`
+	Settings users.ProSettings `json:"settings"`
+	Trial    Trial             `json:"trial"`
 }
 
 const (
@@ -37,6 +38,9 @@ func CheckAdmin(c echo.Context) error {
 }
 
 func ScriptAccess(name, ipath string, roleid uint32) error {
+	if roleid >= users.ResRoleID {
+		return nil
+	}
 	return pro.ScriptAccess(name, ipath, roleid)
 }
 
@@ -46,6 +50,21 @@ func GetRole(id uint32) (role users.Role, ok bool) {
 
 func GetUser(id uint32) (user users.User, ok bool) {
 	return pro.GetUser(id)
+}
+
+func GetUserRole(id, idrole uint32) (uname string, rname string) {
+	if idrole >= users.ResRoleID {
+		uname, rname = GetSchedulerName(id, idrole)
+	} else {
+		uname, rname = pro.GetUserRole(id)
+	}
+	if len(uname) == 0 {
+		uname = fmt.Sprintf("%x", id)
+	}
+	if len(rname) == 0 {
+		rname = fmt.Sprintf("%x", idrole)
+	}
+	return
 }
 
 func GetUsers() []users.User {
@@ -60,7 +79,31 @@ func IncPassCounter(id uint32) error {
 	return pro.IncPassCounter(id)
 }
 
+func IsTwofa() bool {
+	return pro.IsTwofa()
+}
+
+func TwofaQR(id uint32) (string, error) {
+	return pro.TwofaQR(id)
+}
+
+func ValidateOTP(user users.User, otp string) error {
+	return pro.ValidateOTP(user, otp)
+}
+
+func GetTitle() string {
+	ret := storage.Settings.Title
+	if len(ret) == 0 {
+		ret = appInfo.Title
+	} else {
+		ret += `/eonza`
+	}
+	return ret
+}
+
 func ProInit(psw []byte, counter uint32) {
+	pro.CallbackPassCounter = StoragePassCounter
+	pro.CallbackTitle = GetTitle
 	pro.LoadPro(storage.Trial.Mode > TrialOff, psw, counter, cfg.path)
 }
 
@@ -72,6 +115,7 @@ func proSettingsHandle(c echo.Context) error {
 	}
 	response.Active = pro.Active
 	response.Trial = storage.Trial
+	response.Settings = pro.Settings()
 	return c.JSON(http.StatusOK, &response)
 }
 

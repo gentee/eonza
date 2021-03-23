@@ -40,6 +40,7 @@ type Render struct {
 	ProActive   bool
 	DefLists    []DefList
 	User        *users.User
+	Twofa       bool
 	//	ProSettings ProSettings
 	//	Port    int
 	/*	Params   map[string]string
@@ -118,7 +119,6 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		return template.HTML(out)
 	}
 	if url == `script` {
-		var userid, roleid uint32
 		if IsScript {
 			renderScript.Task = task
 			renderScript.Title = scriptTask.Header.Title
@@ -132,17 +132,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Stdout = out2html(files[TExtOut], false)
 			renderScript.Logout = out2html(files[TExtLog], true)
 			renderScript.Task.SourceCode = files[TExtSrc]
-			userid, roleid = renderScript.Task.UserID, renderScript.Task.RoleID
-			if user, ok := GetUser(userid); ok {
-				renderScript.Nickname = user.Nickname
-			} else {
-				renderScript.Nickname = fmt.Sprint(userid)
-			}
-			if role, ok := GetRole(roleid); ok {
-				renderScript.Role = role.Name
-			} else {
-				renderScript.Role = fmt.Sprint(roleid)
-			}
+			renderScript.Nickname, renderScript.Role = GetUserRole(renderScript.Task.UserID, renderScript.Task.RoleID)
 		}
 		if len(renderScript.Task.SourceCode) > 0 {
 			if out, err := lib.Markdown("```go\r\n" + renderScript.Task.SourceCode +
@@ -206,6 +196,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.ProActive = IsProActive()
 		render.DefLists = defaultList
 		render.User = c.(*Auth).User
+		render.Twofa = IsTwofa()
 		data = render
 	}
 

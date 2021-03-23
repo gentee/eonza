@@ -40,6 +40,26 @@ func GetUser(id uint32) (user users.User, ok bool) {
 	return
 }
 
+func GetUserRole(id, idrole uint32) (uname string, rname string) {
+	if idrole >= users.ResRoleID {
+		uname, rname = GetSchedulerName(id, idrole)
+	} else {
+		if user, ok := Users[id]; ok {
+			uname = user.Nickname
+			if role, ok := Roles[user.RoleID]; ok {
+				rname = role.Name
+			}
+		}
+	}
+	if len(uname) == 0 {
+		uname = fmt.Sprintf("%x", id)
+	}
+	if len(rname) == 0 {
+		rname = fmt.Sprintf("%x", idrole)
+	}
+	return
+}
+
 func GetUsers() []users.User {
 	user := Users[users.XRootID]
 	return []users.User{
@@ -82,6 +102,18 @@ func IncPassCounter(id uint32) error {
 
 func proSettingsHandle(c echo.Context) error {
 	return jsonError(c, fmt.Errorf(`Unsupported`))
+}
+
+func IsTwofa() bool {
+	return false
+}
+
+func TwofaQR(id uint32) (string, error) {
+	return ``, fmt.Errorf(`Unsupported`)
+}
+
+func ValidateOTP(user users.User, otp string) error {
+	return fmt.Errorf(`Unsupported`)
 }
 
 func ProApi(e *echo.Echo) {

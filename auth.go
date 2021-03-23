@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"eonza/lib"
@@ -30,6 +31,7 @@ type Claims struct {
 	Counter uint32
 	UserID  uint32
 	RoleID  uint32
+	Twofa   bool
 	jwt.StandardClaims
 }
 
@@ -40,6 +42,8 @@ type session struct {
 
 type ResponseLogin struct {
 	Success bool   `json:"success"`
+	Twofa   bool   `json:"twofa"`
+	TwofaQR string `json:"twofaqr"`
 	ID      string `json:"id,omitempty"`
 	Error   string `json:"error,omitempty"`
 }
@@ -47,7 +51,23 @@ type ResponseLogin struct {
 var (
 	sessionKey string
 	sessions   = make(map[string]session)
+	failTime   = time.Now()
+	loginList  = make(map[string]bool)
+	loginMutex = sync.Mutex{}
 )
+
+func AccessDenied(code int) *echo.HTTPError {
+	var msg string
+	switch code {
+	case http.StatusUnauthorized:
+		msg = "Unauthorized"
+	default:
+		//	case http.StatusForbidden:
+		code = http.StatusForbidden
+		msg = "Access denied"
+	}
+	return echo.NewHTTPError(code, msg)
+}
 
 func getCookie(c echo.Context, name string) string {
 	cookie, err := c.Cookie(name)
@@ -82,7 +102,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				}
 			}
 			if !matched {
-				return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+				return AccessDenied(http.StatusForbidden)
 			}
 		}
 		url := c.Request().URL.String()
@@ -112,11 +132,12 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			isAccess = lib.IsLocalhost(host, ip)
 		}
 		if !isAccess {
-			return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+			return AccessDenied(http.StatusForbidden)
 		}
-		mutex.Lock()
-		defer mutex.Unlock()
-
+		if url != `/api/login` {
+			mutex.Lock()
+			defer mutex.Unlock()
+		}
 		var (
 			userID uint32
 			user   users.User
@@ -141,7 +162,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 					}
 				}
 				if !valid && !strings.HasPrefix(url, `/sys`) {
-					return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+					return AccessDenied(http.StatusUnauthorized)
 				}
 			}
 			lang = scriptTask.Header.Lang
@@ -189,7 +210,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 						c.Request().URL.Path = `login`
 					} else if url != `/api/login` && url != `/api/taskstatus` && url != `/api/sys` &&
 						url != `/api/notification` {
-						return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+						return AccessDenied(http.StatusUnauthorized)
 					}
 				}
 			}
@@ -197,7 +218,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				c.Request().URL.Path = `install`
 			}
 			if user, ok = GetUser(userID); !ok {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+				return AccessDenied(http.StatusUnauthorized)
 			}
 			if u, ok := userSettings[user.ID]; ok {
 				lang = u.Lang
@@ -226,15 +247,39 @@ func loginHandle(c echo.Context) error {
 		response ResponseLogin
 		err      error
 	)
-
+	ip := c.RealIP()
+	loginMutex.Lock()
+	if _, ok := loginList[ip]; ok {
+		loginMutex.Unlock()
+		response.Error = `Too many requests`
+		return c.JSON(http.StatusOK, response)
+	}
+	loginList[ip] = true
+	loginMutex.Unlock()
 	for _, user := range GetUsers() {
 		err = bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(c.FormValue("password")))
 		if err == nil {
+			if IsTwofa() {
+				otp := c.FormValue("otp")
+				if len(otp) > 0 {
+					err = ValidateOTP(user, otp)
+				}
+				if len(otp) == 0 || err != nil {
+					var errqr error
+					response.Twofa = true
+					response.TwofaQR, errqr = TwofaQR(user.ID)
+					if err == nil {
+						err = errqr
+					}
+					break
+				}
+			}
 			expirationTime := time.Now().Add(30 * 24 * time.Hour)
 			claims := &Claims{
 				Counter: user.PassCounter,
 				UserID:  user.ID,
 				RoleID:  user.RoleID,
+				Twofa:   IsTwofa(),
 				StandardClaims: jwt.StandardClaims{
 					ExpiresAt: expirationTime.Unix(),
 				},
@@ -255,7 +300,15 @@ func loginHandle(c echo.Context) error {
 	}
 	if err != nil {
 		response.Error = err.Error()
+		if pause := time.Since(failTime).Milliseconds(); pause < 3000 {
+			time.Sleep(time.Duration(3000-pause) * time.Millisecond)
+		}
+		failTime = time.Now()
 	}
+	loginMutex.Lock()
+	delete(loginList, ip)
+	loginMutex.Unlock()
+
 	response.Success = err == nil
 	return c.JSON(http.StatusOK, response)
 }

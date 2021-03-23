@@ -38,6 +38,11 @@ type Response struct {
 	Error string `json:"error,omitempty"`
 }
 
+type DataResponse struct {
+	Data  string `json:"data"`
+	Error string `json:"error,omitempty"`
+}
+
 var (
 	ErrNotFound = errors.New(`Not found`)
 	IsScript    bool // true, if web-server for the script
@@ -227,6 +232,21 @@ func installHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
+func markdownHandle(c echo.Context) error {
+	var (
+		data DataResponse
+		err  error
+	)
+	if err = c.Bind(&data); err != nil {
+		return jsonError(c, err)
+	}
+	ret, err := lib.Markdown(data.Data)
+	if err != nil {
+		return jsonError(c, err)
+	}
+	return c.JSON(http.StatusOK, DataResponse{Data: ret})
+}
+
 func RunServer(options WebSettings) *echo.Echo {
 	InitLang()
 	InitTemplates()
@@ -251,6 +271,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/images/*", fileHandle)
 	e.GET("/webfonts/*", fileHandle)
 	e.GET("/favicon.ico", fileHandle)
+	e.POST("/tools/md", markdownHandle)
 	if IsScript {
 		e.GET("/ws", wsTaskHandle)    // +
 		e.GET("/sys", sysHandle)      //
@@ -265,20 +286,22 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/export", exportHandle)   // +
 		e.GET("/api/reload", reloadHandle)   // +
 		e.GET("/api/logout", logoutHandle)
-		e.GET("/api/run", runHandle)                 // +
-		e.GET("/api/script", getScriptHandle)        // +
-		e.GET("/api/list", listScriptHandle)         // +
-		e.GET("/api/listrun", listRunHandle)         // +
-		e.GET("/api/notifications", nfyHandle)       // +
-		e.GET("/api/tasks", tasksHandle)             // +
-		e.GET("/api/prosettings", proSettingsHandle) // +
-		e.GET("/api/remove/:id", removeTaskHandle)   // +
-		e.GET("/api/removenfy/:id", removeNfyHandle) // +
-		e.GET("/api/sys", sysTaskHandle)             //
-		e.GET("/api/settings", settingsHandle)       // +
-		e.GET("/api/latest", latestVerHandle)        //
-		e.GET("/api/trial/:id", trialHandle)         // +
-		e.POST("/api/install", installHandle)        // +
+		e.GET("/api/run", runHandle)                     // +
+		e.GET("/api/script", getScriptHandle)            // +
+		e.GET("/api/list", listScriptHandle)             // +
+		e.GET("/api/listrun", listRunHandle)             // +
+		e.GET("/api/notifications", nfyHandle)           // +
+		e.GET("/api/tasks", tasksHandle)                 // +
+		e.GET("/api/timers", timersHandle)               // +
+		e.GET("/api/prosettings", proSettingsHandle)     // +
+		e.GET("/api/remove/:id", removeTaskHandle)       // +
+		e.GET("/api/removenfy/:id", removeNfyHandle)     // +
+		e.GET("/api/removetimer/:id", removeTimerHandle) // +
+		e.GET("/api/sys", sysTaskHandle)                 //
+		e.GET("/api/settings", settingsHandle)           // +
+		e.GET("/api/latest", latestVerHandle)            //
+		e.GET("/api/trial/:id", trialHandle)             // +
+		e.POST("/api/install", installHandle)            // +
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)         // +
 		e.POST("/api/delete", deleteScriptHandle)       // +
@@ -287,6 +310,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/notification", notificationHandle) //
 		e.POST("/api/settings", saveSettingsHandle)     // +
 		e.POST("/api/setpsw", setPasswordHandle)        //
+		e.POST("/api/timer", saveTimerHandle)           // +
 		e.POST("/api/favs", saveFavsHandle)
 		ProApi(e)
 	}
