@@ -35,12 +35,12 @@ type Render struct {
 	PortShift   int64
 	Favs        []Fav
 	Nfy         *NfyResponse
-	Update      VerUpdate
-	Pro         bool
-	ProActive   bool
-	DefLists    []DefList
-	User        *users.User
-	Twofa       bool
+	//	Update      VerUpdate
+	Pro       bool
+	ProActive bool
+	DefLists  []DefList
+	User      *users.User
+	Twofa     bool
 	//	ProSettings ProSettings
 	//	Port    int
 	/*	Params   map[string]string
@@ -190,8 +190,8 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.PortShift = cfg.PortShift
 		render.Favs = userSettings[user.ID].Favs
 		render.Nfy = NfyList(false, user.ID, user.RoleID)
-		render.Update = nfyData.Update
-		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
+		//		render.Update = nfyData.Update
+		//		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))
 		render.Pro = Pro && !cfg.playground
 		render.ProActive = IsProActive()
 		render.DefLists = defaultList

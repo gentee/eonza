@@ -386,12 +386,18 @@ func AutoCheckUpdate() {
 }
 
 func latestVerHandle(c echo.Context) error {
-	if err := CheckUpdates(); err != nil {
-		return jsonError(c, err)
+	if len(c.QueryParam(`cache`)) == 0 {
+		if err := CheckUpdates(); err != nil {
+			return jsonError(c, err)
+		}
+	}
+	var lastChecked string
+	if nfyData.Update.LastChecked.Year() > 2019 {
+		lastChecked = nfyData.Update.LastChecked.Format(TimeFormat)
 	}
 	return c.JSON(http.StatusOK, LatestResponse{
 		Version:     nfyData.Update.Version,
 		Notify:      GetNewVersion(GetLangCode(c.(*Auth).User)),
-		LastChecked: nfyData.Update.LastChecked.Format(TimeFormat),
+		LastChecked: lastChecked,
 	})
 }
