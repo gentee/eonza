@@ -54,6 +54,7 @@ type Storage struct {
 	Users       map[uint32]*User // Deprecated
 	Scripts     map[string]*Script
 	Timers      map[uint32]*Timer
+	Events      map[string]*Event
 }
 
 var (
@@ -66,6 +67,7 @@ var (
 		Users:   make(map[uint32]*User),
 		Scripts: make(map[string]*Script),
 		Timers:  make(map[uint32]*Timer),
+		Events:  make(map[string]*Event),
 	}
 	mutex = &sync.Mutex{}
 )

@@ -44,6 +44,18 @@ type TimersResponse struct {
 	Error string      `json:"error,omitempty"`
 }
 
+type Event struct {
+	ID     uint32 `json:"id"`
+	Name   string `json:"name"`
+	Script string `json:"script"`
+	Active bool   `json:"active"`
+}
+
+type EventsResponse struct {
+	List  []*Event `json:"list"`
+	Error string   `json:"error,omitempty"`
+}
+
 func GetSchedulerName(id, idrole uint32) (uname string, rname string) {
 	if idrole == users.TimersID {
 		if timer, ok := storage.Timers[id]; ok {
@@ -183,4 +195,102 @@ func removeTimerHandle(c echo.Context) error {
 		}
 	}
 	return timersResponse(c)
+}
+
+func eventsResponse(c echo.Context) error {
+	listInfo := make([]*Event, 0, len(storage.Events))
+	for _, item := range storage.Events {
+		listInfo = append(listInfo, item)
+	}
+	sort.Slice(listInfo, func(i, j int) bool {
+		if !listInfo[i].Active {
+			if listInfo[j].Active {
+				return false
+			}
+			return strings.ToLower(listInfo[i].Name) < strings.ToLower(listInfo[j].Name)
+		}
+		if !listInfo[j].Active {
+			return true
+		}
+		return strings.ToLower(listInfo[i].Name) < strings.ToLower(listInfo[j].Name)
+	})
+	return c.JSON(http.StatusOK, &EventsResponse{
+		List: listInfo,
+	})
+}
+
+func eventsHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+	return eventsResponse(c)
+}
+
+func saveEventHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+	var event Event
+	if err := c.Bind(&event); err != nil {
+		return jsonError(c, err)
+	}
+	if len(event.Script) == 0 {
+		return jsonError(c, Lang(DefLang, `errreq`, `Script`))
+	}
+	if len(event.Name) == 0 {
+		return jsonError(c, Lang(DefLang, `errreq`, `Name`))
+	}
+	var curKey string
+	for _, item := range storage.Events {
+		if strings.ToLower(event.Name) == strings.ToLower(item.Name) && event.ID != item.ID {
+			return jsonError(c, fmt.Errorf(`Event '%s' exists`, event.Name))
+		}
+		if item.ID == event.ID {
+			curKey = item.Name
+		}
+	}
+	isEvent := func(id uint32) bool {
+		for _, item := range storage.Events {
+			if item.ID == id {
+				return true
+			}
+		}
+		return false
+	}
+	if event.ID == 0 {
+		for {
+			event.ID = lib.RndNum()
+			if !isEvent(event.ID) {
+				break
+			}
+		}
+	} else if len(curKey) == 0 {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
+	if len(curKey) > 0 && curKey != event.Name {
+		delete(storage.Events, curKey)
+	}
+	storage.Events[event.Name] = &event
+	if err := SaveStorage(); err != nil {
+		return jsonError(c, err)
+	}
+	return eventsResponse(c)
+}
+
+func removeEventHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	for key, item := range storage.Events {
+		if item.ID == uint32(id) {
+			delete(storage.Events, key)
+			if err := SaveStorage(); err != nil {
+				return jsonError(c, err)
+			}
+			break
+		}
+	}
+	return eventsResponse(c)
 }
