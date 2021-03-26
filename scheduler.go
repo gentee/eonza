@@ -45,10 +45,12 @@ type TimersResponse struct {
 }
 
 type Event struct {
-	ID     uint32 `json:"id"`
-	Name   string `json:"name"`
-	Script string `json:"script"`
-	Active bool   `json:"active"`
+	ID        uint32 `json:"id"`
+	Name      string `json:"name"`
+	Script    string `json:"script"`
+	Token     string `json:"token"`
+	Whitelist string `json:"whitelist"`
+	Active    bool   `json:"active"`
 }
 
 type EventsResponse struct {
