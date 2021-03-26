@@ -188,6 +188,7 @@ func initTask() script.Settings {
 		ID:        scriptTask.Header.TaskID,
 		UserID:    scriptTask.Header.User.ID,
 		RoleID:    scriptTask.Header.User.RoleID,
+		IP:        scriptTask.Header.IP,
 		Status:    TaskActive,
 		Name:      scriptTask.Header.Name,
 		StartTime: time.Now().Unix(),
