@@ -59,12 +59,19 @@ type EventsResponse struct {
 }
 
 func GetSchedulerName(id, idrole uint32) (uname string, rname string) {
-	if idrole == users.TimersID {
+	switch idrole {
+	case users.TimersID:
 		if timer, ok := storage.Timers[id]; ok {
 			uname = timer.Name
 		}
 		rname = users.TimersRole
+	case users.ScriptsID:
+		if v, ok := tasks[id]; ok {
+			uname = v.Name
+		}
+		rname = users.ScriptsRole
 	}
+
 	return
 }
 

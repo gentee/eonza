@@ -1875,6 +1875,22 @@ ueBBcnVzm1yPMJ0OhfgKAAD//8b7nCn5AQAA
 `,
 	},
 
+	"/eonza-assets/scripts/run-script.yaml": {
+		name:    "run-script.yaml",
+		local:   "../eonza-assets/scripts/run-script.yaml",
+		size:    659,
+		modtime: 1616923458,
+		compressed: `
+H4sIAAAAAAAC/4RRO27jMBDteYqBVXgXsL0fbMVugT3B7gEWjETYBGiKIakA7iwHSJM0qVLmCi5iwHDg
+6AozNwpI2onsFOmkN2/eZ+hlCMpMPWcARswlB9eYsS+dsoEBBBW05DAs/sdhMWQAVoRZRCY+VFpdFN+K
+ibBWq1IEVRufOJX0ZdqKHwnR9VTLK6k5/GIAM6ntmVOEtDDTCDMrnJh7zsaHTB/zTDKUtMPCSg4/GUBt
+U4ZYBsDJy0Y5WXEIrpFvWpUI4qRZBHo6P95dlZbm1NU1JqN60Vv5DnBurowKSmgOg2g+YLFaGkmTCcmW
+w+8QRDmTFfzJseIgHe9vYw61AYQHAdbVpfQ+c3LAyPl3PI1rToTxkZa4xR0tcYMdPtM97nFPt7gBfML1
+8adviQ+4xo6uqaUVbmlFd0BtUthiRyvAHa5xB9jREl/oBjfUUtvP84kAK+sqp86hv+R+o/Qko8O5v7LX
+AAAA///Tg7chkwIAAA==
+`,
+	},
+
 	"/eonza-assets/scripts/run.eonza.yaml": {
 		name:    "run.eonza.yaml",
 		local:   "../eonza-assets/scripts/run.eonza.yaml",
@@ -11964,6 +11980,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/rename-files.yaml"],
 		_escData["/eonza-assets/scripts/replace.yaml"],
 		_escData["/eonza-assets/scripts/return.eonza.yaml"],
+		_escData["/eonza-assets/scripts/run-script.yaml"],
 		_escData["/eonza-assets/scripts/run.eonza.yaml"],
 		_escData["/eonza-assets/scripts/send-email.yaml"],
 		_escData["/eonza-assets/scripts/send-telegram-message.yaml"],

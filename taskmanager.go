@@ -103,6 +103,15 @@ func RemoveTask(id uint32) {
 		}*/
 }
 
+func GetTaskName(id uint32) (ret string) {
+	if v, ok := tasks[id]; ok {
+		ret = v.Name
+	} else {
+		ret = strconv.FormatUint(uint64(id), 16)
+	}
+	return
+}
+
 func ListTasks() []*Task {
 	ret := make([]*Task, 0, len(tasks))
 	for _, task := range tasks {

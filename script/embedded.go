@@ -41,6 +41,15 @@ type PostNfy struct {
 	Script string
 }
 
+type PostScript struct {
+	TaskID uint32 `json:"taskid"`
+	Script string `json:"script"`
+	Data   string `json:"data"`
+	Silent bool   `json:"silent"`
+	UserID uint32 `json:"userid"`
+	RoleID uint32 `json:"roleid"`
+}
+
 type ScriptItem struct {
 	Title string `json:"title" yaml:"title"`
 	Value string `json:"value,omitempty" yaml:"value,omitempty"`
@@ -160,6 +169,7 @@ var (
 		{Prototype: `SQLValue(str,str,arr.str,str)`, Object: SQLValue},
 		{Prototype: `ConvertText(str,str,str) str`, Object: ConvertText},
 		{Prototype: `MarkdownToHTML(str) str`, Object: lib.Markdown},
+		{Prototype: `RunScript(str,str,bool)`, Object: RunScript},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},

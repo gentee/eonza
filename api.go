@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"eonza/lib"
-	"eonza/script"
+	es "eonza/script"
 	"eonza/users"
 
 	"github.com/gentee/gentee"
@@ -89,7 +89,7 @@ func compileHandle(c echo.Context) error {
 			title = val
 		}
 	}
-	header := script.Header{
+	header := es.Header{
 		Name: name,
 		Lang: langCode,
 	}
@@ -131,7 +131,40 @@ func runHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if console {
-		return c.Blob(http.StatusOK, ``, rs.Data)
+		return c.Blob(http.StatusOK, ``, rs.Encoded)
+	}
+	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
+}
+
+func runScriptHandle(c echo.Context) error {
+	var (
+		postScript es.PostScript
+		err        error
+	)
+	if err = c.Bind(&postScript); err != nil {
+		return jsonError(c, err)
+	}
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) && tasks[postScript.TaskID] == nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
+	rs := RunScript{
+		Name:    postScript.Script,
+		Open:    !postScript.Silent,
+		Console: false,
+		Data:    postScript.Data,
+		User: users.User{
+			ID:       postScript.TaskID,
+			Nickname: GetTaskName(postScript.TaskID),
+			RoleID:   users.ScriptsID,
+		},
+		Role: users.Role{
+			ID:   users.ScriptsID,
+			Name: users.ScriptsRole,
+		},
+		IP: c.RealIP(),
+	}
+	if err := systemRun(&rs); err != nil {
+		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
 }

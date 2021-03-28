@@ -112,3 +112,26 @@ func SendNotification(msg string) error {
 	}
 	return nil
 }
+
+func RunScript(script, data string, silent int64) error {
+	jsonValue, err := json.Marshal(PostScript{
+		TaskID: scriptTask.Header.TaskID,
+		Script: script,
+		Data:   data,
+		UserID: scriptTask.Header.User.ID,
+		RoleID: scriptTask.Header.Role.ID,
+		Silent: silent != 0,
+	})
+	if err == nil {
+		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/runscript",
+			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
+		if err != nil {
+			golog.Error(err)
+		} else {
+			resp.Body.Close()
+		}
+	} else {
+		return err
+	}
+	return nil
+}

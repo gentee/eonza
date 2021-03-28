@@ -20,11 +20,12 @@ type RunScript struct {
 	User    users.User
 	Role    users.Role
 	IP      string
+	Data    string
 
 	// Result fields
-	ID   uint32
-	Port int
-	Data []byte
+	ID      uint32
+	Port    int
+	Encoded []byte
 }
 
 func systemRun(rs *RunScript) error {
@@ -69,6 +70,7 @@ func systemRun(rs *RunScript) error {
 		AssetsDir:    cfg.AssetsDir,
 		LogDir:       cfg.Log.Dir,
 		CDN:          cfg.CDN,
+		Data:         rs.Data,
 		Console:      rs.Console,
 		IsPlayground: cfg.playground,
 		IP:           rs.IP,
@@ -130,7 +132,7 @@ func systemRun(rs *RunScript) error {
 		return err
 	}
 	if rs.Console {
-		rs.Data = data.Bytes()
+		rs.Encoded = data.Bytes()
 	}
 	rs.Port = header.HTTP.Port
 	rs.ID = header.TaskID

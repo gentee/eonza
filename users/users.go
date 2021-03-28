@@ -13,15 +13,17 @@ import (
 )
 
 const (
-	RootUser   = `root`
-	RootRole   = `admin`
-	TimersRole = `timers`
-	EventsRole = `events`
-	ResRoleID  = 0xffffff00
-	EventsID   = 0xfffffffe
-	TimersID   = 0xffffffff
-	XRootID    = 1
-	XAdminID   = 1
+	RootUser    = `root`
+	RootRole    = `admin`
+	TimersRole  = `timers`
+	EventsRole  = `events`
+	ScriptsRole = `scripts`
+	ResRoleID   = 0xffffff00
+	ScriptsID   = 0xfffffffd
+	EventsID    = 0xfffffffe
+	TimersID    = 0xffffffff
+	XRootID     = 1
+	XAdminID    = 1
 )
 
 type ProSettings struct {
@@ -59,9 +61,10 @@ type Auth struct {
 
 func InitUsers(psw []byte, counter uint32) (map[uint32]Role, map[uint32]User) {
 	Roles := map[uint32]Role{
-		XAdminID: {ID: XAdminID, Name: RootRole},
-		TimersID: {ID: TimersID, Name: TimersRole},
-		EventsID: {ID: EventsID, Name: EventsRole},
+		XAdminID:  {ID: XAdminID, Name: RootRole},
+		TimersID:  {ID: TimersID, Name: TimersRole},
+		EventsID:  {ID: EventsID, Name: EventsRole},
+		ScriptsID: {ID: ScriptsID, Name: ScriptsRole},
 	}
 	Users := map[uint32]User{
 		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, RoleID: XAdminID,

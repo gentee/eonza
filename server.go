@@ -310,6 +310,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/taskstatus", taskStatusHandle)     //
 		e.POST("/api/import", importHandle)             // +
 		e.POST("/api/notification", notificationHandle) //
+		e.POST("/api/runscript", runScriptHandle)       //
 		e.POST("/api/settings", saveSettingsHandle)     // +
 		e.POST("/api/setpsw", setPasswordHandle)        //
 		e.POST("/api/timer", saveTimerHandle)           // +
