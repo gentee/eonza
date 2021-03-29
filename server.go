@@ -295,6 +295,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/timers", timersHandle)               // +
 		e.GET("/api/events", eventsHandle)               // +
 		e.GET("/api/prosettings", proSettingsHandle)     // +
+		e.GET("/api/randid", randidHandle)               // +
 		e.GET("/api/remove/:id", removeTaskHandle)       // +
 		e.GET("/api/removenfy/:id", removeNfyHandle)     // +
 		e.GET("/api/removetimer/:id", removeTimerHandle) // +
@@ -315,6 +316,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/setpsw", setPasswordHandle)        //
 		e.POST("/api/timer", saveTimerHandle)           // +
 		e.POST("/api/saveevent", saveEventHandle)       // +
+		e.POST("/api/event", eventHandle)               // +
 		e.POST("/api/favs", saveFavsHandle)
 		ProApi(e)
 	}

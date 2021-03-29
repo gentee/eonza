@@ -5,9 +5,12 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"eonza/lib"
 	"eonza/users"
 	"fmt"
+	"net"
 	"net/http"
 	"sort"
 	"strconv"
@@ -53,10 +56,33 @@ type Event struct {
 	Active    bool   `json:"active"`
 }
 
+type EventData struct {
+	Name string `json:"name"`
+	Data string `json:"data"`
+	Rand string `json:"rand"`
+	Sign string `json:"sign"`
+}
+
 type EventsResponse struct {
 	List  []*Event `json:"list"`
 	Error string   `json:"error,omitempty"`
 }
+
+type RandID struct {
+	ID   uint32
+	Time time.Time
+}
+
+type RandResponse struct {
+	Rand  string `json:"rand"`
+	Error string `json:"error,omitempty"`
+}
+
+const RandLimit = 64
+
+var (
+	randIDs [RandLimit]RandID
+)
 
 func GetSchedulerName(id, idrole uint32) (uname string, rname string) {
 	switch idrole {
@@ -70,6 +96,14 @@ func GetSchedulerName(id, idrole uint32) (uname string, rname string) {
 			uname = v.Name
 		}
 		rname = users.ScriptsRole
+	case users.EventsID:
+		for _, event := range storage.Events {
+			if event.ID == id {
+				uname = event.Name
+				break
+			}
+		}
+		rname = users.EventsRole
 	}
 
 	return
@@ -302,4 +336,113 @@ func removeEventHandle(c echo.Context) error {
 		}
 	}
 	return eventsResponse(c)
+}
+
+func eventHandle(c echo.Context) error {
+	var (
+		err       error
+		eventData EventData
+		event     *Event
+		ok        bool
+	)
+	if err = c.Bind(&eventData); err != nil {
+		return jsonError(c, err)
+	}
+	if event, ok = storage.Events[eventData.Name]; !ok || !event.Active {
+		return AccessDenied(http.StatusForbidden)
+	}
+	ip := c.RealIP()
+	if len(strings.TrimSpace(event.Whitelist)) > 0 {
+		whitelist := strings.Split(strings.ReplaceAll(event.Whitelist, `,`, ` `), ` `)
+		var matched bool
+		clientip := net.ParseIP(ip)
+		for _, item := range whitelist {
+			if len(item) == 0 {
+				continue
+			}
+			_, network, err := net.ParseCIDR(item)
+			if err == nil && network.Contains(clientip) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return AccessDenied(http.StatusForbidden)
+		}
+	}
+	host := c.Request().Host
+	if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
+		host = host[:offPort]
+	}
+	if !lib.IsLocalhost(host, ip) || len(eventData.Rand) > 0 {
+		if len(event.Token) == 0 {
+			return AccessDenied(http.StatusForbidden)
+		}
+		var isRnd bool
+		now := time.Now()
+		rnd, _ := strconv.ParseUint(eventData.Rand, 10, 32)
+		if rnd > 0 {
+			for i := 0; i < RandLimit; i++ {
+				if uint64(randIDs[i].ID) == rnd {
+					if randIDs[i].Time.After(now) {
+						randIDs[i].ID = 0
+						isRnd = true
+						break
+					}
+				}
+			}
+		}
+		if !isRnd {
+			return AccessDenied(http.StatusForbidden)
+		}
+		shaHash := sha256.Sum256([]byte(event.Name + eventData.Data + eventData.Rand + event.Token))
+		if strings.ToLower(eventData.Sign) != strings.ToLower(hex.EncodeToString(shaHash[:])) {
+			return AccessDenied(http.StatusForbidden)
+		}
+	}
+	rs := RunScript{
+		Name:    event.Script,
+		Open:    false,
+		Console: false,
+		Data:    eventData.Data,
+		User: users.User{
+			ID:       event.ID,
+			Nickname: event.Name,
+			RoleID:   users.EventsID,
+		},
+		Role: users.Role{
+			ID:   users.EventsID,
+			Name: users.EventsRole,
+		},
+		IP: ip,
+	}
+	if err := systemRun(&rs); err != nil {
+		return jsonError(c, err)
+	}
+	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
+}
+
+func randidHandle(c echo.Context) error {
+	var (
+		rnd, i uint32
+		rand   RandResponse
+	)
+
+	for rnd == 0 {
+		rnd = lib.RndNum()
+	}
+	now := time.Now()
+	for i = 0; i < RandLimit; i++ {
+		if randIDs[i].ID == 0 || randIDs[i].Time.Before(now) {
+			randIDs[i].ID = rnd
+			randIDs[i].Time = now.Add(3 * time.Second)
+			break
+		}
+	}
+	if i >= RandLimit {
+		rand.Error = `Too many randid requests`
+	} else {
+		rand.Rand = strconv.FormatUint(uint64(rnd), 10)
+	}
+	return c.JSON(http.StatusOK, rand)
 }

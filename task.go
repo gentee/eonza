@@ -380,6 +380,7 @@ func initTask() script.Settings {
 	(*glob)[`t`] = "\t"
 	(*glob)[`s`] = " "
 	(*glob)[`data`] = strings.TrimSpace(scriptTask.Header.Data)
+	(*glob)[`eonzaport`] = fmt.Sprint(scriptTask.Header.ServerPort)
 
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{
