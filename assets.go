@@ -1294,7 +1294,7 @@ JPEmvgRlc0PYZr7GYzwvyS6Wq4v+Ccy6umfHFqcCeLXVhlIBkRj3TfE6ZYjfksJKuYv+fmd4SmGgTQfW
 		name:    "foreach-file.yaml",
 		local:   "../eonza-assets/scripts/foreach-file.yaml",
 		size:    1433,
-		modtime: 1607779636,
+		modtime: 1616936928,
 		compressed: `
 H4sIAAAAAAAC/4RSUUsbTRR9319x2SBqvrh+fA/fw4L4UBUCYiGhQmFBx91JMmUyG2Ym0mgFkb5ZKPRH
 9DlQW7ampn/h7j8qd2ez3dRofXFz7jlnzp05hlsrVN+EHoBiQx5CL9WcxYOtnpDcA7DCSh7CeuOExo11
@@ -1488,19 +1488,20 @@ MhX6RR67Kfl7Cislxv77M/Yxx7VzFJHfAQAA///cPdUckwUAAA==
 	"/eonza-assets/scripts/if.eonza.yaml": {
 		name:    "if.eonza.yaml",
 		local:   "../eonza-assets/scripts/if.eonza.yaml",
-		size:    1363,
-		modtime: 1607779636,
+		size:    1490,
+		modtime: 1616931834,
 		compressed: `
-H4sIAAAAAAAC/7RUz24TPxC++ylGu6r6+0kkFBAcfEUcuMABxLVyN5OtJa93sb1Ryh+pTSWuPXHhgniD
-qFKkqJDyCuM3QvZukk26FSf2ZM833/eNPTu26JzUueUMQIsCOcjxEEv9QTAAJ51CDofpsRxbJxwWqF16
-yABGaLMIhEWMVMKdckjSoXUjJU/Sh+mwMmVuRFFInacJAzhFVQX9wUarDSqhcw6mZgCqzBVOUHF4xgBq
-bWrNwZkaWSWMKCxng7ZOVBYnwuyU2cZiQe6sQg6PN/lKWtdNHmalHkknS207+U8ZQFnFaLgSiLRmtRZq
-TMO31ZoIE8AoFJHWvMvTpbvD05iLYLZHPGp3O5XEQO2q2m33A0iSzubV67c7lllR3bHMyqISBoPRnuuT
-+1wb2DqziUiHhe2WsdXH97VQG+XwTYSqQ8MC0EsZS4U4ldbZPt4W7ffTk/u5G7CXajDHaSFcdtrHjcBe
-51WNPb1X9V86j9O+1k9d+AX/SRNER7dzpOQo6U0vTW/2o4SF0YweqBun42b0n6+HRyiwmZFVc8D1BHJ4
-oSzCO2GkOFHNnXUfEQ4vx/Cm8wyYekeeftCNP6cl/fYz8Jf+gn7SLV3T0l/t+dB3WvhzWtAvWtCKVjT3
-V0DXNI/0Oa38jOY9/vSNbmnlL/zMn/tLuvFfgjjQ1+i1ZFk5Qg6fBgxAjrfH/a81fhAfhv/hY3ttByfl
-6OyAAXxmfwIAAP//eGCRq1MFAAA=
+H4sIAAAAAAAC/7RUzW7TThC/71OMHFX9/yUSCggOviIOXOAAgmO1dSbuSuu12R2HlA+pSSU49sQFCSHe
+IKoUKSqkvMLsG6G13cRJXXHCJ3t+8/vw7uw6JFImdbEAMDLDGNRogLl5JwUAKdIYw37vUI0cScIMDfX2
+BcAQXVIB4aWqFJKOY4h6A0dDrY56d3uDwuaplVmmTNqLBMAx6iLo99daTVFLk8ZgSwGg81TjGHUMjwRA
+aWxpYiBboiiklZmLRb/JidrhWNqtmE2tCkQnBcZwf92vlaN28yDJzVCRyo1r9T8UAHlRVcOSQEWr366F
+atPwbLTG0gawEqqQxrzNMznd4BlMZTDbIR40X1tJqkJJRUmb7z5EUevj2fOXW5ZJVtywTPKskBaD0Y7r
+g9tca9iRXVcUYebaMTb6+KaUeq0cnrHUZdiwAHRSRkojTpQj18XboN1+Znw7dw12Ui2mOMkkJcdd3Aro
+4h06kpbcW0WdvBrdGRldYsfQ6PIvI4OTrpmZUJjdf7J7sqXb+qfoIOpsz21n971IhDNdeaCpnQ7rO+Px
+9amTGlxiVVH/4PXRjeGJdgivpFXySNdr1r59Yng6ghet+wOgtR1xgCw5eK0obJ0tt7z5B1/6U17ybz8D
+f+an/JOv+IKX/nwnBH/nhT/lBf/iBa94xXN/DnzB84o+55Wf8bwjHH/lK175qZ/5U3/Gl/5TEAf+Unkt
+b+blbzz3n3kZLHjhZ37qz8FPRZIPMYYPfQGgRptF+69JeKe6l/6H983i7x3lw5M9AfBR/AkAAP//5DcB
+jtIFAAA=
 `,
 	},
 

@@ -7,6 +7,7 @@ package script
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/gentee/gentee/core"
 	"github.com/gentee/gentee/vm"
@@ -135,6 +136,20 @@ func ReplaceObj(key string) (ret string, found bool) {
 func GetVarObj(name string) (*core.Obj, error) {
 	val, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(name)
 	if !ok {
+		subfields := strings.Split(name, `.`)
+		if len(subfields) > 1 {
+			if val, ok = dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(subfields[0]); ok {
+				ret := val.(*core.Obj)
+				for i := 1; i < len(subfields); i++ {
+					if ret, _ = vm.ItemºObjStr(ret, subfields[i]); ret == nil {
+						break
+					}
+				}
+				if ret != nil {
+					return ret, nil
+				}
+			}
+		}
 		return nil, fmt.Errorf(`object var %s doesn't exist`, name)
 	}
 	return val.(*core.Obj), nil

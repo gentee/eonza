@@ -379,7 +379,7 @@ func initTask() script.Settings {
 	(*glob)[`r`] = "\r"
 	(*glob)[`t`] = "\t"
 	(*glob)[`s`] = " "
-	(*glob)[`data`] = scriptTask.Header.Data
+	(*glob)[`data`] = strings.TrimSpace(scriptTask.Header.Data)
 
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{

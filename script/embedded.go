@@ -250,6 +250,8 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	case `match`:
 		i, err = vm.MatchºStrStr(varVal, val)
 		item.result = i != 0
+	case `starts`:
+		item.result = strings.HasPrefix(varVal, val)
 	default:
 		return fmt.Errorf(`Unknown comparison type: %s`, item.Cmp)
 	}
