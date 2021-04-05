@@ -5,7 +5,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -57,6 +60,11 @@ type TaskInfo struct {
 type TasksResponse struct {
 	List  []TaskInfo `json:"list,omitempty"`
 	Error string     `json:"error,omitempty"`
+}
+
+type Feedback struct {
+	Like     int    `json:"like"`
+	Feedback string `json:"feedback"`
 }
 
 func jsonError(c echo.Context, err interface{}) error {
@@ -361,4 +369,37 @@ func trialHandle(c echo.Context) error {
 		}
 	}
 	return proSettingsHandle(c)
+}
+
+func feedbackHandle(c echo.Context) error {
+	var (
+		feedback Feedback
+		resp     *http.Response
+		body     []byte
+		err      error
+	)
+	if err = c.Bind(&feedback); err != nil {
+		return jsonError(c, err)
+	}
+	//	user := c.(*Auth).User
+	jsonValue, err := json.Marshal(feedback)
+	if err == nil {
+		resp, err = http.Post(appInfo.Homepage+"feedback",
+			"application/json", bytes.NewBuffer(jsonValue))
+		if err == nil {
+			if body, err = ioutil.ReadAll(resp.Body); err == nil {
+				var answer Response
+				if err = json.Unmarshal(body, &answer); err == nil {
+					if len(answer.Error) > 0 {
+						err = fmt.Errorf(answer.Error)
+					}
+				}
+			}
+			resp.Body.Close()
+		}
+	}
+	if err != nil {
+		return jsonError(c, err)
+	}
+	return jsonSuccess(c)
 }

@@ -318,6 +318,7 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.POST("/api/saveevent", saveEventHandle)       // +
 		e.POST("/api/event", eventHandle)               // +
 		e.POST("/api/favs", saveFavsHandle)
+		e.POST("/api/feedback", feedbackHandle) // +
 		ProApi(e)
 	}
 	go func() {
