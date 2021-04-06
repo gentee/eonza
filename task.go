@@ -188,6 +188,7 @@ func initTask() script.Settings {
 		ID:        scriptTask.Header.TaskID,
 		UserID:    scriptTask.Header.User.ID,
 		RoleID:    scriptTask.Header.User.RoleID,
+		IP:        scriptTask.Header.IP,
 		Status:    TaskActive,
 		Name:      scriptTask.Header.Name,
 		StartTime: time.Now().Unix(),
@@ -378,6 +379,8 @@ func initTask() script.Settings {
 	(*glob)[`r`] = "\r"
 	(*glob)[`t`] = "\t"
 	(*glob)[`s`] = " "
+	(*glob)[`data`] = strings.TrimSpace(scriptTask.Header.Data)
+	(*glob)[`eonzaport`] = fmt.Sprint(scriptTask.Header.ServerPort)
 
 	script.InitData(chLogout, chForm, glob)
 	return script.Settings{

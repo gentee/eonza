@@ -41,6 +41,7 @@ type Task struct {
 	ID         uint32 `json:"id"`
 	Status     int    `json:"status"`
 	Name       string `json:"name"`
+	IP         string `json:"ip"`
 	StartTime  int64  `json:"start"`
 	FinishTime int64  `json:"finish"`
 	UserID     uint32 `json:"userid"`
@@ -57,7 +58,8 @@ var (
 )
 
 func (task *Task) Head() string {
-	return fmt.Sprintf("%x,%x/%x,%d,%s,%d\r\n", task.ID, task.UserID, task.RoleID, task.Port, task.Name, task.StartTime)
+	return fmt.Sprintf("%x,%x/%x/%s,%d,%s,%d\r\n", task.ID, task.UserID, task.RoleID, task.IP,
+		task.Port, task.Name, task.StartTime)
 }
 
 func taskTrace(unixTime int64, status int, message string) {
@@ -101,6 +103,15 @@ func RemoveTask(id uint32) {
 		}*/
 }
 
+func GetTaskName(id uint32) (ret string) {
+	if v, ok := tasks[id]; ok {
+		ret = v.Name
+	} else {
+		ret = strconv.FormatUint(uint64(id), 16)
+	}
+	return
+}
+
 func ListTasks() []*Task {
 	ret := make([]*Task, 0, len(tasks))
 	for _, task := range tasks {
@@ -139,6 +150,7 @@ func NewTask(header script.Header) (err error) {
 		ID:        header.TaskID,
 		Status:    TaskActive,
 		Name:      header.Name,
+		IP:        header.IP,
 		StartTime: time.Now().Unix(),
 		UserID:    header.User.ID,
 		RoleID:    header.User.RoleID,
@@ -155,7 +167,8 @@ func NewTask(header script.Header) (err error) {
 }
 
 func (task *Task) String() string {
-	return fmt.Sprintf("%x,%x/%x,%d,%s,%d,%d,%d,%s", task.ID, task.UserID, task.RoleID, task.Port, task.Name,
+	return fmt.Sprintf("%x,%x/%x/%s,%d,%s,%d,%d,%d,%s", task.ID, task.UserID, task.RoleID, task.IP,
+		task.Port, task.Name,
 		task.StartTime, task.FinishTime, task.Status, task.Message)
 }
 
@@ -180,6 +193,9 @@ func LogToTask(input string) (task Task, err error) {
 				return
 			}
 			task.RoleID = uint32(uival)
+			if len(ur) > 2 {
+				task.IP = ur[2]
+			}
 		} else {
 			task.RoleID = users.XAdminID
 		}

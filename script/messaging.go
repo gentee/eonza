@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,6 +19,11 @@ import (
 	"github.com/kataras/golog"
 	mail "github.com/xhit/go-simple-mail/v2"
 )
+
+type Response struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+}
 
 var ErrInvalidPar = fmt.Errorf(`Invalid parameter`)
 
@@ -111,4 +117,35 @@ func SendNotification(msg string) error {
 		return err
 	}
 	return nil
+}
+
+func RunScript(script, data string, silent int64) error {
+	jsonValue, err := json.Marshal(PostScript{
+		TaskID: scriptTask.Header.TaskID,
+		Script: script,
+		Data:   data,
+		UserID: scriptTask.Header.User.ID,
+		RoleID: scriptTask.Header.Role.ID,
+		Silent: silent != 0,
+	})
+	var (
+		resp *http.Response
+		body []byte
+	)
+	if err == nil {
+		resp, err = http.Post(fmt.Sprintf("http://localhost:%d/api/runscript",
+			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
+		if err == nil {
+			if body, err = ioutil.ReadAll(resp.Body); err == nil {
+				var answer Response
+				if err = json.Unmarshal(body, &answer); err == nil {
+					if !answer.Success && len(answer.Error) > 0 {
+						err = fmt.Errorf(answer.Error)
+					}
+				}
+			}
+			resp.Body.Close()
+		}
+	}
+	return err
 }

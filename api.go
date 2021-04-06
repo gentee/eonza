@@ -5,14 +5,17 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"eonza/lib"
-	"eonza/script"
+	es "eonza/script"
 	"eonza/users"
 
 	"github.com/gentee/gentee"
@@ -59,6 +62,11 @@ type TasksResponse struct {
 	Error string     `json:"error,omitempty"`
 }
 
+type Feedback struct {
+	Like     int    `json:"like"`
+	Feedback string `json:"feedback"`
+}
+
 func jsonError(c echo.Context, err interface{}) error {
 	return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
 }
@@ -89,7 +97,7 @@ func compileHandle(c echo.Context) error {
 			title = val
 		}
 	}
-	header := script.Header{
+	header := es.Header{
 		Name: name,
 		Lang: langCode,
 	}
@@ -131,7 +139,40 @@ func runHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if console {
-		return c.Blob(http.StatusOK, ``, rs.Data)
+		return c.Blob(http.StatusOK, ``, rs.Encoded)
+	}
+	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
+}
+
+func runScriptHandle(c echo.Context) error {
+	var (
+		postScript es.PostScript
+		err        error
+	)
+	if err = c.Bind(&postScript); err != nil {
+		return jsonError(c, err)
+	}
+	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) && tasks[postScript.TaskID] == nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+	}
+	rs := RunScript{
+		Name:    postScript.Script,
+		Open:    !postScript.Silent,
+		Console: false,
+		Data:    postScript.Data,
+		User: users.User{
+			ID:       postScript.TaskID,
+			Nickname: GetTaskName(postScript.TaskID),
+			RoleID:   users.ScriptsID,
+		},
+		Role: users.Role{
+			ID:   users.ScriptsID,
+			Name: users.ScriptsRole,
+		},
+		IP: c.RealIP(),
+	}
+	if err := systemRun(&rs); err != nil {
+		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
 }
@@ -328,4 +369,37 @@ func trialHandle(c echo.Context) error {
 		}
 	}
 	return proSettingsHandle(c)
+}
+
+func feedbackHandle(c echo.Context) error {
+	var (
+		feedback Feedback
+		resp     *http.Response
+		body     []byte
+		err      error
+	)
+	if err = c.Bind(&feedback); err != nil {
+		return jsonError(c, err)
+	}
+	//	user := c.(*Auth).User
+	jsonValue, err := json.Marshal(feedback)
+	if err == nil {
+		resp, err = http.Post(appInfo.Homepage+"feedback",
+			"application/json", bytes.NewBuffer(jsonValue))
+		if err == nil {
+			if body, err = ioutil.ReadAll(resp.Body); err == nil {
+				var answer Response
+				if err = json.Unmarshal(body, &answer); err == nil {
+					if len(answer.Error) > 0 {
+						err = fmt.Errorf(answer.Error)
+					}
+				}
+			}
+			resp.Body.Close()
+		}
+	}
+	if err != nil {
+		return jsonError(c, err)
+	}
+	return jsonSuccess(c)
 }

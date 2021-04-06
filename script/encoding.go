@@ -23,6 +23,7 @@ type Header struct {
 	LogDir       string
 	Theme        string
 	CDN          string
+	Data         string
 	Console      bool
 	IsPlayground bool
 	SourceCode   []byte
