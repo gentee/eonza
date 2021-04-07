@@ -278,7 +278,7 @@ JV7py2vJu7m/d2d7v5e345zJTZF2KxDrqbkOqCTiUhlbFuRWw0fp31VMk52358eFKzO4NAhQ6PHUgDAH
 		name:    "test-data.yaml",
 		local:   "../eonza-assets/init/test-data.yaml",
 		size:    2612,
-		modtime: 1617695416,
+		modtime: 1617696947,
 		compressed: `
 H4sIAAAAAAAC/6RWW2/cNhN9168YUAg2/mCtd9e3rwT8UCAXBC3sIt72JQpsWhrvsuWSCjlykib+7wVF
 6hrbSNMXwR7OnJk5PDNLh0RSbxxPALTYIQdCR1kpSCQAJEkhhzU6ghfBVAnacpilc+/n0lkCoMxG4R0q

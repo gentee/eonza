@@ -5,7 +5,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,7 +33,7 @@ func SetLogging(basename string) {
 		cfg.Log.Level = logLevelInfo
 	}
 	if strings.Index(cfg.Log.Mode, logModeStdout) < 0 {
-		golog.SetOutput(ioutil.Discard)
+		golog.SetOutput(io.Discard)
 	}
 	err := os.MkdirAll(cfg.Log.Dir, 0777)
 	if err != nil {

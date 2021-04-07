@@ -127,7 +127,7 @@ func NewUser(nickname string) (uint32, error) {
 	}
 	user.PublicKey = public
 	user.ID = crc32.ChecksumIEEE(private)
-	if err = ioutil.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
+	if err = os.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
 		[]byte(hex.EncodeToString(private)), 0777 os.ModePerm); err != nil {
 		return 0, err
 	}

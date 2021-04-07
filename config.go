@@ -7,7 +7,6 @@ package main
 import (
 	"eonza/lib"
 	"eonza/users"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -109,7 +108,7 @@ func LoadConfig() {
 			golog.Fatal(err)
 		}
 	}
-	if cfgData, err = ioutil.ReadFile(cfg.path); err != nil {
+	if cfgData, err = os.ReadFile(cfg.path); err != nil {
 		golog.Fatal(err)
 	}
 	if err = yaml.Unmarshal(cfgData, &cfg); err != nil {
@@ -212,5 +211,5 @@ func SaveConfig() error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(cfg.path, data, 0777 /*os.ModePerm*/)
+	return os.WriteFile(cfg.path, data, 0777 /*os.ModePerm*/)
 }

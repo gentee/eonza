@@ -12,7 +12,7 @@ import (
 	"eonza/script"
 	"eonza/users"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -230,7 +230,7 @@ func InitTaskManager() (err error) {
 		return
 	}
 	tasks = make(map[uint32]*Task)
-	input, err := ioutil.ReadFile(filename)
+	input, err := os.ReadFile(filename)
 	if err != nil {
 		return
 	}
@@ -245,7 +245,7 @@ func InitTaskManager() (err error) {
 			resp, err := http.Get(url + `/info`)
 			active := false
 			if err == nil {
-				if body, err := ioutil.ReadAll(resp.Body); err == nil {
+				if body, err := io.ReadAll(resp.Body); err == nil {
 					var task Task
 					if err = json.Unmarshal(body, &task); err == nil && task.ID == item.ID {
 						active = true
@@ -331,7 +331,7 @@ func GetTaskFiles(id uint32) (ret []string) {
 		if i == TExtTrace {
 			continue
 		}
-		if out, err = ioutil.ReadFile(filepath.Join(cfg.Log.Dir, fname+ext)); err == nil {
+		if out, err = os.ReadFile(filepath.Join(cfg.Log.Dir, fname+ext)); err == nil {
 			ret[i] = string(out)
 		}
 	}

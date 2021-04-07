@@ -7,7 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,7 +24,7 @@ func request(url string) ([]byte, error) {
 	buf := core.NewBuffer()
 	res, err = http.Get(fmt.Sprintf(`http://%s:%s`, Localhost, url))
 	if err == nil {
-		buf.Data, err = ioutil.ReadAll(res.Body)
+		buf.Data, err = io.ReadAll(res.Body)
 		res.Body.Close()
 	}
 	return buf.Data, err

@@ -7,7 +7,7 @@ package lib
 import (
 	"bytes"
 	"compress/gzip"
-	"io/ioutil"
+	"io"
 	"time"
 )
 
@@ -39,6 +39,6 @@ func GzipDecompress(input []byte) (out []byte, err error) {
 		return
 	}
 	defer gz.Close()
-	out, err = ioutil.ReadAll(gz)
+	out, err = io.ReadAll(gz)
 	return
 }

@@ -10,7 +10,7 @@ import (
 	"encoding/gob"
 	"eonza/lib"
 	"eonza/script"
-	"io/ioutil"
+	"os"
 	"sync"
 	"time"
 
@@ -95,11 +95,11 @@ func SaveStorage() error {
 	if out, err = lib.GzipCompress(data.Bytes()); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(lib.ChangeExt(cfg.path, StorageExt), out, 0777 /*os.ModePerm*/)
+	return os.WriteFile(lib.ChangeExt(cfg.path, StorageExt), out, 0777 /*os.ModePerm*/)
 }
 
 func LoadStorage(psw string) {
-	data, err := ioutil.ReadFile(lib.ChangeExt(cfg.path, StorageExt))
+	data, err := os.ReadFile(lib.ChangeExt(cfg.path, StorageExt))
 	if err != nil {
 		golog.Fatal(err)
 	}

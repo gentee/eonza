@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -387,7 +387,7 @@ func feedbackHandle(c echo.Context) error {
 		resp, err = http.Post(appInfo.Homepage+"feedback",
 			"application/json", bytes.NewBuffer(jsonValue))
 		if err == nil {
-			if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			if body, err = io.ReadAll(resp.Body); err == nil {
 				var answer Response
 				if err = json.Unmarshal(body, &answer); err == nil {
 					if len(answer.Error) > 0 {

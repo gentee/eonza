@@ -12,7 +12,7 @@ import (
 	"eonza/users"
 	"fmt"
 	"hash/crc64"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -94,7 +94,7 @@ func LoadNotifications() {
 		}
 		golog.Fatal(err)
 	}
-	data, err := ioutil.ReadFile(nfyfile)
+	data, err := os.ReadFile(nfyfile)
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func saveNotifications(update bool) error {
 	if err = enc.Encode(nfyData); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(lib.ChangeExt(cfg.path, NfyExt), data.Bytes(),
+	if err = os.WriteFile(lib.ChangeExt(cfg.path, NfyExt), data.Bytes(),
 		0777 /*os.ModePerm*/); err != nil {
 		return err
 	}
@@ -342,7 +342,7 @@ func CheckUpdates() error {
 	if err != nil {
 		return err
 	}
-	if body, err := ioutil.ReadAll(resp.Body); err == nil {
+	if body, err := io.ReadAll(resp.Body); err == nil {
 		var upd VerUpdate
 		if err = json.Unmarshal(body, &upd); err == nil {
 			if len(upd.Version) > 0 && upd.Version != Version {
