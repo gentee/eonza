@@ -2281,6 +2281,29 @@ zy5J09x8zk12fhb3kgwvdPb44GYRNdv7lk7EnwAAAP//u4hwZocDAAA=
 `,
 	},
 
+	"/eonza-assets/scripts/try.yaml": {
+		name:    "try.yaml",
+		local:   "../eonza-assets/scripts/try.yaml",
+		size:    1620,
+		modtime: 1617851598,
+		compressed: `
+H4sIAAAAAAAC/5ST32rjRhTG7/UUhxEhCdhxN8HbVt4NLCVpb3rV0JvOshlLY3moNGNmRt4IY9gNFLq0
+tJe9a18hSTENKXVf4eiNyhnZjrPdvYgvrPNn5vt+Oppx0nulc5dEAFqUMgFv6wjAK1/IBHbjV1SNdyOA
+ifBjqhw4nxVqGPfig4k1uRVlqXQelmTSpWETBaFSmLyQU1kk8DQCqLStNFlUMgIYy2Ky9qO4EDpPwFbR
+RFhRuiTqrpEIZhvK2/ogJMHD1xOZwGFE+8OLSE3/AK9WPF8JnRUShK5BWmusAz8WHsZiKsGkaWWtzGC3
+3dI6ntkaevCF8Ok4lDeGCZzRA8wITkgKvpbOiZzobPXAFX/H6+YNXuE1LptLvGoum58Bb5q3uAC8wSX+
+hf/gLd7hVfNL8w5vqbxsfsRbvMY7vN2mwT9wif82PzWXtBx6VFg0b3DR/IA3pPw+I/6GV/gnLvFvXAav
+O2je4hKXeN28wwUZN78Cpdueiyg1mUyAeVvDjGsA2BmarN7heg4pzYLGt+p8I/23wu5xVrp8KixnHTh/
+lqkpOF8X8jlnmXKTQtTJqJAXA86OqRnBpl0KmyvdtSof+wSeWFmGRQrSQjj3nLORcDASXa9K6bqpsmkh
+KT+64GwjkprCWJp6LPtHnx/1SaGnjp/1MjUNhseBFXZmYTDzNnuAORFZpujcfXLQlyU8keUAVmzeTEg7
+NAZDkX6fW1PprNu6xqenJy9OXgzaDOLRqH/YPxyMjPbd17J9raEpMs6Od2Yn1p7JC78nrd2ft3hcrzDD
+//k+1xEA3wwWOBtW3hvtwmi/m3FG55yzBDj7lGqchblTPvS6rXh54dtSfGClt3XMWYd0mZl4FcSoOQPO
+OVNaeSUKCpNQCDso6IQ0kyNRFf6+T/eWnnPO5p0173u/x3OKobE+buv3lAF69kHMsGGLAx4BEWQ/iKFy
+baz8H8dHKdr1a4ztabykj0nBqbHlXvvt7gU546yzsV5nLS1nT0Past7frXnnERKfPZDYHKL5y/MIYEXm
+Xiu6zl+uL3GYyD60zVQ4CevTwCCBNtrurV6eRRDaqZlKy/Wca65Z9F8AAAD//+rtdZxUBgAA
+`,
+	},
+
 	"/eonza-assets/scripts/unpack-targz.yaml": {
 		name:    "unpack-targz.yaml",
 		local:   "../eonza-assets/scripts/unpack-targz.yaml",
@@ -12075,6 +12098,7 @@ var _escDirs = map[string][]os.FileInfo{
 		_escData["/eonza-assets/scripts/sql-query.yaml"],
 		_escData["/eonza-assets/scripts/sql-row.yaml"],
 		_escData["/eonza-assets/scripts/sql-value.yaml"],
+		_escData["/eonza-assets/scripts/try.yaml"],
 		_escData["/eonza-assets/scripts/unpack-targz.yaml"],
 		_escData["/eonza-assets/scripts/unpack-zip.yaml"],
 		_escData["/eonza-assets/scripts/while.yaml"],
