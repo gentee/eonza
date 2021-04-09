@@ -27,7 +27,8 @@ const (
 )
 
 type ProSettings struct {
-	Twofa bool `json:"twofa"`
+	Twofa  bool   `json:"twofa"`
+	Master string `json:"master"`
 }
 
 type Role struct {
