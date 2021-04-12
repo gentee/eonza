@@ -16,9 +16,10 @@ import (
 )
 
 type ProOptions struct {
-	Active   bool              `json:"active"`
-	Settings users.ProSettings `json:"settings"`
-	Trial    Trial             `json:"trial"`
+	Active   bool                `json:"active"`
+	Settings users.ProSettings   `json:"settings"`
+	Storage  pro.StorageResponse `json:"storage"`
+	Trial    Trial               `json:"trial"`
 }
 
 const (
@@ -120,6 +121,8 @@ func proSettingsHandle(c echo.Context) error {
 	response.Active = pro.Active
 	response.Trial = storage.Trial
 	response.Settings = pro.Settings()
+	response.Storage = pro.PassStorage()
+
 	return c.JSON(http.StatusOK, &response)
 }
 
