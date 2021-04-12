@@ -87,6 +87,10 @@ func TwofaQR(id uint32) (string, error) {
 	return pro.TwofaQR(id)
 }
 
+func IsDecrypted() bool {
+	return pro.IsDecrypted()
+}
+
 func ValidateOTP(user users.User, otp string) error {
 	return pro.ValidateOTP(user, otp)
 }

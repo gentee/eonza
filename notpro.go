@@ -108,6 +108,10 @@ func IsTwofa() bool {
 	return false
 }
 
+func IsDecrypted() bool {
+	return true
+}
+
 func TwofaQR(id uint32) (string, error) {
 	return ``, fmt.Errorf(`Unsupported`)
 }
