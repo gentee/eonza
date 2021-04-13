@@ -65,6 +65,7 @@ type TasksResponse struct {
 type Feedback struct {
 	Like     int    `json:"like"`
 	Feedback string `json:"feedback"`
+	Email    string `json:"email"`
 }
 
 func jsonError(c echo.Context, err interface{}) error {
