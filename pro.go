@@ -126,6 +126,10 @@ func proSettingsHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, &response)
 }
 
+func SecureConstants() map[string]string {
+	return pro.SecureConstants()
+}
+
 func ProApi(e *echo.Echo) {
 	pro.ProApi(e)
 }

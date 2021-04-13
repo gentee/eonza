@@ -120,5 +120,9 @@ func ValidateOTP(user users.User, otp string) error {
 	return fmt.Errorf(`Unsupported`)
 }
 
+func SecureConstants() map[string]string {
+	return nil
+}
+
 func ProApi(e *echo.Echo) {
 }

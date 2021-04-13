@@ -10,7 +10,6 @@ import (
 	"encoding/gob"
 	"eonza/lib"
 	"eonza/script"
-	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -119,7 +118,6 @@ func LoadStorage(psw string) {
 	if storage.Trial.Mode < Licensed && storage.Trial.Count > TrialDays {
 		storage.Trial.Mode = TrialDisabled
 	}
-	fmt.Println(`Trial`, storage.Trial)
 	if cfg.playground {
 		SetActive(false)
 	}

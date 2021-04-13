@@ -79,6 +79,7 @@ func systemRun(rs *RunScript) error {
 		ClaimKey:     cfg.HTTP.JWTKey + sessionKey,
 		IsPro:        storage.Trial.Mode > TrialOff,
 		Constants:    storage.Settings.Constants,
+		SecureConsts: SecureConstants(),
 		Lang:         langCode,
 		TaskID:       lib.RndNum(),
 		ServerPort:   cfg.HTTP.Port,

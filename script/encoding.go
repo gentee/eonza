@@ -28,6 +28,7 @@ type Header struct {
 	IsPlayground bool
 	SourceCode   []byte
 	Constants    map[string]string
+	SecureConsts map[string]string
 	Lang         string
 	User         users.User
 	Role         users.Role
