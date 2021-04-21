@@ -362,9 +362,7 @@ func trialHandle(c echo.Context) error {
 		}
 	}
 	if mode != storage.Trial.Mode {
-		if err = SetActive(storage.Trial.Mode == TrialOn); err != nil {
-			return jsonError(c, err)
-		}
+		SetActive()
 		if err = SaveStorage(); err != nil {
 			return jsonError(c, err)
 		}

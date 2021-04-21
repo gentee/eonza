@@ -77,7 +77,7 @@ func systemRun(rs *RunScript) error {
 		User:         rs.User,
 		Role:         rs.Role,
 		ClaimKey:     cfg.HTTP.JWTKey + sessionKey,
-		IsPro:        storage.Trial.Mode > TrialOff,
+		IsPro:        IsProActive(), //storage.Trial.Mode > TrialOff,
 		Constants:    storage.Settings.Constants,
 		SecureConsts: SecureConstants(),
 		Lang:         langCode,
@@ -115,14 +115,14 @@ func systemRun(rs *RunScript) error {
 	if err != nil {
 		return err
 	}
-	if storage.Trial.Mode == TrialOn {
+	if !Licensed() && storage.Trial.Mode == TrialOn {
 		now := time.Now()
 		if storage.Trial.Last.Day() != now.Day() {
 			storage.Trial.Count++
 			storage.Trial.Last = now
 			if storage.Trial.Count > TrialDays {
 				storage.Trial.Mode = TrialDisabled
-				SetActive(false)
+				SetActive()
 			}
 			if err = SaveStorage(); err != nil {
 				return err

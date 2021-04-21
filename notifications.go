@@ -81,9 +81,10 @@ type Notifications struct {
 }
 
 var (
-	nfyData  = Notifications{ReadTime: make(map[uint32]time.Time)}
-	nfyMutex = &sync.Mutex{}
-	CRCTable = crc64.MakeTable(crc64.ISO)
+	nfyData      = Notifications{ReadTime: make(map[uint32]time.Time)}
+	nfyMutex     = &sync.Mutex{}
+	CRCTable     = crc64.MakeTable(crc64.ISO)
+	NextVerified = time.Now().Add(time.Hour * 6)
 )
 
 func LoadNotifications() {
@@ -365,6 +366,10 @@ func AutoCheckUpdate() {
 		update bool
 	)
 	now := time.Now()
+	if now.After(NextVerified) {
+		VerifyKey()
+		NextVerified = now.Add(time.Hour * 6)
+	}
 	switch storage.Settings.AutoUpdate {
 	case `daily`:
 		update = now.After(nfyData.Update.LastChecked.Add(time.Hour * 24))

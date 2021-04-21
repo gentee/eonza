@@ -25,7 +25,6 @@ const (
 	TrialDisabled = -1
 	TrialOff      = 0
 	TrialOn       = 1
-	Licensed      = 2
 )
 
 type Trial struct {
@@ -115,11 +114,11 @@ func LoadStorage(psw string) {
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
 	}
-	if storage.Trial.Mode < Licensed && storage.Trial.Count > TrialDays {
+	if storage.Trial.Mode != TrialDisabled && storage.Trial.Count > TrialDays {
 		storage.Trial.Mode = TrialDisabled
 	}
 	if cfg.playground {
-		SetActive(false)
+		storage.Trial.Mode = TrialDisabled
 	}
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)

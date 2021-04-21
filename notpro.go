@@ -22,6 +22,10 @@ var (
 	proMutex = &sync.Mutex{}
 )
 
+func Licensed() bool {
+	return false
+}
+
 func IsProActive() bool {
 	return false
 }
@@ -75,8 +79,7 @@ func ScriptAccess(name, ipath string, roleid uint32) error {
 	return nil
 }
 
-func SetActive(active bool) error {
-	return nil
+func SetActive() {
 }
 
 func SetUserPassword(id uint32, hash []byte) error {
@@ -98,6 +101,9 @@ func IncPassCounter(id uint32) error {
 		Users[id] = user
 	}
 	return nil
+}
+
+func VerifyKey() {
 }
 
 func proSettingsHandle(c echo.Context) error {

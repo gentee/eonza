@@ -26,6 +26,13 @@ const (
 	XAdminID    = 1
 )
 
+type LicenseInfo struct {
+	Status  int    `json:"status"`
+	License string `json:"license"`
+	Volume  int    `json:"volume"`
+	Expire  string `json:"expire"`
+}
+
 type ProSettings struct {
 	Twofa  bool   `json:"twofa"`
 	Master string `json:"master"`
