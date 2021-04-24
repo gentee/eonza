@@ -6,7 +6,7 @@ package script
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"golang.org/x/text/encoding/ianaindex"
@@ -21,7 +21,7 @@ func ConvertText(source, from, to string) (string, error) {
 			return ``, err
 		}
 		toutf8 := transform.NewReader(strings.NewReader(source), e.NewDecoder())
-		decBytes, _ := ioutil.ReadAll(toutf8)
+		decBytes, _ := io.ReadAll(toutf8)
 		source = string(decBytes)
 	}
 	if to != `utf-8` {

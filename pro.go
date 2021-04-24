@@ -16,21 +16,31 @@ import (
 )
 
 type ProOptions struct {
-	Active   bool              `json:"active"`
-	Settings users.ProSettings `json:"settings"`
-	Trial    Trial             `json:"trial"`
+	Active   bool                `json:"active"`
+	License  users.LicenseInfo   `json:"license"`
+	Settings users.ProSettings   `json:"settings"`
+	Storage  pro.StorageResponse `json:"storage"`
+	Trial    Trial               `json:"trial"`
 }
 
 const (
 	Pro = true
 )
 
+func Licensed() bool {
+	return pro.Licensed()
+}
+
 func IsProActive() bool {
 	return pro.Active
 }
 
-func SetActive(active bool) error {
-	return pro.SetActive(active)
+func SetActive() {
+	pro.SetActive()
+}
+
+func VerifyKey() {
+	pro.VerifyKey(false)
 }
 
 func CheckAdmin(c echo.Context) error {
@@ -87,6 +97,10 @@ func TwofaQR(id uint32) (string, error) {
 	return pro.TwofaQR(id)
 }
 
+func IsDecrypted() bool {
+	return pro.IsDecrypted()
+}
+
 func ValidateOTP(user users.User, otp string) error {
 	return pro.ValidateOTP(user, otp)
 }
@@ -101,10 +115,15 @@ func GetTitle() string {
 	return ret
 }
 
+func GetTrialMode() int {
+	return storage.Trial.Mode
+}
+
 func ProInit(psw []byte, counter uint32) {
 	pro.CallbackPassCounter = StoragePassCounter
 	pro.CallbackTitle = GetTitle
-	pro.LoadPro(storage.Trial.Mode > TrialOff, psw, counter, cfg.path)
+	pro.CallbackTrial = GetTrialMode
+	pro.LoadPro(psw, counter, cfg.path)
 }
 
 func proSettingsHandle(c echo.Context) error {
@@ -113,10 +132,17 @@ func proSettingsHandle(c echo.Context) error {
 	if err := CheckAdmin(c); err != nil {
 		return jsonError(c, err)
 	}
-	response.Active = pro.Active
+	response.Active = IsProActive()
+	response.License = pro.GetLicenseInfo()
 	response.Trial = storage.Trial
 	response.Settings = pro.Settings()
+	response.Storage = pro.PassStorage()
+
 	return c.JSON(http.StatusOK, &response)
+}
+
+func SecureConstants() map[string]string {
+	return pro.SecureConstants()
 }
 
 func ProApi(e *echo.Echo) {

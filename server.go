@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -323,7 +323,7 @@ func RunServer(options WebSettings) *echo.Echo {
 	}
 	go func() {
 		if IsScript {
-			e.Logger.SetOutput(ioutil.Discard)
+			e.Logger.SetOutput(io.Discard)
 		}
 		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil && !isShutdown {
 			if IsScript {
@@ -352,7 +352,7 @@ func pingHost(port int) bool {
 	)
 	resp, err := http.Get(fmt.Sprintf("http://%s:%d/ping", Localhost, port))
 	if err == nil {
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, _ = io.ReadAll(resp.Body)
 		resp.Body.Close()
 	}
 	return string(body) == Success

@@ -22,6 +22,10 @@ var (
 	proMutex = &sync.Mutex{}
 )
 
+func Licensed() bool {
+	return false
+}
+
 func IsProActive() bool {
 	return false
 }
@@ -75,8 +79,7 @@ func ScriptAccess(name, ipath string, roleid uint32) error {
 	return nil
 }
 
-func SetActive(active bool) error {
-	return nil
+func SetActive() {
 }
 
 func SetUserPassword(id uint32, hash []byte) error {
@@ -100,6 +103,9 @@ func IncPassCounter(id uint32) error {
 	return nil
 }
 
+func VerifyKey() {
+}
+
 func proSettingsHandle(c echo.Context) error {
 	return jsonError(c, fmt.Errorf(`Unsupported`))
 }
@@ -108,12 +114,20 @@ func IsTwofa() bool {
 	return false
 }
 
+func IsDecrypted() bool {
+	return true
+}
+
 func TwofaQR(id uint32) (string, error) {
 	return ``, fmt.Errorf(`Unsupported`)
 }
 
 func ValidateOTP(user users.User, otp string) error {
 	return fmt.Errorf(`Unsupported`)
+}
+
+func SecureConstants() map[string]string {
+	return nil
 }
 
 func ProApi(e *echo.Echo) {

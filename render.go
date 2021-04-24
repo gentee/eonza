@@ -41,6 +41,7 @@ type Render struct {
 	DefLists  []DefList
 	User      *users.User
 	Twofa     bool
+	AskMaster bool
 	//	ProSettings ProSettings
 	//	Port    int
 	/*	Params   map[string]string
@@ -197,6 +198,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		render.DefLists = defaultList
 		render.User = c.(*Auth).User
 		render.Twofa = IsTwofa()
+		render.AskMaster = IsProActive() && !IsDecrypted()
 		data = render
 	}
 

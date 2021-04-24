@@ -5,7 +5,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -32,7 +31,7 @@ func ClearAsset() (err error) {
 			if info.IsDir() {
 				return nil
 			}
-			data, err = ioutil.ReadFile(path)
+			data, err = os.ReadFile(path)
 			assets[filepath.ToSlash(path[len(assetsPath)+1:])] = data
 			return err
 		})

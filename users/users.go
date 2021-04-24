@@ -26,8 +26,16 @@ const (
 	XAdminID    = 1
 )
 
+type LicenseInfo struct {
+	Status  int    `json:"status"`
+	License string `json:"license"`
+	Volume  int    `json:"volume"`
+	Expire  string `json:"expire"`
+}
+
 type ProSettings struct {
-	Twofa bool `json:"twofa"`
+	Twofa  bool   `json:"twofa"`
+	Master string `json:"master"`
 }
 
 type Role struct {
@@ -127,7 +135,7 @@ func NewUser(nickname string) (uint32, error) {
 	}
 	user.PublicKey = public
 	user.ID = crc32.ChecksumIEEE(private)
-	if err = ioutil.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
+	if err = os.WriteFile(filepath.Join(cfg.Users.Dir, user.Nickname+`.key`),
 		[]byte(hex.EncodeToString(private)), 0777 os.ModePerm); err != nil {
 		return 0, err
 	}

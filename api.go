@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -65,6 +65,7 @@ type TasksResponse struct {
 type Feedback struct {
 	Like     int    `json:"like"`
 	Feedback string `json:"feedback"`
+	Email    string `json:"email"`
 }
 
 func jsonError(c echo.Context, err interface{}) error {
@@ -361,9 +362,7 @@ func trialHandle(c echo.Context) error {
 		}
 	}
 	if mode != storage.Trial.Mode {
-		if err = SetActive(storage.Trial.Mode == TrialOn); err != nil {
-			return jsonError(c, err)
-		}
+		SetActive()
 		if err = SaveStorage(); err != nil {
 			return jsonError(c, err)
 		}
@@ -387,7 +386,7 @@ func feedbackHandle(c echo.Context) error {
 		resp, err = http.Post(appInfo.Homepage+"feedback",
 			"application/json", bytes.NewBuffer(jsonValue))
 		if err == nil {
-			if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			if body, err = io.ReadAll(resp.Body); err == nil {
 				var answer Response
 				if err = json.Unmarshal(body, &answer); err == nil {
 					if len(answer.Error) > 0 {

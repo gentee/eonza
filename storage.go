@@ -10,7 +10,7 @@ import (
 	"encoding/gob"
 	"eonza/lib"
 	"eonza/script"
-	"io/ioutil"
+	"os"
 	"sync"
 	"time"
 
@@ -25,7 +25,6 @@ const (
 	TrialDisabled = -1
 	TrialOff      = 0
 	TrialOn       = 1
-	Licensed      = 2
 )
 
 type Trial struct {
@@ -95,11 +94,11 @@ func SaveStorage() error {
 	if out, err = lib.GzipCompress(data.Bytes()); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(lib.ChangeExt(cfg.path, StorageExt), out, 0777 /*os.ModePerm*/)
+	return os.WriteFile(lib.ChangeExt(cfg.path, StorageExt), out, 0777 /*os.ModePerm*/)
 }
 
 func LoadStorage(psw string) {
-	data, err := ioutil.ReadFile(lib.ChangeExt(cfg.path, StorageExt))
+	data, err := os.ReadFile(lib.ChangeExt(cfg.path, StorageExt))
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -115,11 +114,11 @@ func LoadStorage(psw string) {
 	if err := zr.Close(); err != nil {
 		golog.Fatal(err)
 	}
-	if storage.Trial.Mode < Licensed && storage.Trial.Count > TrialDays {
+	if storage.Trial.Mode != TrialDisabled && storage.Trial.Count > TrialDays {
 		storage.Trial.Mode = TrialDisabled
 	}
 	if cfg.playground {
-		SetActive(false)
+		storage.Trial.Mode = TrialDisabled
 	}
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)

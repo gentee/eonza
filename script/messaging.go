@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -136,7 +136,7 @@ func RunScript(script, data string, silent int64) error {
 		resp, err = http.Post(fmt.Sprintf("http://localhost:%d/api/runscript",
 			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
 		if err == nil {
-			if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			if body, err = io.ReadAll(resp.Body); err == nil {
 				var answer Response
 				if err = json.Unmarshal(body, &answer); err == nil {
 					if !answer.Success && len(answer.Error) > 0 {

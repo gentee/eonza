@@ -585,6 +585,14 @@ func replace(values map[string]string, input []rune, stack *[]string,
 					if glob != nil {
 						value, ok = (*glob)[key[1:]]
 					}
+				} else if key[0] == '@' && scriptTask.Header.SecureConsts != nil {
+					value, ok = scriptTask.Header.SecureConsts[key[1:]]
+					if ok {
+						result = append(result, []rune(value)...)
+						clearName()
+						isName = false
+						continue
+					}
 				} else {
 					if values != nil {
 						value, ok = values[key]

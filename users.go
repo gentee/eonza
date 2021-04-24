@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	es "eonza/script"
@@ -54,7 +54,7 @@ func LoadUsersSettings() error {
 			user UserSettings
 		)
 		user.Lang = appInfo.Lang
-		data, err = ioutil.ReadFile(filepath.Join(cfg.Users.Dir, item.Nickname+UserExt))
+		data, err = os.ReadFile(filepath.Join(cfg.Users.Dir, item.Nickname+UserExt))
 		if err == nil {
 			if err = yaml.Unmarshal(data, &user); err != nil {
 				return err
@@ -153,7 +153,7 @@ func SaveUser(id uint32) error {
 	if !ok {
 		return fmt.Errorf(`Access denied`)
 	}
-	return ioutil.WriteFile(filepath.Join(cfg.Users.Dir,
+	return os.WriteFile(filepath.Join(cfg.Users.Dir,
 		user.Nickname+UserExt), data, 0777 /*os.ModePerm*/)
 }
 

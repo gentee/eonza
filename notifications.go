@@ -12,7 +12,7 @@ import (
 	"eonza/users"
 	"fmt"
 	"hash/crc64"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -81,9 +81,10 @@ type Notifications struct {
 }
 
 var (
-	nfyData  = Notifications{ReadTime: make(map[uint32]time.Time)}
-	nfyMutex = &sync.Mutex{}
-	CRCTable = crc64.MakeTable(crc64.ISO)
+	nfyData      = Notifications{ReadTime: make(map[uint32]time.Time)}
+	nfyMutex     = &sync.Mutex{}
+	CRCTable     = crc64.MakeTable(crc64.ISO)
+	NextVerified = time.Now().Add(time.Hour * 6)
 )
 
 func LoadNotifications() {
@@ -94,7 +95,7 @@ func LoadNotifications() {
 		}
 		golog.Fatal(err)
 	}
-	data, err := ioutil.ReadFile(nfyfile)
+	data, err := os.ReadFile(nfyfile)
 	if err != nil {
 		golog.Fatal(err)
 	}
@@ -149,7 +150,7 @@ func saveNotifications(update bool) error {
 	if err = enc.Encode(nfyData); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(lib.ChangeExt(cfg.path, NfyExt), data.Bytes(),
+	if err = os.WriteFile(lib.ChangeExt(cfg.path, NfyExt), data.Bytes(),
 		0777 /*os.ModePerm*/); err != nil {
 		return err
 	}
@@ -342,7 +343,7 @@ func CheckUpdates() error {
 	if err != nil {
 		return err
 	}
-	if body, err := ioutil.ReadAll(resp.Body); err == nil {
+	if body, err := io.ReadAll(resp.Body); err == nil {
 		var upd VerUpdate
 		if err = json.Unmarshal(body, &upd); err == nil {
 			if len(upd.Version) > 0 && upd.Version != Version {
@@ -365,6 +366,10 @@ func AutoCheckUpdate() {
 		update bool
 	)
 	now := time.Now()
+	if now.After(NextVerified) {
+		VerifyKey()
+		NextVerified = now.Add(time.Hour * 6)
+	}
 	switch storage.Settings.AutoUpdate {
 	case `daily`:
 		update = now.After(nfyData.Update.LastChecked.Add(time.Hour * 24))
