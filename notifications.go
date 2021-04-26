@@ -317,7 +317,7 @@ func removeNfyHandle(c echo.Context) error {
 }
 
 func GetNewVersion(lang string) (ret string) {
-	if len(nfyData.Update.Version) > 0 {
+	if len(nfyData.Update.Version) > 0 && nfyData.Update.Version != Version {
 		var (
 			lid  int
 			pref string
@@ -346,7 +346,7 @@ func CheckUpdates() error {
 	if body, err := io.ReadAll(resp.Body); err == nil {
 		var upd VerUpdate
 		if err = json.Unmarshal(body, &upd); err == nil {
-			if len(upd.Version) > 0 && upd.Version != Version {
+			if len(upd.Version) > 0 && upd.Version != nfyData.Update.Version {
 				nfyData.Update.Version = upd.Version
 				nfyData.Update.Changelog = upd.Changelog
 				nfyData.Update.Downloads = upd.Downloads
