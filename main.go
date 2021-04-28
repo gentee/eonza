@@ -65,10 +65,7 @@ func main() {
 		if err = LoadCustomAsset(scriptTask.Header.AssetsDir, scriptTask.Header.HTTP.Theme); err != nil {
 			golog.Fatal(err)
 		}
-		e = RunServer(WebSettings{
-			Port: scriptTask.Header.HTTP.Port,
-			Open: scriptTask.Header.HTTP.Open,
-		})
+		e = RunServer(*scriptTask.Header.HTTP)
 		go func() {
 			start := time.Now()
 			settings := initTask()
@@ -108,10 +105,7 @@ func main() {
 		InitScripts()
 		CreateSysTray()
 		RunCron()
-		e = RunServer(WebSettings{
-			Port: cfg.HTTP.Port,
-			Open: cfg.HTTP.Open,
-		})
+		e = RunServer(cfg.HTTP)
 	}
 	signal.Notify(stopchan, os.Kill, os.Interrupt, syscall.SIGTERM)
 	<-stopchan

@@ -20,8 +20,6 @@ import (
 	"sync"
 	"time"
 
-	es "eonza/script"
-
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
@@ -240,33 +238,6 @@ func nfyHandle(c echo.Context) error {
 		saveNotifications(false)
 	}
 	return c.JSON(http.StatusOK, resp)
-}
-
-func notificationHandle(c echo.Context) error {
-	var (
-		postNfy es.PostNfy
-		err     error
-	)
-	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}
-	if err = c.Bind(&postNfy); err != nil {
-		return jsonError(c, err)
-	}
-	nfy := Notification{
-		Text:   postNfy.Text,
-		UserID: users.XRootID,
-		RoleID: users.XAdminID,
-		Script: postNfy.Script,
-	}
-	if ptask, ok := tasks[postNfy.TaskID]; ok {
-		nfy.UserID = ptask.UserID
-		nfy.RoleID = ptask.RoleID
-	}
-	if err = NewNotification(&nfy); err != nil {
-		return jsonError(c, err)
-	}
-	return jsonSuccess(c)
 }
 
 func removeNfyHandle(c echo.Context) error {

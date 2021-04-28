@@ -39,6 +39,10 @@ func systemRun(rs *RunScript) error {
 	if err != nil {
 		return err
 	}
+	localPort, err := getPort()
+	if err != nil {
+		return err
+	}
 	if rs.Role.ID >= users.ResRoleID {
 		utemp, _ := GetUser(users.XRootID)
 		langCode = GetLangCode(&utemp)
@@ -82,13 +86,16 @@ func systemRun(rs *RunScript) error {
 		SecureConsts: SecureConstants(),
 		Lang:         langCode,
 		TaskID:       lib.RndNum(),
-		ServerPort:   cfg.HTTP.Port,
+		ServerPort:   cfg.HTTP.LocalPort,
 		HTTP: &lib.HTTPConfig{
-			Host:   cfg.HTTP.Host,
-			Port:   port,
-			Open:   rs.Open,
-			Theme:  cfg.HTTP.Theme,
-			Access: cfg.HTTP.Access,
+			Host:      cfg.HTTP.Host,
+			Port:      port,
+			LocalPort: localPort,
+			Open:      rs.Open,
+			Theme:     cfg.HTTP.Theme,
+			Access:    cfg.HTTP.Access,
+			Cert:      cfg.HTTP.Cert,
+			Priv:      cfg.HTTP.Priv,
 		},
 	}
 	if header.IsPlayground {

@@ -131,8 +131,21 @@ func LoadConfig() {
 	if cfg.HTTP.Port == 0 {
 		cfg.HTTP.Port = DefPort
 	}
+	if cfg.HTTP.LocalPort == 0 {
+		if cfg.HTTP.LocalPort, err = getPort(); err != nil {
+			golog.Fatal(err)
+		}
+	}
 	if len(cfg.HTTP.Theme) == 0 {
 		cfg.HTTP.Theme = DefTheme
+	}
+	if cfg.HTTP.Host != Localhost {
+		if len(cfg.HTTP.Cert) == 0 {
+			golog.Fatal(`Specify the path to the certificate pem file in config file`)
+		}
+		if len(cfg.HTTP.Priv) == 0 {
+			golog.Fatal(`Specify the path to the private key pem file in config file`)
+		}
 	}
 	switch cfg.HTTP.Access {
 	case AccessHost:

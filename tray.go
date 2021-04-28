@@ -86,7 +86,7 @@ func TrayReady() {
 			case menuItem = <-chanFav:
 				_, name := menuItem.Name()
 				if len(name) > 0 {
-					_, err := request(fmt.Sprintf("%d/api/run?name=%s", cfg.HTTP.Port, name))
+					_, err := lib.LocalGet(cfg.HTTP.Port, fmt.Sprintf("api/run?name=%s", name))
 					if err != nil {
 						golog.Error(err)
 					}

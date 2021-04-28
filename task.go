@@ -5,7 +5,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"eonza/lib"
 	"eonza/script"
@@ -193,6 +192,7 @@ func initTask() script.Settings {
 		Name:      scriptTask.Header.Name,
 		StartTime: time.Now().Unix(),
 		Port:      scriptTask.Header.HTTP.Port,
+		LocalPort: scriptTask.Header.HTTP.LocalPort,
 	}
 
 	createFile := func(ext string) *os.File {
@@ -375,6 +375,7 @@ func initTask() script.Settings {
 	(*glob)[`os`] = runtime.GOOS
 	(*glob)[`isconsole`] = fmt.Sprint(scriptTask.Header.Console)
 	(*glob)[`port`] = fmt.Sprint(scriptTask.Header.HTTP.Port)
+	(*glob)[`localport`] = fmt.Sprint(scriptTask.Header.HTTP.LocalPort)
 	(*glob)[`n`] = "\n"
 	(*glob)[`r`] = "\r"
 	(*glob)[`t`] = "\t"
@@ -434,20 +435,14 @@ func infoHandle(c echo.Context) error {
 
 func sendCmdStatus(status int, timeStamp int64, message string) {
 	taskTrace(timeStamp, status, message)
-	jsonValue, err := json.Marshal(TaskStatus{
-		TaskID:  task.ID,
-		Status:  status,
-		Message: message,
-		Time:    timeStamp,
-	})
-	if err == nil {
-		resp, err := http.Post(fmt.Sprintf("http://%s:%d/api/taskstatus", Localhost,
-			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
-		if err != nil {
-			golog.Error(err)
-		} else {
-			resp.Body.Close()
-		}
+	if _, err := lib.LocalPost(scriptTask.Header.ServerPort, `api/taskstatus`,
+		TaskStatus{
+			TaskID:  task.ID,
+			Status:  status,
+			Message: message,
+			Time:    timeStamp,
+		}); err != nil {
+		golog.Error(err)
 	}
 	var finish string
 	task.Status = status
@@ -472,12 +467,6 @@ func sysHandle(c echo.Context) error {
 	if uint32(id) != task.ID {
 		return jsonError(c, fmt.Errorf(`wrong task id`))
 	}
-	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}
-	/*	if err := taskAccess(c); err != nil {
-		return jsonError(c, err)
-	}*/
 	if cmd == gentee.SysTerminate {
 		go func() {
 			setStatus(TaskTerminated)
