@@ -68,12 +68,16 @@ func systemRun(rs *RunScript) error {
 			title = val
 		}
 	}
+	var cdn string
+	if cfg.HTTP.Host != Localhost {
+		cdn = fmt.Sprintf(`https://%s:%d`, cfg.HTTP.Host, cfg.HTTP.Port)
+	}
 	header := script.Header{
 		Name:         rs.Name,
 		Title:        title,
 		AssetsDir:    cfg.AssetsDir,
 		LogDir:       cfg.Log.Dir,
-		CDN:          cfg.CDN,
+		CDN:          cdn,
 		Data:         rs.Data,
 		Console:      rs.Console,
 		IsPlayground: cfg.playground,
