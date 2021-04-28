@@ -331,7 +331,7 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 				if IsScript {
 					setStatus(TaskFailed, err)
 				}
-				if cfg.HTTP.Access != AccessHost && pingHost(options.Port) {
+				if pingHost(options.Port) {
 					lib.Open(fmt.Sprintf("http://%s:%d", Localhost, options.Port))
 				}
 				golog.Fatal(err)

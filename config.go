@@ -49,12 +49,6 @@ type Config struct {
 	playground bool
 }
 
-const (
-	AccessLocalhost = Localhost
-	AccessPrivate   = `private`
-	AccessHost      = `host`
-)
-
 var (
 	cfg = Config{
 		Version: GetVersion(),
@@ -68,7 +62,6 @@ var (
 			Port:   DefPort,
 			Open:   true,
 			Theme:  `default`,
-			Access: AccessLocalhost,
 			JWTKey: lib.UniqueName(12),
 		},
 	}
@@ -143,12 +136,6 @@ func LoadConfig() {
 		if len(cfg.HTTP.Priv) == 0 {
 			golog.Fatal(`Specify the path to the private key pem file in config file`)
 		}
-	}
-	switch cfg.HTTP.Access {
-	case AccessHost:
-	case AccessPrivate:
-	default:
-		cfg.HTTP.Access = AccessLocalhost
 	}
 	cfg.develop = cfg.Mode == ModeDevelop
 	cfg.playground = cfg.Mode == ModePlayground

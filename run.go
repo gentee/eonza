@@ -97,7 +97,6 @@ func systemRun(rs *RunScript) error {
 			LocalPort: localPort,
 			Open:      rs.Open,
 			Theme:     cfg.HTTP.Theme,
-			Access:    cfg.HTTP.Access,
 			Cert:      cfg.HTTP.Cert,
 			Priv:      cfg.HTTP.Priv,
 		},

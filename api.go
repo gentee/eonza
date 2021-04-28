@@ -158,9 +158,6 @@ func sysTaskHandle(c echo.Context) error {
 	if taskid, err = strconv.ParseUint(c.QueryParam(`taskid`), 10, 32); err != nil {
 		return jsonError(c, err)
 	}
-	/*if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}*/
 	user := c.(*Auth).User
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
