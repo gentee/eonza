@@ -32,7 +32,6 @@ type Render struct {
 	Lang        string
 	Login       bool
 	Localhost   bool
-	PortShift   int64
 	Favs        []Fav
 	Nfy         *NfyResponse
 	//	Update      VerUpdate
@@ -188,7 +187,6 @@ func RenderPage(c echo.Context, url string) (string, error) {
 
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
-		render.PortShift = cfg.PortShift
 		render.Favs = userSettings[user.ID].Favs
 		render.Nfy = NfyList(false, user.ID, user.RoleID)
 		//		render.Update = nfyData.Update
