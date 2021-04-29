@@ -85,23 +85,10 @@ func SaveTrace(task *Task) (err error) {
 }
 
 func RemoveTask(id uint32) {
+	delete(tasks, id)
 	for _, ext := range append(TaskExt, `zip`) {
 		os.Remove(filepath.Join(cfg.Log.Dir, fmt.Sprintf("%08x.%s", id, ext)))
 	}
-	/*	if err := filepath.Walk(cfg.Log.Dir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				return nil
-			}
-			if strings.HasPrefix(info.Name(), pref) {
-				os.Remove(path)
-			}
-			return nil
-		}); err != nil {
-			golog.Error(err)
-		}*/
 }
 
 func GetTaskName(id uint32) (ret string) {
@@ -126,7 +113,6 @@ func ListTasks() []*Task {
 	})
 	if len(ret) > TasksLimit {
 		for i := TasksLimit; i < len(ret); i++ {
-			delete(tasks, ret[i].ID)
 			RemoveTask(ret[i].ID)
 		}
 		ret = ret[:TasksLimit]

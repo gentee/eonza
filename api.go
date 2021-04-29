@@ -19,6 +19,7 @@ import (
 	"eonza/users"
 
 	"github.com/gentee/gentee"
+	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
 
@@ -241,8 +242,10 @@ func removeTaskHandle(c echo.Context) error {
 			return jsonError(c, fmt.Errorf(`Access denied`))
 		}
 	}
-	delete(tasks, uint32(idTask))
 	RemoveTask(uint32(idTask))
+	if errSave := SaveTasks(); errSave != nil {
+		golog.Error(errSave)
+	}
 	return tasksHandle(c)
 }
 
