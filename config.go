@@ -7,6 +7,7 @@ package main
 import (
 	"eonza/lib"
 	"eonza/users"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -130,11 +131,17 @@ func LoadConfig() {
 		cfg.HTTP.Theme = DefTheme
 	}
 	if cfg.HTTP.Host != Localhost {
-		if len(cfg.HTTP.Cert) == 0 {
+		if cfg.HTTP.Cert == nil {
 			golog.Fatal(`Specify the path to the certificate pem file in config file`)
 		}
-		if len(cfg.HTTP.Priv) == 0 {
+		if cfg.HTTP.Priv == nil {
 			golog.Fatal(`Specify the path to the private key pem file in config file`)
+		}
+		if cfg.HTTP.Cert, err = os.ReadFile(fmt.Sprint(cfg.HTTP.Cert)); err != nil {
+			golog.Fatal(err)
+		}
+		if cfg.HTTP.Priv, err = os.ReadFile(fmt.Sprint(cfg.HTTP.Priv)); err != nil {
+			golog.Fatal(err)
 		}
 	}
 	cfg.develop = cfg.Mode == ModeDevelop

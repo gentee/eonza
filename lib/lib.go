@@ -26,14 +26,14 @@ import (
 
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
-	Host      string `yaml:"host"`      // if empty, then localhost
-	Port      int    `yaml:"port"`      // if empty, then DefPort
-	LocalPort int    `yaml:"localport"` // if empty, then define automatically
-	Open      bool   `yaml:"open"`      // if true then host is opened
-	Theme     string `yaml:"theme"`     // theme of web interface. if it is empty - DefTheme
-	JWTKey    string `yaml:"jwtkey"`    // Secret key for JWT token
-	Cert      string `yaml:"cert"`      // cert pem file
-	Priv      string `yaml:"priv"`      // private key pem file
+	Host      string      `yaml:"host"`      // if empty, then localhost
+	Port      int         `yaml:"port"`      // if empty, then DefPort
+	LocalPort int         `yaml:"localport"` // if empty, then define automatically
+	Open      bool        `yaml:"open"`      // if true then host is opened
+	Theme     string      `yaml:"theme"`     // theme of web interface. if it is empty - DefTheme
+	JWTKey    string      `yaml:"jwtkey"`    // Secret key for JWT token
+	Cert      interface{} `yaml:"cert"`      // cert pem file
+	Priv      interface{} `yaml:"priv"`      // private key pem file
 }
 
 // PlaygroundConfig stores the config of playgroundmode
