@@ -64,6 +64,8 @@ var (
 			Open:   true,
 			Theme:  `default`,
 			JWTKey: lib.UniqueName(12),
+			Cert:   ``,
+			Priv:   ``,
 		},
 	}
 	firstRun bool
