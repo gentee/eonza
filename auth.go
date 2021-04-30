@@ -87,7 +87,6 @@ func accessIP(curIP, originalIP string) bool {
 func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) (err error) {
 		var (
-			access       string
 			isAccess, ok bool
 		)
 		ip := c.RealIP()
@@ -115,20 +114,11 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 			host = host[:offPort]
 		}
 		if IsScript {
-			access = scriptTask.Header.HTTP.Access
+			isAccess = host == scriptTask.Header.HTTP.Host && accessIP(ip, scriptTask.Header.IP)
 		} else {
-			access = cfg.HTTP.Access
+			isAccess = host == cfg.HTTP.Host
 		}
-		if access == AccessPrivate {
-			isAccess = lib.IsPrivate(host, ip)
-		} else if access == AccessHost {
-			if IsScript {
-				isAccess = (host == scriptTask.Header.HTTP.Host && accessIP(ip, scriptTask.Header.IP)) ||
-					host == Localhost
-			} else {
-				isAccess = host == cfg.HTTP.Host || host == Localhost
-			}
-		} else {
+		if isAccess && host == Localhost {
 			isAccess = lib.IsLocalhost(host, ip)
 		}
 		if !isAccess {
@@ -208,8 +198,8 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 				if !valid {
 					if url == `/` {
 						c.Request().URL.Path = `login`
-					} else if url != `/api/login` && url != `/api/taskstatus` && url != `/api/sys` &&
-						url != `/api/notification` && url != `/api/runscript` && url != `/api/event` &&
+					} else if url != `/api/login` && /*url != `/api/taskstatus` &&*/ url != `/api/sys` &&
+						/*url != `/api/notification` && url != `/api/runscript` && url != `/api/event` &&*/
 						url != `/api/randid` {
 						return AccessDenied(http.StatusUnauthorized)
 					}

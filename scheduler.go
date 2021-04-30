@@ -57,10 +57,10 @@ type Event struct {
 }
 
 type EventData struct {
-	Name string `json:"name"`
-	Data string `json:"data"`
-	Rand string `json:"rand"`
-	Sign string `json:"sign"`
+	Name string `json:"name" form:"name"`
+	Data string `json:"data" form:"data"`
+	Rand string `json:"rand" form:"rand"`
+	Sign string `json:"sign" form:"sign"`
 }
 
 type EventsResponse struct {

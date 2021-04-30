@@ -5,11 +5,9 @@
 package script
 
 import (
-	"bytes"
 	"encoding/json"
+	"eonza/lib"
 	"fmt"
-	"io"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -99,53 +97,33 @@ func SendEmail(smtpserv *core.Obj, emailobj *core.Obj) error {
 	return err
 }
 
-func SendNotification(msg string) error {
-	jsonValue, err := json.Marshal(PostNfy{
+func SendNotification(msg string) (err error) {
+	if _, err = lib.LocalPost(scriptTask.Header.ServerPort, `api/notification`, PostNfy{
 		TaskID: scriptTask.Header.TaskID,
 		Text:   msg,
 		Script: scriptTask.Header.Name,
-	})
-	if err == nil {
-		resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/notification",
-			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
-		if err != nil {
-			golog.Error(err)
-		} else {
-			resp.Body.Close()
-		}
-	} else {
-		return err
+	}); err != nil {
+		golog.Error(err)
 	}
-	return nil
+	return
 }
 
-func RunScript(script, data string, silent int64) error {
-	jsonValue, err := json.Marshal(PostScript{
+func RunScript(script, data string, silent int64) (err error) {
+	var body []byte
+	if body, err = lib.LocalPost(scriptTask.Header.ServerPort, `api/runscript`, PostScript{
 		TaskID: scriptTask.Header.TaskID,
 		Script: script,
 		Data:   data,
 		UserID: scriptTask.Header.User.ID,
 		RoleID: scriptTask.Header.Role.ID,
 		Silent: silent != 0,
-	})
-	var (
-		resp *http.Response
-		body []byte
-	)
-	if err == nil {
-		resp, err = http.Post(fmt.Sprintf("http://localhost:%d/api/runscript",
-			scriptTask.Header.ServerPort), "application/json", bytes.NewBuffer(jsonValue))
-		if err == nil {
-			if body, err = io.ReadAll(resp.Body); err == nil {
-				var answer Response
-				if err = json.Unmarshal(body, &answer); err == nil {
-					if !answer.Success && len(answer.Error) > 0 {
-						err = fmt.Errorf(answer.Error)
-					}
-				}
+	}); err == nil {
+		var answer Response
+		if err = json.Unmarshal(body, &answer); err == nil {
+			if !answer.Success && len(answer.Error) > 0 {
+				err = fmt.Errorf(answer.Error)
 			}
-			resp.Body.Close()
 		}
 	}
-	return err
+	return
 }

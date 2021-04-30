@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"eonza/lib"
@@ -25,12 +26,6 @@ const (
 	XForwardedFor = "X-Forwarded-For"
 	XRealIP       = "X-Real-IP"
 )
-
-// WebSettings contains web-server parameters
-type WebSettings struct {
-	Port int
-	Open bool // if true then webpage is opened
-}
 
 type Response struct {
 	Success bool `json:"success"`
@@ -247,7 +242,11 @@ func markdownHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, DataResponse{Data: ret})
 }
 
-func RunServer(options WebSettings) *echo.Echo {
+func allowOrigin(origin string) (bool, error) {
+	return strings.HasPrefix(origin, `https://`+cfg.HTTP.Host), nil
+}
+
+func RunServer(options lib.HTTPConfig) *echo.Echo {
 	InitLang()
 	InitTemplates()
 	e := echo.New()
@@ -256,11 +255,12 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
-	/* e.Use(md.CORSWithConfig(md.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet},
-	}))}*/
-
+	if !IsScript && options.Host != Localhost {
+		e.Use(md.CORSWithConfig(md.CORSConfig{
+			AllowOriginFunc: allowOrigin,
+			AllowMethods:    []string{http.MethodGet},
+		}))
+	}
 	//e.HTTPErrorHandler = customHTTPErrorHandler
 
 	e.GET("/", indexHandle)
@@ -273,9 +273,9 @@ func RunServer(options WebSettings) *echo.Echo {
 	e.GET("/favicon.ico", fileHandle)
 	e.POST("/tools/md", markdownHandle)
 	if IsScript {
-		e.GET("/ws", wsTaskHandle)    // +
-		e.GET("/sys", sysHandle)      //
-		e.GET("/info", infoHandle)    // +
+		e.GET("/ws", wsTaskHandle) // +
+		e.GET("/sys", sysHandle)   //
+		//		e.GET("/info", infoHandle)    // +
 		e.POST("/stdin", stdinHandle) // +
 		e.POST("/form", formHandle)   // +
 	} else {
@@ -306,33 +306,43 @@ func RunServer(options WebSettings) *echo.Echo {
 		e.GET("/api/trial/:id", trialHandle)             // +
 		e.POST("/api/install", installHandle)            // +
 		e.POST("/api/login", loginHandle)
-		e.POST("/api/script", saveScriptHandle)         // +
-		e.POST("/api/delete", deleteScriptHandle)       // +
-		e.POST("/api/taskstatus", taskStatusHandle)     //
-		e.POST("/api/import", importHandle)             // +
-		e.POST("/api/notification", notificationHandle) //
-		e.POST("/api/runscript", runScriptHandle)       //
-		e.POST("/api/settings", saveSettingsHandle)     // +
-		e.POST("/api/setpsw", setPasswordHandle)        //
-		e.POST("/api/timer", saveTimerHandle)           // +
-		e.POST("/api/saveevent", saveEventHandle)       // +
-		e.POST("/api/event", eventHandle)               // +
+		e.POST("/api/script", saveScriptHandle)   // +
+		e.POST("/api/delete", deleteScriptHandle) // +
+		//		e.POST("/api/taskstatus", taskStatusHandle)     //
+		e.POST("/api/import", importHandle) // +
+		// e.POST("/api/notification", notificationHandle) //
+		//e.POST("/api/runscript", runScriptHandle)   //
+		e.POST("/api/settings", saveSettingsHandle) // +
+		e.POST("/api/setpsw", setPasswordHandle)    //
+		e.POST("/api/timer", saveTimerHandle)       // +
+		e.POST("/api/saveevent", saveEventHandle)   // +
+		e.POST("/api/event", eventHandle)           // +
 		e.POST("/api/favs", saveFavsHandle)
 		e.POST("/api/feedback", feedbackHandle) // +
 		ProApi(e)
 	}
+	RunLocalServer(options.LocalPort)
 	go func() {
 		if IsScript {
 			e.Logger.SetOutput(io.Discard)
 		}
-		if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil && !isShutdown {
-			if IsScript {
-				setStatus(TaskFailed, err)
+		if options.Host == Localhost {
+			if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil && !isShutdown {
+				if IsScript {
+					setStatus(TaskFailed, err)
+				}
+				if pingHost(options.Port) {
+					lib.Open(fmt.Sprintf("http://%s:%d", Localhost, options.Port))
+				}
+				golog.Fatal(err)
 			}
-			if cfg.HTTP.Access != AccessHost && pingHost(options.Port) {
-				lib.Open(fmt.Sprintf("http://%s:%d", Localhost, options.Port))
+		} else {
+			if err := e.StartTLS(fmt.Sprintf(":%d", options.Port), options.Cert, options.Priv); err != nil && !isShutdown {
+				if IsScript {
+					setStatus(TaskFailed, err)
+				}
+				golog.Fatal(err)
 			}
-			golog.Fatal(err)
 		}
 	}()
 	if options.Open {
@@ -347,13 +357,6 @@ func RunServer(options WebSettings) *echo.Echo {
 }
 
 func pingHost(port int) bool {
-	var (
-		body []byte
-	)
-	resp, err := http.Get(fmt.Sprintf("http://%s:%d/ping", Localhost, port))
-	if err == nil {
-		body, _ = io.ReadAll(resp.Body)
-		resp.Body.Close()
-	}
+	body, _ := lib.LocalGet(port, `ping`)
 	return string(body) == Success
 }

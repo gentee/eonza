@@ -20,8 +20,6 @@ import (
 	"sync"
 	"time"
 
-	es "eonza/script"
-
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
@@ -242,33 +240,6 @@ func nfyHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func notificationHandle(c echo.Context) error {
-	var (
-		postNfy es.PostNfy
-		err     error
-	)
-	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}
-	if err = c.Bind(&postNfy); err != nil {
-		return jsonError(c, err)
-	}
-	nfy := Notification{
-		Text:   postNfy.Text,
-		UserID: users.XRootID,
-		RoleID: users.XAdminID,
-		Script: postNfy.Script,
-	}
-	if ptask, ok := tasks[postNfy.TaskID]; ok {
-		nfy.UserID = ptask.UserID
-		nfy.RoleID = ptask.RoleID
-	}
-	if err = NewNotification(&nfy); err != nil {
-		return jsonError(c, err)
-	}
-	return jsonSuccess(c)
-}
-
 func removeNfyHandle(c echo.Context) error {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	isAccess := func(item *Notification) bool {
@@ -317,7 +288,7 @@ func removeNfyHandle(c echo.Context) error {
 }
 
 func GetNewVersion(lang string) (ret string) {
-	if len(nfyData.Update.Version) > 0 {
+	if len(nfyData.Update.Version) > 0 && nfyData.Update.Version != Version {
 		var (
 			lid  int
 			pref string
@@ -346,7 +317,7 @@ func CheckUpdates() error {
 	if body, err := io.ReadAll(resp.Body); err == nil {
 		var upd VerUpdate
 		if err = json.Unmarshal(body, &upd); err == nil {
-			if len(upd.Version) > 0 && upd.Version != Version {
+			if len(upd.Version) > 0 && upd.Version != nfyData.Update.Version {
 				nfyData.Update.Version = upd.Version
 				nfyData.Update.Changelog = upd.Changelog
 				nfyData.Update.Downloads = upd.Downloads

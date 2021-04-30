@@ -6,10 +6,13 @@ package lib
 
 import (
 	"archive/zip"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,12 +26,14 @@ import (
 
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
-	Host   string `yaml:"host"`   // if empty, then localhost
-	Port   int    `yaml:"port"`   // if empty, then DefPort
-	Open   bool   `yaml:"open"`   // if true then host is opened
-	Theme  string `yaml:"theme"`  // theme of web interface. if it is empty - DefTheme
-	Access string `yaml:"access"` // Access level - localhost, private - DefAccess == localhost
-	JWTKey string `yaml:"jwtkey"` // Secret key for JWT token
+	Host      string      `yaml:"host"`      // if empty, then localhost
+	Port      int         `yaml:"port"`      // if empty, then DefPort
+	LocalPort int         `yaml:"localport"` // if empty, then define automatically
+	Open      bool        `yaml:"open"`      // if true then host is opened
+	Theme     string      `yaml:"theme"`     // theme of web interface. if it is empty - DefTheme
+	JWTKey    string      `yaml:"jwtkey"`    // Secret key for JWT token
+	Cert      interface{} `yaml:"cert"`      // cert pem file
+	Priv      interface{} `yaml:"priv"`      // private key pem file
 }
 
 // PlaygroundConfig stores the config of playgroundmode
@@ -226,4 +231,31 @@ func IsPrivate(host, ipaddr string) bool {
 		return true
 	}
 	return isPrivate()
+}
+
+func LocalGet(port int, url string) (body []byte, err error) {
+	var (
+		res *http.Response
+	)
+	res, err = http.Get(fmt.Sprintf(`http://localhost:%d/%s`, port, url))
+	if err == nil {
+		body, err = io.ReadAll(res.Body)
+		res.Body.Close()
+	}
+	return
+}
+
+func LocalPost(port int, url string, data interface{}) (body []byte, err error) {
+	var resp *http.Response
+
+	jsonValue, err := json.Marshal(data)
+	if err == nil {
+		resp, err = http.Post(fmt.Sprintf("http://localhost:%d/%s", port, url),
+			"application/json", bytes.NewBuffer(jsonValue))
+		if err == nil {
+			body, err = io.ReadAll(resp.Body)
+			resp.Body.Close()
+		}
+	}
+	return
 }

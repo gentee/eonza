@@ -7,6 +7,7 @@ package main
 import (
 	"eonza/lib"
 	"eonza/users"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -43,20 +44,11 @@ type Config struct {
 	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
 	Playground lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
 	Whitelist  []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
-	//  undocumented fields
-	PortShift int64  `yaml:"portshift,omitempty"` // shift of the port
-	CDN       string `yaml:"cdn,omitempty"`       // url for static files in task
 
 	path       string // path to cfg file
 	develop    bool
 	playground bool
 }
-
-const (
-	AccessLocalhost = Localhost
-	AccessPrivate   = `private`
-	AccessHost      = `host`
-)
 
 var (
 	cfg = Config{
@@ -71,8 +63,9 @@ var (
 			Port:   DefPort,
 			Open:   true,
 			Theme:  `default`,
-			Access: AccessLocalhost,
 			JWTKey: lib.UniqueName(12),
+			Cert:   ``,
+			Priv:   ``,
 		},
 	}
 	firstRun bool
@@ -131,14 +124,27 @@ func LoadConfig() {
 	if cfg.HTTP.Port == 0 {
 		cfg.HTTP.Port = DefPort
 	}
+	if cfg.HTTP.LocalPort == 0 {
+		if cfg.HTTP.LocalPort, err = getPort(); err != nil {
+			golog.Fatal(err)
+		}
+	}
 	if len(cfg.HTTP.Theme) == 0 {
 		cfg.HTTP.Theme = DefTheme
 	}
-	switch cfg.HTTP.Access {
-	case AccessHost:
-	case AccessPrivate:
-	default:
-		cfg.HTTP.Access = AccessLocalhost
+	if cfg.HTTP.Host != Localhost {
+		if cfg.HTTP.Cert == nil {
+			golog.Fatal(`Specify the path to the certificate pem file in config file`)
+		}
+		if cfg.HTTP.Priv == nil {
+			golog.Fatal(`Specify the path to the private key pem file in config file`)
+		}
+		if cfg.HTTP.Cert, err = os.ReadFile(fmt.Sprint(cfg.HTTP.Cert)); err != nil {
+			golog.Fatal(err)
+		}
+		if cfg.HTTP.Priv, err = os.ReadFile(fmt.Sprint(cfg.HTTP.Priv)); err != nil {
+			golog.Fatal(err)
+		}
 	}
 	cfg.develop = cfg.Mode == ModeDevelop
 	cfg.playground = cfg.Mode == ModePlayground

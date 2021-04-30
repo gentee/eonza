@@ -19,6 +19,7 @@ import (
 	"eonza/users"
 
 	"github.com/gentee/gentee"
+	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
 
@@ -145,98 +146,8 @@ func runHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
 }
 
-func runScriptHandle(c echo.Context) error {
-	var (
-		postScript es.PostScript
-		err        error
-	)
-	if err = c.Bind(&postScript); err != nil {
-		return jsonError(c, err)
-	}
-	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) && tasks[postScript.TaskID] == nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}
-	rs := RunScript{
-		Name:    postScript.Script,
-		Open:    !postScript.Silent,
-		Console: false,
-		Data:    postScript.Data,
-		User: users.User{
-			ID:       postScript.TaskID,
-			Nickname: GetTaskName(postScript.TaskID),
-			RoleID:   users.ScriptsID,
-		},
-		Role: users.Role{
-			ID:   users.ScriptsID,
-			Name: users.ScriptsRole,
-		},
-		IP: c.RealIP(),
-	}
-	if err := systemRun(&rs); err != nil {
-		return jsonError(c, err)
-	}
-	return c.JSON(http.StatusOK, RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
-}
-
 func pingHandle(c echo.Context) error {
 	return c.HTML(http.StatusOK, Success)
-}
-
-func taskStatusHandle(c echo.Context) error {
-	var (
-		taskStatus TaskStatus
-		err        error
-		finish     string
-	)
-	if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}
-
-	if err = c.Bind(&taskStatus); err != nil {
-		return jsonError(c, err)
-	}
-	if taskStatus.Time != 0 {
-		finish = time.Unix(taskStatus.Time, 0).Format(TimeFormat)
-	}
-	cmd := WsCmd{
-		TaskID:  taskStatus.TaskID,
-		Cmd:     WcStatus,
-		Status:  taskStatus.Status,
-		Message: taskStatus.Message,
-		Time:    finish,
-	}
-	if taskStatus.Status == TaskActive {
-		task := tasks[taskStatus.TaskID]
-		cmd.Task = &Task{
-			ID:         task.ID,
-			Status:     task.Status,
-			Name:       task.Name,
-			StartTime:  task.StartTime,
-			FinishTime: task.FinishTime,
-			UserID:     task.UserID,
-			RoleID:     task.RoleID,
-			Port:       task.Port,
-		}
-	}
-
-	for id, client := range clients {
-		err := client.Conn.WriteJSON(cmd)
-		if err != nil {
-			client.Conn.Close()
-			delete(clients, id)
-		}
-	}
-	if ptask := tasks[taskStatus.TaskID]; ptask != nil {
-		ptask.Status = taskStatus.Status
-		if taskStatus.Status >= TaskFinished {
-			ptask.Message = taskStatus.Message
-			ptask.FinishTime = taskStatus.Time
-			if err = SaveTrace(ptask); err != nil {
-				return jsonError(c, err)
-			}
-		}
-	}
-	return jsonSuccess(c)
 }
 
 func sysTaskHandle(c echo.Context) error {
@@ -248,21 +159,14 @@ func sysTaskHandle(c echo.Context) error {
 	if taskid, err = strconv.ParseUint(c.QueryParam(`taskid`), 10, 32); err != nil {
 		return jsonError(c, err)
 	}
-	/*if !strings.HasPrefix(c.Request().Host, Localhost+`:`) {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
-	}*/
 	user := c.(*Auth).User
 	for _, item := range tasks {
 		if item.ID == uint32(taskid) {
 			if user.RoleID != users.XAdminID && user.ID != item.UserID {
 				return jsonError(c, fmt.Errorf(`Access denied`))
 			}
-			url := fmt.Sprintf("http://%s:%d/sys?cmd=%s&taskid=%d", Localhost, item.Port, cmd, taskid)
 			go func() {
-				resp, err := http.Get(url)
-				if err == nil {
-					resp.Body.Close()
-				}
+				lib.LocalGet(item.LocalPort, fmt.Sprintf("sys?cmd=%s&taskid=%d", cmd, taskid))
 			}()
 			break
 		}
@@ -338,8 +242,10 @@ func removeTaskHandle(c echo.Context) error {
 			return jsonError(c, fmt.Errorf(`Access denied`))
 		}
 	}
-	delete(tasks, uint32(idTask))
 	RemoveTask(uint32(idTask))
+	if errSave := SaveTasks(); errSave != nil {
+		golog.Error(errSave)
+	}
 	return tasksHandle(c)
 }
 

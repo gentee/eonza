@@ -12,7 +12,6 @@ import (
 	"eonza/script"
 	"eonza/users"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"os"
@@ -47,6 +46,7 @@ type Task struct {
 	UserID     uint32 `json:"userid"`
 	RoleID     uint32 `json:"roleid"`
 	Port       int    `json:"port"`
+	LocalPort  int    `json:"localport"`
 	Message    string `json:"message,omitempty"`
 	SourceCode string `json:"sourcecode,omitempty"`
 }
@@ -73,6 +73,7 @@ func taskTrace(unixTime int64, status int, message string) {
 func SaveTrace(task *Task) (err error) {
 	if task.Status >= TaskFinished {
 		freePort(task.Port)
+		freePort(task.LocalPort)
 	}
 	_, err = traceFile.Write([]byte(fmt.Sprintf("%s\r\n", task.String())))
 	if len(tasks) > int(TasksLimit*1.2) {
@@ -84,23 +85,10 @@ func SaveTrace(task *Task) (err error) {
 }
 
 func RemoveTask(id uint32) {
+	delete(tasks, id)
 	for _, ext := range append(TaskExt, `zip`) {
 		os.Remove(filepath.Join(cfg.Log.Dir, fmt.Sprintf("%08x.%s", id, ext)))
 	}
-	/*	if err := filepath.Walk(cfg.Log.Dir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				return nil
-			}
-			if strings.HasPrefix(info.Name(), pref) {
-				os.Remove(path)
-			}
-			return nil
-		}); err != nil {
-			golog.Error(err)
-		}*/
 }
 
 func GetTaskName(id uint32) (ret string) {
@@ -125,7 +113,6 @@ func ListTasks() []*Task {
 	})
 	if len(ret) > TasksLimit {
 		for i := TasksLimit; i < len(ret); i++ {
-			delete(tasks, ret[i].ID)
 			RemoveTask(ret[i].ID)
 		}
 		ret = ret[:TasksLimit]
@@ -155,6 +142,7 @@ func NewTask(header script.Header) (err error) {
 		UserID:    header.User.ID,
 		RoleID:    header.User.RoleID,
 		Port:      header.HTTP.Port,
+		LocalPort: header.HTTP.LocalPort,
 	}
 	if err = SaveTrace(&task); err != nil {
 		return
@@ -241,17 +229,13 @@ func InitTaskManager() (err error) {
 	}
 	for key, item := range tasks {
 		if item.Status < TaskFinished {
-			url := fmt.Sprintf("http://%s:%d", Localhost, item.Port)
-			resp, err := http.Get(url + `/info`)
 			active := false
+			body, err := lib.LocalGet(item.LocalPort, `info`)
 			if err == nil {
-				if body, err := io.ReadAll(resp.Body); err == nil {
-					var task Task
-					if err = json.Unmarshal(body, &task); err == nil && task.ID == item.ID {
-						active = true
-						tasks[key].Status = task.Status
-					}
-					resp.Body.Close()
+				var task Task
+				if err = json.Unmarshal(body, &task); err == nil && task.ID == item.ID {
+					active = true
+					tasks[key].Status = task.Status
 				}
 			}
 			if !active {
@@ -266,13 +250,6 @@ func InitTaskManager() (err error) {
 
 func CloseTaskManager() {
 	traceFile.Close()
-}
-
-func usePort(port int) {
-	i := port - cfg.HTTP.Port - 1
-	if i < PortsPool {
-		ports[i] = true
-	}
 }
 
 func freePort(port int) {
