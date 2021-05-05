@@ -16,7 +16,9 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/gentee/gentee"
+	"github.com/gentee/gentee/core"
 	"github.com/gentee/gentee/vm"
+	"gopkg.in/ini.v1"
 	"gopkg.in/yaml.v2"
 )
 
@@ -170,6 +172,8 @@ var (
 		{Prototype: `ConvertText(str,str,str) str`, Object: ConvertText},
 		{Prototype: `MarkdownToHTML(str) str`, Object: lib.Markdown},
 		{Prototype: `RunScript(str,str,bool)`, Object: RunScript},
+		{Prototype: `LoadIni(buf) handle`, Object: LoadIni},
+		{Prototype: `GetIniValue(handle,str,str,str,str) bool`, Object: GetIniValue},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
@@ -734,4 +738,23 @@ func GetClipboard() (string, error) {
 
 func Unsupported(name string) error {
 	return fmt.Errorf(`The '%s' function is unsupported`, name)
+}
+
+func LoadIni(buf *core.Buffer) (cfg *ini.File, err error) {
+	cfg, err = ini.Load(buf.Data)
+	return
+}
+
+func GetIniValue(cfg *ini.File, section, key, varname, defvalue string) (ret int64, err error) {
+	sec := cfg.Section(section)
+	if sec != nil {
+		if sec.HasKey(key) {
+			ret = 1
+			err = SetVar(varname, sec.Key(key).String())
+		}
+	}
+	if ret == 0 {
+		SetVar(varname, defvalue)
+	}
+	return
 }
