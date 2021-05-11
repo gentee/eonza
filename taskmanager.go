@@ -303,7 +303,7 @@ func GetTaskFiles(id uint32) (ret []string) {
 	)
 	fname := fmt.Sprintf(`%08x.`, id)
 
-	ret = make([]string, TExtSrc+1)
+	ret = make([]string, len(TaskExt))
 	for i, ext := range TaskExt {
 		if i == TExtTrace {
 			continue
@@ -312,7 +312,8 @@ func GetTaskFiles(id uint32) (ret []string) {
 			ret[i] = string(out)
 		}
 	}
-	if len(ret[TExtLog]) > 0 && len(ret[TExtOut]) > 0 && len(ret[TExtSrc]) > 0 {
+	if len(ret[TExtLog]) > 0 || len(ret[TExtOut]) > 0 || len(ret[TExtSrc]) > 0 ||
+		len(ret[TExtReport]) > 0 {
 		return
 	}
 	r, err := zip.OpenReader(filepath.Join(cfg.Log.Dir, fname+`zip`))

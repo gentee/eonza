@@ -754,7 +754,11 @@ func GetIniValue(cfg *ini.File, section, key, varname, defvalue string) (ret int
 		}
 	}
 	if ret == 0 {
-		SetVar(varname, defvalue)
+		if len(defvalue) == 0 {
+			err = fmt.Errorf(`%s key doesn't exist in INI file`, key)
+		} else {
+			SetVar(varname, defvalue)
+		}
 	}
 	return
 }

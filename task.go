@@ -41,6 +41,7 @@ const (
 	TExtOut
 	TExtLog
 	TExtSrc
+	TExtReport
 )
 
 type FormResponse struct {
@@ -75,7 +76,7 @@ var (
 	prevStatus int
 	upgrader   websocket.Upgrader
 	wsChan     chan WsCmd
-	TaskExt    = []string{"trace", "out", "log", "g"}
+	TaskExt    = []string{"trace", "out", "log", "g", "eor"}
 
 	stdoutBuf []string
 	logoutBuf []string
@@ -116,8 +117,11 @@ func closeTask() {
 		if i == TExtSrc && len(scriptTask.Header.SourceCode) == 0 {
 			continue
 		}
-		files = append(files, filepath.Join(scriptTask.Header.LogDir,
-			fmt.Sprintf("%08x.%s", task.ID, item)))
+		fname := filepath.Join(scriptTask.Header.LogDir, fmt.Sprintf("%08x.%s", task.ID, item))
+		if _, err := os.Stat(fname); os.IsNotExist(err) {
+			continue
+		}
+		files = append(files, fname)
 	}
 	output := filepath.Join(scriptTask.Header.LogDir, fmt.Sprintf("%08x.zip", task.ID))
 
