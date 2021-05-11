@@ -34,6 +34,7 @@ const (
 	WcForm            // form output
 	WcProgress        // progress bar
 	WcNotify          // notification
+	WcReport          // report
 )
 
 const (
@@ -51,11 +52,12 @@ type FormResponse struct {
 }
 
 type WsClient struct {
-	StdoutCount int
-	LogoutCount int
-	Conn        *websocket.Conn
-	UserID      uint32
-	RoleID      uint32
+	StdoutCount  int
+	LogoutCount  int
+	ReportsCount int
+	Conn         *websocket.Conn
+	UserID       uint32
+	RoleID       uint32
 }
 
 type WsCmd struct {
@@ -81,8 +83,10 @@ var (
 	stdoutBuf []string
 	logoutBuf []string
 	formData  []script.FormInfo
+	reports   []string
 	iStdout   int
 	iLogout   int
+	iReports  int
 
 	console   *os.File
 	cmdFile   *os.File
@@ -94,6 +98,7 @@ var (
 	chLogout   chan string
 	chForm     chan script.FormInfo
 	chFormNext chan bool
+	chReport   chan script.Report
 	chProgress chan *gentee.Progress
 	chSystem   chan int
 	chFinish   chan bool
@@ -144,6 +149,19 @@ func sendForm(client WsClient) error {
 		Message: formData[0].Data,
 		Status:  int(formData[0].ID),
 	})
+}
+
+func sendReport(client WsClient) error {
+	for i := client.ReportsCount; i < iReports; i++ {
+		if err := client.Conn.WriteJSON(WsCmd{
+			TaskID:  task.ID,
+			Cmd:     WcReport,
+			Message: reports[i],
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func sendStdout(client WsClient) error {
@@ -236,6 +254,7 @@ func initTask() script.Settings {
 	chLogout = make(chan string)
 	chForm = make(chan script.FormInfo)
 	chFormNext = make(chan bool)
+	chReport = make(chan script.Report)
 	chProgress = make(chan *gentee.Progress)
 	chSystem = make(chan int)
 	chFinish = make(chan bool)
@@ -341,6 +360,29 @@ func initTask() script.Settings {
 	}()
 
 	go func() {
+		var out script.Report
+		for {
+			out = <-chReport
+			data, err := script.ReportToHtml(out)
+			if err == nil {
+				mutex.Lock()
+				reports = append(reports, data)
+				iReports = len(reports)
+				for id, client := range clients {
+					if sendReport(client) == nil {
+						client.ReportsCount = iReports
+						clients[id] = client
+					} else {
+						client.Conn.Close()
+						delete(clients, id)
+					}
+				}
+				mutex.Unlock()
+			}
+		}
+	}()
+
+	go func() {
 		var cmd WsCmd
 		for task.Status <= TaskSuspended {
 			cmd = <-wsChan
@@ -387,7 +429,7 @@ func initTask() script.Settings {
 	(*glob)[`data`] = strings.TrimSpace(scriptTask.Header.Data)
 	(*glob)[`eonzaport`] = fmt.Sprint(scriptTask.Header.ServerPort)
 
-	script.InitData(chLogout, chForm, glob)
+	script.InitData(chLogout, chForm, chReport, glob)
 	return script.Settings{
 		ChStdin:        chStdin,
 		ChStdout:       chStdout,
@@ -418,8 +460,11 @@ func wsTaskHandle(c echo.Context) error {
 			client.StdoutCount = iStdout
 			if err = sendLogout(client); err == nil {
 				client.LogoutCount = iLogout
-				if err = sendForm(client); err == nil {
-					clients[lib.RndNum()] = client
+				if err = sendReport(client); err == nil {
+					client.ReportsCount = iReports
+					if err = sendForm(client); err == nil {
+						clients[lib.RndNum()] = client
+					}
 				}
 			}
 		}

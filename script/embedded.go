@@ -127,6 +127,7 @@ type Data struct {
 	Mutex    sync.Mutex
 	chLogout chan string
 	chForm   chan FormInfo
+	chReport chan Report
 	Global   *map[string]string
 }
 
@@ -174,6 +175,7 @@ var (
 		{Prototype: `RunScript(str,str,bool)`, Object: RunScript},
 		{Prototype: `LoadIni(buf) handle`, Object: LoadIni},
 		{Prototype: `GetIniValue(handle,str,str,str,str) bool`, Object: GetIniValue},
+		{Prototype: `CreateReport(str,str,int)`, Object: CreateReport},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
@@ -715,10 +717,11 @@ func SetYamlVars(in string) error {
 	return nil
 }
 
-func InitData(chLogout chan string, chForm chan FormInfo, glob *map[string]string) {
+func InitData(chLogout chan string, chForm chan FormInfo, chReport chan Report, glob *map[string]string) {
 	dataScript.Vars = make([]map[string]string, 0, 8)
 	dataScript.chLogout = chLogout
 	dataScript.chForm = chForm
+	dataScript.chReport = chReport
 	dataScript.Global = glob
 }
 
