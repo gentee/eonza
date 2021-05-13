@@ -175,7 +175,7 @@ var (
 		{Prototype: `RunScript(str,str,bool)`, Object: RunScript},
 		{Prototype: `LoadIni(buf) handle`, Object: LoadIni},
 		{Prototype: `GetIniValue(handle,str,str,str,str) bool`, Object: GetIniValue},
-		{Prototype: `CreateReport(str,str,int)`, Object: CreateReport},
+		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},

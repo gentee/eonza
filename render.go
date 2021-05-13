@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"eonza/lib"
+	"eonza/script"
 	"eonza/users"
 	"fmt"
 	"html/template"
@@ -61,6 +62,7 @@ type RenderScript struct {
 	Source   template.HTML
 	Stdout   template.HTML
 	Logout   template.HTML
+	Reports  []script.Report
 }
 
 var (
@@ -108,12 +110,15 @@ func RenderPage(c echo.Context, url string) (string, error) {
 	)
 
 	out2html := func(input string, isLog bool) template.HTML {
-		out := strings.ReplaceAll(input, "\n", `<br>`)
-		if isLog {
-			for key, item := range map[string]string{`INFO`: `egreen`, `FORM`: `eblue`,
-				`WARN`: `eyellow`, `ERROR`: `ered`} {
-				out = strings.ReplaceAll(out, "["+key+"]", fmt.Sprintf(`<span class="%s">[%s]</span>`,
-					item, key))
+		var out string
+		if len(strings.TrimSpace(input)) != 0 {
+			out = strings.ReplaceAll(input, "\n", `<br>`)
+			if isLog {
+				for key, item := range map[string]string{`INFO`: `egreen`, `FORM`: `eblue`,
+					`WARN`: `eyellow`, `ERROR`: `ered`} {
+					out = strings.ReplaceAll(out, "["+key+"]", fmt.Sprintf(`<span class="%s">[%s]</span>`,
+						item, key))
+				}
 			}
 		}
 		return template.HTML(out)
@@ -128,9 +133,10 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
-			files := GetTaskFiles(renderScript.Task.ID)
+			files, replist := GetTaskFiles(renderScript.Task.ID)
 			renderScript.Stdout = out2html(files[TExtOut], false)
 			renderScript.Logout = out2html(files[TExtLog], true)
+			renderScript.Reports = replist
 			renderScript.Task.SourceCode = files[TExtSrc]
 			renderScript.Nickname, renderScript.Role = GetUserRole(renderScript.Task.UserID, renderScript.Task.RoleID)
 		}

@@ -7,6 +7,7 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"eonza/lib"
 	"eonza/script"
@@ -296,7 +297,7 @@ func wsMainHandle(c echo.Context) error {
 	return nil
 }
 
-func GetTaskFiles(id uint32) (ret []string) {
+func GetTaskFiles(id uint32) (ret []string, replist []script.Report) {
 	var (
 		err error
 		out []byte
@@ -337,7 +338,18 @@ func GetTaskFiles(id uint32) (ret []string) {
 				_, err = buf.ReadFrom(rc)
 				rc.Close()
 				if err == nil {
-					ret[i] = string(buf.Bytes())
+					if i == TExtReport {
+						dec := gob.NewDecoder(&buf)
+						if err = dec.Decode(&replist); err != nil {
+							golog.Error(err)
+						} else {
+							for i, item := range replist {
+								replist[i].Body = script.ReportToHtml(item)
+							}
+						}
+					} else {
+						ret[i] = string(buf.Bytes())
+					}
 				}
 			}
 

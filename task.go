@@ -80,13 +80,14 @@ var (
 	wsChan     chan WsCmd
 	TaskExt    = []string{"trace", "out", "log", "g", "eor"}
 
-	stdoutBuf []string
-	logoutBuf []string
-	formData  []script.FormInfo
-	reports   []string
-	iStdout   int
-	iLogout   int
-	iReports  int
+	stdoutBuf  []string
+	logoutBuf  []string
+	formData   []script.FormInfo
+	reports    []string
+	iStdout    int
+	iLogout    int
+	iReports   int
+	reportFile []script.Report
 
 	console   *os.File
 	cmdFile   *os.File
@@ -363,9 +364,14 @@ func initTask() script.Settings {
 		var out script.Report
 		for {
 			out = <-chReport
-			data, err := script.ReportToHtml(out)
+			data, err := script.ReportToJSON(out)
 			if err == nil {
 				mutex.Lock()
+				reportFile = append(reportFile, out)
+				if err := script.SaveReport(filepath.Join(scriptTask.Header.LogDir,
+					fmt.Sprintf(`%08x.%s`, task.ID, script.ReportExt)), reportFile); err != nil {
+					golog.Error(err)
+				}
 				reports = append(reports, data)
 				iReports = len(reports)
 				for id, client := range clients {
