@@ -133,7 +133,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 		} else {
 			renderScript.Task = *c.Get(`Task`).(*Task)
 			renderScript.Title = c.Get(`Title`).(string)
-			files, replist := GetTaskFiles(renderScript.Task.ID)
+			files, replist := GetTaskFiles(renderScript.Task.ID, true)
 			renderScript.Stdout = out2html(files[TExtOut], false)
 			renderScript.Logout = out2html(files[TExtLog], true)
 			renderScript.Reports = replist

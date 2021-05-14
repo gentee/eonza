@@ -297,7 +297,7 @@ func wsMainHandle(c echo.Context) error {
 	return nil
 }
 
-func GetTaskFiles(id uint32) (ret []string, replist []script.Report) {
+func GetTaskFiles(id uint32, render bool) (ret []string, replist []script.Report) {
 	var (
 		err error
 		out []byte
@@ -305,12 +305,27 @@ func GetTaskFiles(id uint32) (ret []string, replist []script.Report) {
 	fname := fmt.Sprintf(`%08x.`, id)
 
 	ret = make([]string, len(TaskExt))
+	decode := func(i int, buf *bytes.Buffer) {
+		if i == TExtReport {
+			dec := gob.NewDecoder(buf)
+			if err = dec.Decode(&replist); err != nil {
+				golog.Error(err)
+			} else if render {
+				for i, item := range replist {
+					replist[i].Body = script.ReportToHtml(item)
+				}
+			}
+		} else {
+			ret[i] = string(buf.Bytes())
+		}
+	}
+
 	for i, ext := range TaskExt {
 		if i == TExtTrace {
 			continue
 		}
 		if out, err = os.ReadFile(filepath.Join(cfg.Log.Dir, fname+ext)); err == nil {
-			ret[i] = string(out)
+			decode(i, bytes.NewBuffer(out))
 		}
 	}
 	if len(ret[TExtLog]) > 0 || len(ret[TExtOut]) > 0 || len(ret[TExtSrc]) > 0 ||
@@ -338,18 +353,7 @@ func GetTaskFiles(id uint32) (ret []string, replist []script.Report) {
 				_, err = buf.ReadFrom(rc)
 				rc.Close()
 				if err == nil {
-					if i == TExtReport {
-						dec := gob.NewDecoder(&buf)
-						if err = dec.Decode(&replist); err != nil {
-							golog.Error(err)
-						} else {
-							for i, item := range replist {
-								replist[i].Body = script.ReportToHtml(item)
-							}
-						}
-					} else {
-						ret[i] = string(buf.Bytes())
-					}
+					decode(i, &buf)
 				}
 			}
 

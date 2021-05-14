@@ -280,11 +280,12 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.POST("/form", formHandle)   // +
 	} else {
 		e.GET("/ws", wsMainHandle)
-		e.GET("/task/:id", showTaskHandle)   // +
-		e.GET("/api/compile", compileHandle) // +
-		e.GET("/api/exit", exitHandle)       // +
-		e.GET("/api/export", exportHandle)   // +
-		e.GET("/api/reload", reloadHandle)   // +
+		e.GET("/task/:id", showTaskHandle)         // +
+		e.GET("/api/compile", compileHandle)       // +
+		e.GET("/api/exit", exitHandle)             // +
+		e.GET("/api/export", exportHandle)         // +
+		e.GET("/api/savereport", saveReportHandle) // +
+		e.GET("/api/reload", reloadHandle)         // +
 		e.GET("/api/logout", logoutHandle)
 		e.GET("/api/run", runHandle)                     // +
 		e.GET("/api/script", getScriptHandle)            // +

@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"eonza/lib"
 	"html"
 	"os"
 	"strings"
@@ -41,6 +42,10 @@ func CreateReport(title, body string) {
 	}
 }
 
+func GetReportExt(report Report) string {
+	return ReportsExt[ReportType(report)]
+}
+
 func ReportType(report Report) int {
 	if len(report.Body) == 0 {
 		return RF_TEXT
@@ -56,10 +61,18 @@ func ReportType(report Report) int {
 }
 
 func ReportToHtml(report Report) string {
-	var ret string
+	var (
+		ret string
+		err error
+	)
 	switch ReportType(report) {
 	case RF_MARKDOWN:
+		ret, err = lib.Markdown(report.Body)
+		if err != nil {
+			ret = `<pre>` + err.Error() + `</pre>`
+		}
 	case RF_HTML:
+		ret = report.Body
 	default:
 		ret = `<pre>` + html.EscapeString(report.Body) + `</pre>`
 	}
