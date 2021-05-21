@@ -91,6 +91,7 @@ func systemRun(rs *RunScript) error {
 		Lang:         langCode,
 		TaskID:       lib.RndNum(),
 		ServerPort:   cfg.HTTP.LocalPort,
+		URLPort:      cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
 			Host:      cfg.HTTP.Host,
 			Port:      port,
