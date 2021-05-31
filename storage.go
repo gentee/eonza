@@ -25,6 +25,9 @@ const (
 	TrialDisabled = -1
 	TrialOff      = 0
 	TrialOn       = 1
+
+	DefMaxTasks    = 100
+	DefRemoveAfter = 14
 )
 
 type Trial struct {
@@ -43,6 +46,8 @@ type Settings struct {
 	Title          string            `json:"title"`
 	HideTray       bool              `json:"hidetray"`
 	AutoUpdate     string            `json:"autoupdate"`
+	RemoveAfter    int               `json:"removeafter"`
+	MaxTasks       int               `json:"maxtasks"`
 }
 
 // Storage contains all application data
@@ -59,9 +64,11 @@ type Storage struct {
 var (
 	storage = Storage{
 		Settings: Settings{
-			LogLevel:   script.LOG_INFO,
-			Constants:  make(map[string]string),
-			AutoUpdate: `weekly`,
+			LogLevel:    script.LOG_INFO,
+			Constants:   make(map[string]string),
+			AutoUpdate:  `weekly`,
+			MaxTasks:    DefMaxTasks,
+			RemoveAfter: DefRemoveAfter,
 		},
 		Users:   make(map[uint32]*User),
 		Scripts: make(map[string]*Script),

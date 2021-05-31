@@ -35,6 +35,8 @@ const ( // TaskStatus
 	TaskTerminated
 	TaskFailed
 	TaskCrashed
+
+	TasksPage = 5
 )
 
 type Task struct {
@@ -50,12 +52,14 @@ type Task struct {
 	LocalPort  int    `json:"localport"`
 	Message    string `json:"message,omitempty"`
 	SourceCode string `json:"sourcecode,omitempty"`
+	Locked     bool   `json:"locked"`
 }
 
 var (
-	traceFile *os.File
-	tasks     map[uint32]*Task
-	ports     [PortsPool]bool
+	traceFile      *os.File
+	tasks          map[uint32]*Task
+	ports          [PortsPool]bool
+	prevCheckTasks time.Time
 )
 
 func (task *Task) Head() string {
@@ -71,17 +75,47 @@ func taskTrace(unixTime int64, status int, message string) {
 	}
 }
 
+func SaveTasks() (err error) {
+	list := ListTasks()
+	var out string
+	for i := len(list) - 1; i >= 0; i-- {
+		out += list[i].String() + "\r\n"
+	}
+	traceFile.Truncate(0)
+	traceFile.Seek(0, 0)
+	_, err = traceFile.Write([]byte(out))
+	return
+}
+
+func CheckTasks() (err error) {
+	if prevCheckTasks.Add(1 * time.Hour).Before(time.Now()) {
+		list := ListTasks()
+		var count int
+		timeout := time.Now().AddDate(0, 0, -storage.Settings.RemoveAfter)
+		for _, item := range list {
+			if item.Locked {
+				continue
+			}
+			if count > storage.Settings.MaxTasks || time.Unix(item.StartTime, 0).Before(timeout) {
+				RemoveTask(item.ID)
+				continue
+			}
+			count++
+		}
+		if len(list) != len(tasks) {
+			err = SaveTasks()
+		}
+		prevCheckTasks = time.Now()
+	}
+	return
+}
+
 func SaveTrace(task *Task) (err error) {
 	if task.Status >= TaskFinished {
 		freePort(task.Port)
 		freePort(task.LocalPort)
 	}
 	_, err = traceFile.Write([]byte(fmt.Sprintf("%s\r\n", task.String())))
-	if len(tasks) > int(TasksLimit*1.2) {
-		if errSave := SaveTasks(); errSave != nil {
-			golog.Error(errSave)
-		}
-	}
 	return
 }
 
@@ -112,25 +146,7 @@ func ListTasks() []*Task {
 		}
 		return ret[i].StartTime > ret[j].StartTime
 	})
-	if len(ret) > TasksLimit {
-		for i := TasksLimit; i < len(ret); i++ {
-			RemoveTask(ret[i].ID)
-		}
-		ret = ret[:TasksLimit]
-	}
 	return ret
-}
-
-func SaveTasks() (err error) {
-	list := ListTasks()
-	var out string
-	for i := len(list) - 1; i >= 0; i-- {
-		out += list[i].String() + "\r\n"
-	}
-	traceFile.Truncate(0)
-	traceFile.Seek(0, 0)
-	_, err = traceFile.Write([]byte(out))
-	return
 }
 
 func NewTask(header script.Header) (err error) {
@@ -152,13 +168,17 @@ func NewTask(header script.Header) (err error) {
 		return fmt.Errorf(`task %x exists`, task.ID)
 	}
 	tasks[task.ID] = &task
-	return
+	return CheckTasks()
 }
 
 func (task *Task) String() string {
-	return fmt.Sprintf("%x,%x/%x/%s,%d,%s,%d,%d,%d,%s", task.ID, task.UserID, task.RoleID, task.IP,
+	var locked string
+	if task.Locked {
+		locked = `*`
+	}
+	return fmt.Sprintf("%x,%x/%x/%s,%d,%s,%d,%d,%d%s,%s", task.ID, task.UserID, task.RoleID, task.IP,
 		task.Port, task.Name,
-		task.StartTime, task.FinishTime, task.Status, task.Message)
+		task.StartTime, task.FinishTime, task.Status, locked, task.Message)
 }
 
 func LogToTask(input string) (task Task, err error) {
@@ -201,7 +221,12 @@ func LogToTask(input string) (task Task, err error) {
 			return
 		}
 		task.FinishTime = ival
-		if ival, err = strconv.ParseInt(vals[6], 10, 64); err != nil {
+		status := vals[6]
+		if strings.HasSuffix(status, `*`) {
+			task.Locked = true
+			status = status[:len(status)-1]
+		}
+		if ival, err = strconv.ParseInt(status, 10, 64); err != nil {
 			return
 		}
 		task.Status = int(ival)
@@ -245,7 +270,7 @@ func InitTaskManager() (err error) {
 			}
 		}
 	}
-	err = SaveTasks()
+	err = CheckTasks()
 	return
 }
 

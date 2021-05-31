@@ -45,6 +45,12 @@ func saveSettingsHandle(c echo.Context) error {
 	user := c.(*Auth).User
 	if user.RoleID == users.XAdminID {
 		hideTray = storage.Settings.HideTray
+		if options.Common.RemoveAfter <= 0 {
+			options.Common.RemoveAfter = DefRemoveAfter
+		}
+		if options.Common.MaxTasks <= 0 {
+			options.Common.MaxTasks = DefMaxTasks
+		}
 		storage.Settings = options.Common
 		if err = SaveStorage(); err != nil {
 			return jsonError(c, err)

@@ -59,8 +59,10 @@ type TaskInfo struct {
 }
 
 type TasksResponse struct {
-	List  []TaskInfo `json:"list,omitempty"`
-	Error string     `json:"error,omitempty"`
+	List     []TaskInfo `json:"list,omitempty"`
+	Page     int        `json:"page"`
+	AllPages int        `json:"allpages"`
+	Error    string     `json:"error,omitempty"`
 }
 
 type Feedback struct {
@@ -175,7 +177,18 @@ func sysTaskHandle(c echo.Context) error {
 }
 
 func tasksHandle(c echo.Context) error {
+	if err := CheckTasks(); err != nil {
+		return jsonError(c, err)
+	}
+	var page, allpages int
 	list := ListTasks()
+	if len(list) > 0 {
+		allpages = len(list) / TasksPage
+		if len(list)%TasksPage != 0 {
+			allpages++
+		}
+		page = 1
+	}
 	listInfo := make([]TaskInfo, 0, len(list))
 	user := c.(*Auth).User
 	var (
@@ -216,7 +229,9 @@ func tasksHandle(c echo.Context) error {
 		}
 	}
 	return c.JSON(http.StatusOK, &TasksResponse{
-		List: listInfo,
+		List:     listInfo,
+		Page:     page,
+		AllPages: allpages,
 	})
 }
 
