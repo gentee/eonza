@@ -180,15 +180,9 @@ func tasksHandle(c echo.Context) error {
 	if err := CheckTasks(); err != nil {
 		return jsonError(c, err)
 	}
-	var page, allpages int
 	list := ListTasks()
-	if len(list) > 0 {
-		allpages = len(list) / TasksPage
-		if len(list)%TasksPage != 0 {
-			allpages++
-		}
-		page = 1
-	}
+	page := 1
+	allpages := 1
 	listInfo := make([]TaskInfo, 0, len(list))
 	user := c.(*Auth).User
 	var (
@@ -228,8 +222,24 @@ func tasksHandle(c echo.Context) error {
 			})
 		}
 	}
+	if len(listInfo) > 0 {
+		allpages = len(listInfo) / TasksPage
+		if len(listInfo)%TasksPage != 0 {
+			allpages++
+		}
+		if cur := c.QueryParam("page"); len(cur) > 0 {
+			if ipage, err := strconv.ParseInt(cur, 10, 32); err == nil && int(ipage) <= allpages {
+				page = int(ipage)
+			}
+		}
+	}
+	start := TasksPage * (page - 1)
+	end := TasksPage * page
+	if end > len(listInfo) {
+		end = len(listInfo)
+	}
 	return c.JSON(http.StatusOK, &TasksResponse{
-		List:     listInfo,
+		List:     listInfo[start:end],
 		Page:     page,
 		AllPages: allpages,
 	})
