@@ -298,6 +298,7 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.GET("/api/prosettings", proSettingsHandle)     // +
 		e.GET("/api/randid", randidHandle)               // +
 		e.GET("/api/remove/:id", removeTaskHandle)       // +
+		e.GET("/api/lock/:id", lockTaskHandle)           // +
 		e.GET("/api/removenfy/:id", removeNfyHandle)     // +
 		e.GET("/api/removetimer/:id", removeTimerHandle) // +
 		e.GET("/api/removeevent/:id", removeEventHandle) // +

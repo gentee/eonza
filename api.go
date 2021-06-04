@@ -54,6 +54,7 @@ type TaskInfo struct {
 	User    string `json:"user"`
 	Role    string `json:"role"`
 	ToDel   bool   `json:"todel"`
+	Locked  bool   `json:"locked"`
 	Port    int    `json:"port"`
 	Message string `json:"message,omitempty"`
 }
@@ -216,6 +217,7 @@ func tasksHandle(c echo.Context) error {
 				FinishTime: finish,
 				User:       userName,
 				Role:       roleName,
+				Locked:     item.Locked,
 				Port:       item.Port,
 				ToDel:      todel,
 				Message:    item.Message,
@@ -245,7 +247,15 @@ func tasksHandle(c echo.Context) error {
 	})
 }
 
+func lockTaskHandle(c echo.Context) error {
+	return taskAction(c, true)
+}
+
 func removeTaskHandle(c echo.Context) error {
+	return taskAction(c, false)
+}
+
+func taskAction(c echo.Context, lock bool) error {
 	var (
 		ptask *Task
 		ok    bool
@@ -267,7 +277,14 @@ func removeTaskHandle(c echo.Context) error {
 			return jsonError(c, fmt.Errorf(`Access denied`))
 		}
 	}
-	RemoveTask(uint32(idTask))
+	if lock {
+		ptask.Locked = !ptask.Locked
+	} else {
+		if ptask.Locked {
+			return jsonError(c, fmt.Errorf(`Access denied`))
+		}
+		RemoveTask(uint32(idTask))
+	}
 	if errSave := SaveTasks(); errSave != nil {
 		golog.Error(errSave)
 	}

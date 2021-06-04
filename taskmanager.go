@@ -36,7 +36,7 @@ const ( // TaskStatus
 	TaskFailed
 	TaskCrashed
 
-	TasksPage = 2
+	TasksPage = 50
 )
 
 type Task struct {
