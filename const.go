@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "1.18.0"
+	Version = "1.19.0"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
@@ -25,7 +25,6 @@ const (
 	RunLimit     = 20
 	// Number of reserved ports
 	PortsPool   = 1000
-	TasksLimit  = 50
 	TimeFormat  = `2006/01/02 15:04:05`
 	TimeoutOpen = 4000
 	SourceCode  = `source-code`

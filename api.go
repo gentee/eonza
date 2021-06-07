@@ -54,13 +54,16 @@ type TaskInfo struct {
 	User    string `json:"user"`
 	Role    string `json:"role"`
 	ToDel   bool   `json:"todel"`
+	Locked  bool   `json:"locked"`
 	Port    int    `json:"port"`
 	Message string `json:"message,omitempty"`
 }
 
 type TasksResponse struct {
-	List  []TaskInfo `json:"list,omitempty"`
-	Error string     `json:"error,omitempty"`
+	List     []TaskInfo `json:"list,omitempty"`
+	Page     int        `json:"page"`
+	AllPages int        `json:"allpages"`
+	Error    string     `json:"error,omitempty"`
 }
 
 type Feedback struct {
@@ -175,7 +178,12 @@ func sysTaskHandle(c echo.Context) error {
 }
 
 func tasksHandle(c echo.Context) error {
+	if err := CheckTasks(); err != nil {
+		return jsonError(c, err)
+	}
 	list := ListTasks()
+	page := 1
+	allpages := 1
 	listInfo := make([]TaskInfo, 0, len(list))
 	user := c.(*Auth).User
 	var (
@@ -209,18 +217,45 @@ func tasksHandle(c echo.Context) error {
 				FinishTime: finish,
 				User:       userName,
 				Role:       roleName,
+				Locked:     item.Locked,
 				Port:       item.Port,
 				ToDel:      todel,
 				Message:    item.Message,
 			})
 		}
 	}
+	if len(listInfo) > 0 {
+		allpages = len(listInfo) / TasksPage
+		if len(listInfo)%TasksPage != 0 {
+			allpages++
+		}
+		if cur := c.QueryParam("page"); len(cur) > 0 {
+			if ipage, err := strconv.ParseInt(cur, 10, 32); err == nil && int(ipage) <= allpages {
+				page = int(ipage)
+			}
+		}
+	}
+	start := TasksPage * (page - 1)
+	end := TasksPage * page
+	if end > len(listInfo) {
+		end = len(listInfo)
+	}
 	return c.JSON(http.StatusOK, &TasksResponse{
-		List: listInfo,
+		List:     listInfo[start:end],
+		Page:     page,
+		AllPages: allpages,
 	})
 }
 
+func lockTaskHandle(c echo.Context) error {
+	return taskAction(c, true)
+}
+
 func removeTaskHandle(c echo.Context) error {
+	return taskAction(c, false)
+}
+
+func taskAction(c echo.Context, lock bool) error {
 	var (
 		ptask *Task
 		ok    bool
@@ -242,7 +277,14 @@ func removeTaskHandle(c echo.Context) error {
 			return jsonError(c, fmt.Errorf(`Access denied`))
 		}
 	}
-	RemoveTask(uint32(idTask))
+	if lock {
+		ptask.Locked = !ptask.Locked
+	} else {
+		if ptask.Locked {
+			return jsonError(c, fmt.Errorf(`Access denied`))
+		}
+		RemoveTask(uint32(idTask))
+	}
 	if errSave := SaveTasks(); errSave != nil {
 		golog.Error(errSave)
 	}

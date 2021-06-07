@@ -37,6 +37,7 @@ type Header struct {
 	IP           string
 	TaskID       uint32
 	ServerPort   int
+	URLPort      int
 	HTTP         *lib.HTTPConfig
 	Playground   *lib.PlaygroundConfig
 }

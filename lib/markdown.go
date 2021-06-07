@@ -12,6 +12,7 @@ import (
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 )
 
@@ -32,6 +33,7 @@ func Markdown(input string) (string, error) {
 
 	markdown := goldmark.New(
 		goldmark.WithExtensions(
+			extension.Table,
 			highlighting.NewHighlighting(
 				highlighting.WithStyle("monokai"),
 				highlighting.WithFormatOptions(

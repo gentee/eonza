@@ -360,6 +360,10 @@ func eventHandle(c echo.Context) error {
 			if len(item) == 0 {
 				continue
 			}
+			if item == ip {
+				matched = true
+				break
+			}
 			_, network, err := net.ParseCIDR(item)
 			if err == nil && network.Contains(clientip) {
 				matched = true
