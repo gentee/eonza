@@ -18,7 +18,9 @@ const (
 	TimersRole  = `timers`
 	EventsRole  = `events`
 	ScriptsRole = `scripts`
+	BrowserRole = `browser`
 	ResRoleID   = 0xffffff00
+	BrowserID   = 0xfffffffc
 	ScriptsID   = 0xfffffffd
 	EventsID    = 0xfffffffe
 	TimersID    = 0xffffffff
@@ -73,6 +75,7 @@ func InitUsers(psw []byte, counter uint32) (map[uint32]Role, map[uint32]User) {
 		TimersID:  {ID: TimersID, Name: TimersRole},
 		EventsID:  {ID: EventsID, Name: EventsRole},
 		ScriptsID: {ID: ScriptsID, Name: ScriptsRole},
+		BrowserID: {ID: BrowserID, Name: BrowserRole},
 	}
 	Users := map[uint32]User{
 		XRootID: {ID: XRootID, Nickname: RootUser, PasswordHash: psw, RoleID: XAdminID,

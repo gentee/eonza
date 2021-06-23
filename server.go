@@ -243,7 +243,8 @@ func markdownHandle(c echo.Context) error {
 }
 
 func allowOrigin(origin string) (bool, error) {
-	return strings.HasPrefix(origin, `https://`+cfg.HTTP.Host), nil
+	return strings.HasPrefix(origin, `https://`+cfg.HTTP.Host) ||
+		origin == `chrome-extension://`+ChromeExtension, nil
 }
 
 func RunServer(options lib.HTTPConfig) *echo.Echo {
@@ -255,10 +256,10 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
-	if !IsScript && options.Host != Localhost {
+	if !IsScript /*&& options.Host != Localhost*/ {
 		e.Use(md.CORSWithConfig(md.CORSConfig{
 			AllowOriginFunc: allowOrigin,
-			AllowMethods:    []string{http.MethodGet},
+			AllowMethods:    []string{http.MethodGet, http.MethodPost},
 		}))
 	}
 	//e.HTTPErrorHandler = customHTTPErrorHandler
@@ -306,7 +307,9 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.GET("/api/settings", settingsHandle)           // +
 		e.GET("/api/latest", latestVerHandle)            //
 		e.GET("/api/trial/:id", trialHandle)             // +
-		e.POST("/api/install", installHandle)            // +
+		e.GET("/api/browserrun", browserRunHandle)
+		e.POST("/api/browserext", browserExtHandle)
+		e.POST("/api/install", installHandle) // +
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)   // +
 		e.POST("/api/delete", deleteScriptHandle) // +
