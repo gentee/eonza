@@ -5,22 +5,26 @@
 package main
 
 import (
-	"eonza/lib"
 	"eonza/users"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
 const (
-	ChromeExtension = `lnhmpeahpfhnpijjccofkfapmadmefih`
+	ChromeExtension = ``
 )
 
 type ExtScript struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
+}
+
+type ExtRun struct {
+	Name string `json:"name"`
+	Open bool   `json:"open"`
+	URL  string `json:"url"`
 }
 
 type ExtListResponse struct {
@@ -34,24 +38,22 @@ type ExtInfo struct {
 
 func browserExtHandle(c echo.Context) error {
 	var err error
-	// Now it supports only localhost
-	// all hosts -> remove api/browserext from auth
-	ip := c.RealIP()
-	host := c.Request().Host
-	if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
-		host = host[:offPort]
-	}
-	if !lib.IsLocalhost(host, ip) {
-		return AccessDenied(http.StatusForbidden)
-	}
+	/*	ip := c.RealIP()
+		host := c.Request().Host
+		if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
+			host = host[:offPort]
+		}
+		if !lib.IsLocalhost(host, ip) {
+			return AccessDenied(http.StatusForbidden)
+		}*/
 	var ext ExtInfo
 	if err = c.Bind(&ext); err != nil {
 		return jsonError(c, err)
 	}
 
 	list := []ExtScript{
-		{`ooops`, ext.Url},
-		{`my.script`, `Скрипт для запуска`},
+		{`welcome`, ext.Url},
+		{`my.scrypt`, `Скрипт для запуска`},
 	}
 	//	list := make([]ExtScript, 0)
 	/*	userId := c.(*Auth).User.ID
@@ -68,28 +70,38 @@ func browserExtHandle(c echo.Context) error {
 }
 
 func browserRunHandle(c echo.Context) error {
+	var (
+		err error
+		ext ExtRun
+	)
+	if err = c.Bind(&ext); err != nil {
+		return jsonError(c, err)
+	}
+
+	user := c.(*Auth).User
 	rs := RunScript{
-		Name: `welcome`,
-		User: users.User{
-			ID:       users.XAdminID,
-			Nickname: users.RootUser,
-			RoleID:   users.BrowserID,
-		},
+		Name: ext.Name,
+		Open: ext.Open && cfg.HTTP.Host == Localhost,
+		User: *user,
+		/*		users.User{
+				ID:       users.XAdminID,
+				Nickname: users.RootUser,
+				RoleID:   users.BrowserID,
+			},*/
 		Role: users.Role{
 			ID:   users.BrowserID,
 			Name: users.BrowserRole,
 		},
 		IP: Localhost,
 	}
-	if err := systemRun(&rs); err != nil {
+	if err = systemRun(&rs); err != nil {
 		NewNotification(&Notification{
 			Text:   fmt.Sprintf(`Browser extension error: %s`, err.Error()),
-			UserID: users.XAdminID,
+			UserID: user.ID,
 			RoleID: users.BrowserID,
 			Script: rs.Name,
 		})
+		return jsonError(c, err)
 	}
-	return c.JSON(http.StatusOK, &Response{
-		Success: true,
-	})
+	return c.JSON(http.StatusOK, &RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
 }

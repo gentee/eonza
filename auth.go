@@ -204,7 +204,7 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 						c.Request().URL.Path = `login`
 					} else if url != `/api/login` && /*url != `/api/taskstatus` &&*/ url != `/api/sys` &&
 						/*url != `/api/notification` && url != `/api/runscript` && url != `/api/event` &&*/
-						url != `/api/browserext` && url != `/api/randid` {
+						url != `/api/randid` {
 						return AccessDenied(http.StatusUnauthorized)
 					}
 				}

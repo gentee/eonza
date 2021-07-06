@@ -87,10 +87,10 @@ var (
 func GetSchedulerName(id, idrole uint32) (uname string, rname string) {
 	switch idrole {
 	case users.BrowserID:
-		/*		if user, ok := Users[id]; ok {
-				uname = user.Nickname
-			}*/
-		uname = users.RootUser
+		if user, ok := GetUser(id); ok {
+			uname = user.Nickname
+		}
+		//		uname = users.RootUser
 		if len(uname) == 0 {
 			uname = fmt.Sprintf("%x", id)
 		}
