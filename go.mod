@@ -1,8 +1,9 @@
 module eonza
 
-go 1.15
+go 1.16
 
 require (
+	github.com/PuerkitoBio/goquery v1.7.0
 	github.com/alecthomas/chroma v0.9.1
 	github.com/alecthomas/colour v0.1.0 // indirect
 	github.com/alecthomas/repr v0.0.0-20210301060118-828286944d6a // indirect

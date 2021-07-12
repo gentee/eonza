@@ -186,6 +186,12 @@ var (
 		{Prototype: `DeleteRegistryValue(handle,str)`, Object: DeleteRegistryValue},
 		{Prototype: `GetRegistryValue(handle,str,str) str`, Object: GetRegistryValue},
 		{Prototype: `OpenRegistryKey(int,str,int) handle`, Object: OpenRegistryKey},
+		// HTML parsing
+		{Prototype: `ParseHTML(str) handle`, Object: ParseHTML},
+		{Prototype: `FindHTML(handle,str) handle`, Object: FindHTML},
+		{Prototype: `AttribHTML(handle,str) str`, Object: AttribHTML},
+		{Prototype: `TextHTML(handle) str`, Object: TextHTML},
+		{Prototype: `ChildrenHTML(handle) arr.handle`, Object: ChildrenHTML},
 		// For gentee
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
