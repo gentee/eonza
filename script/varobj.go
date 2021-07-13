@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gentee/gentee/core"
 	"github.com/gentee/gentee/vm"
 )
@@ -45,6 +46,9 @@ func MapCondition(rt *vm.Runtime, item *core.Map) (int64, error) {
 func ObjToStr(key string) (string, bool) {
 	if len(dataScript.ObjVars) > 0 {
 		if v, ok := dataScript.ObjVars[len(dataScript.ObjVars)-1].Load(key); ok {
+			if iv, ok := v.(*core.Obj).Data.(*goquery.Selection); ok {
+				return iv.Text(), true
+			}
 			switch vm.Type(v.(*core.Obj)) {
 			case `int`, `float`, `str`, `bool`:
 				return fmt.Sprint(v.(*core.Obj).Data), true
@@ -74,8 +78,13 @@ func ReplaceObj(key string) (ret string, found bool) {
 				} else {
 					return false
 				}
-			} else if obj, _ = vm.ItemºObjStr(obj, name); obj == nil {
-				return false
+			} else {
+				if q, ok := obj.Data.(*goquery.Selection); ok {
+					obj = core.NewObj()
+					obj.Data, _ = q.Attr(name)
+				} else if obj, _ = vm.ItemºObjStr(obj, name); obj == nil {
+					return false
+				}
 			}
 		}
 		off = i + 1
@@ -123,10 +132,13 @@ func ReplaceObj(key string) (ret string, found bool) {
 		return
 	}
 	if obj != nil {
-		switch obj.Data.(type) {
+		switch v := obj.Data.(type) {
+		case *goquery.Selection:
+			ret = v.Text()
+			found = true
 		case *core.Array, *core.Map:
 		default:
-			ret = fmt.Sprint(obj.Data)
+			ret = fmt.Sprint(v)
 			found = true
 		}
 	}

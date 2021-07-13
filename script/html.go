@@ -5,6 +5,7 @@
 package script
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -12,8 +13,23 @@ import (
 )
 
 func ParseHTML(input string) (*goquery.Selection, error) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(input))
-	return doc.Selection, err
+	if strings.HasPrefix(input, `<`) {
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(input))
+		return doc.Selection, err
+	}
+	var (
+		o   *core.Obj
+		err error
+		ret *goquery.Selection
+		ok  bool
+	)
+	if o, err = GetVarObj(input); err != nil {
+		return nil, err
+	}
+	if ret, ok = o.Data.(*goquery.Selection); !ok {
+		return nil, fmt.Errorf(`%s is not html node`, input)
+	}
+	return ret, nil
 }
 
 func FindHTML(node *goquery.Selection, selector string) *goquery.Selection {

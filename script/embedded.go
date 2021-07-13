@@ -193,6 +193,7 @@ var (
 		{Prototype: `TextHTML(handle) str`, Object: TextHTML},
 		{Prototype: `ChildrenHTML(handle) arr.handle`, Object: ChildrenHTML},
 		// For gentee
+		{Prototype: `obj(handle) obj`, Object: ObjHandle},
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
 		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
 		{Prototype: `YamlToObj(str) obj`, Object: YamlToObj},
