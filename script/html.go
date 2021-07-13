@@ -13,13 +13,19 @@ import (
 )
 
 func ParseHTML(input string) (*goquery.Selection, error) {
+	var err error
+
+	if !strings.HasPrefix(input, `<`) && IsVar(input) != 0 {
+		if input, err = GetVar(input); err != nil {
+			return nil, err
+		}
+	}
 	if strings.HasPrefix(input, `<`) {
 		doc, err := goquery.NewDocumentFromReader(strings.NewReader(input))
 		return doc.Selection, err
 	}
 	var (
 		o   *core.Obj
-		err error
 		ret *goquery.Selection
 		ok  bool
 	)
