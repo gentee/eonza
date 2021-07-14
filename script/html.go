@@ -20,7 +20,7 @@ func ParseHTML(input string) (*goquery.Selection, error) {
 			return nil, err
 		}
 	}
-	if strings.HasPrefix(input, `<`) {
+	if strings.HasPrefix(strings.TrimSpace(input), `<`) {
 		doc, err := goquery.NewDocumentFromReader(strings.NewReader(input))
 		return doc.Selection, err
 	}
