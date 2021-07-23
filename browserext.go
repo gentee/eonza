@@ -5,9 +5,11 @@
 package main
 
 import (
+	"eonza/lib"
 	"eonza/users"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +17,22 @@ import (
 const (
 	ChromeExtension = ``
 )
+
+type BrowserSettings struct {
+	Body bool `json:"body"`
+}
+
+type Browser struct {
+	ID       uint32          `json:"id"`
+	URLs     string          `json:"urls"`
+	Scripts  string          `json:"scripts"`
+	Settings BrowserSettings `json:"settings"`
+}
+
+type BrowsersResponse struct {
+	List  []*Browser `json:"list"`
+	Error string     `json:"error,omitempty"`
+}
 
 type ExtScript struct {
 	Name  string `json:"name"`
@@ -104,4 +122,78 @@ func browserRunHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, &RunResponse{Success: true, Port: rs.Port, ID: rs.ID})
+}
+
+func browsersResponse(c echo.Context) error {
+	return c.JSON(http.StatusOK, &BrowsersResponse{
+		List: storage.Browsers,
+	})
+}
+
+func browsersHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+	return browsersResponse(c)
+}
+
+func saveBrowserHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+	var browser Browser
+	if err := c.Bind(&browser); err != nil {
+		return jsonError(c, err)
+	}
+	if len(browser.Scripts) == 0 {
+		return jsonError(c, Lang(DefLang, `errreq`, `Scripts`))
+	}
+	isBrowser := func(id uint32) int {
+		for i, item := range storage.Browsers {
+			if item.ID == id {
+				return i + 1
+			}
+		}
+		return 0
+	}
+	curID := isBrowser(browser.ID)
+	if browser.ID == 0 {
+		for {
+			browser.ID = lib.RndNum()
+			if isBrowser(browser.ID) == 0 {
+				break
+			}
+		}
+		storage.Browsers = append(storage.Browsers, &browser)
+	} else if curID == 0 {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	} else {
+		storage.Browsers[curID-1] = &browser
+	}
+	if err := SaveStorage(); err != nil {
+		return jsonError(c, err)
+	}
+	return browsersResponse(c)
+}
+
+func removeBrowserHandle(c echo.Context) error {
+	if err := CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	for i, item := range storage.Browsers {
+		if item.ID == uint32(id) {
+			if i < len(storage.Browsers)-1 {
+				storage.Browsers = append(storage.Browsers[:i], storage.Browsers[i+1:]...)
+			} else {
+				storage.Browsers = storage.Browsers[:i]
+			}
+			if err := SaveStorage(); err != nil {
+				return jsonError(c, err)
+			}
+			break
+		}
+	}
+	return browsersResponse(c)
 }
