@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,8 +36,9 @@ type BrowsersResponse struct {
 }
 
 type ExtScript struct {
-	Name  string `json:"name"`
-	Title string `json:"title"`
+	Name     string          `json:"name"`
+	Title    string          `json:"title"`
+	Settings BrowserSettings `json:"settings"`
 }
 
 type ExtRun struct {
@@ -55,25 +57,51 @@ type ExtInfo struct {
 }
 
 func browserExtHandle(c echo.Context) error {
-	var err error
-	/*	ip := c.RealIP()
-		host := c.Request().Host
-		if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
-			host = host[:offPort]
-		}
-		if !lib.IsLocalhost(host, ip) {
-			return AccessDenied(http.StatusForbidden)
-		}*/
-	var ext ExtInfo
+	var (
+		err error
+		ext ExtInfo
+	)
 	if err = c.Bind(&ext); err != nil {
 		return jsonError(c, err)
 	}
 
-	list := []ExtScript{
-		{`welcome`, ext.Url},
-		{`my.scrypt`, `Скрипт для запуска`},
+	list := make([]ExtScript, 0)
+	added := make(map[string]bool)
+	for _, item := range storage.Browsers {
+		url := strings.ReplaceAll(strings.TrimSpace(item.URLs), "\n", " ")
+		match := len(url) == 0
+		if !match {
+			for _, upath := range strings.Split(url, " ") {
+				upath = strings.TrimSpace(upath)
+				if strings.HasPrefix(upath, `http`) {
+					match = strings.HasPrefix(ext.Url, upath)
+				} else {
+					match = strings.Contains(ext.Url, upath)
+				}
+				if match {
+					break
+				}
+			}
+		}
+		if match {
+			for _, cmd := range strings.Split(item.Scripts, `,`) {
+				cmd = strings.TrimSpace(cmd)
+				if added[cmd] {
+					continue
+				}
+				var script *Script
+				if script = getScript(cmd); script == nil {
+					continue
+				}
+				list = append(list, ExtScript{
+					Name:     script.Settings.Name,
+					Title:    script.Settings.Title,
+					Settings: item.Settings,
+				})
+
+			}
+		}
 	}
-	//	list := make([]ExtScript, 0)
 	/*	userId := c.(*Auth).User.ID
 		if _, ok := userSettings[userId]; ok {
 			for _, name := range userSettings[userId].History.Run {
