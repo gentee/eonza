@@ -5,7 +5,9 @@
 package main
 
 import (
+	"encoding/json"
 	"eonza/lib"
+	es "eonza/script"
 	"eonza/users"
 	"fmt"
 	"net/http"
@@ -20,7 +22,7 @@ const (
 )
 
 type BrowserSettings struct {
-	Body bool `json:"body"`
+	HTML bool `json:"html"`
 }
 
 type Browser struct {
@@ -42,9 +44,11 @@ type ExtScript struct {
 }
 
 type ExtRun struct {
-	Name string `json:"name"`
-	Open bool   `json:"open"`
-	URL  string `json:"url"`
+	Name  string `json:"name"`
+	Open  bool   `json:"open"`
+	URL   string `json:"url"`
+	Title string `json:"title"`
+	HTML  string `json:"html,omitempty"`
 }
 
 type ExtListResponse struct {
@@ -64,7 +68,8 @@ func browserExtHandle(c echo.Context) error {
 	if err = c.Bind(&ext); err != nil {
 		return jsonError(c, err)
 	}
-
+	lang := c.(*Auth).Lang
+	glob := &langRes[GetLangId(c.(*Auth).User)]
 	list := make([]ExtScript, 0)
 	added := make(map[string]bool)
 	for _, item := range storage.Browsers {
@@ -93,23 +98,18 @@ func browserExtHandle(c echo.Context) error {
 				if script = getScript(cmd); script == nil {
 					continue
 				}
-				list = append(list, ExtScript{
-					Name:     script.Settings.Name,
-					Title:    script.Settings.Title,
-					Settings: item.Settings,
-				})
-
+				user := c.(*Auth).User
+				if ScriptAccess(script.Settings.Name, script.Settings.Path, user.RoleID) == nil {
+					list = append(list, ExtScript{
+						Name:     script.Settings.Name,
+						Title:    es.ReplaceVars(script.Settings.Title, script.Langs[lang], glob),
+						Settings: item.Settings,
+					})
+					added[cmd] = true
+				}
 			}
 		}
 	}
-	/*	userId := c.(*Auth).User.ID
-		if _, ok := userSettings[userId]; ok {
-			for _, name := range userSettings[userId].History.Run {
-				if item := getScript(name); item != nil {
-					list = append(list, ScriptToItem(c, item))
-				}
-			}
-		}*/
 	return c.JSON(http.StatusOK, &ExtListResponse{
 		List: list,
 	})
@@ -117,17 +117,21 @@ func browserExtHandle(c echo.Context) error {
 
 func browserRunHandle(c echo.Context) error {
 	var (
-		err error
-		ext ExtRun
+		err  error
+		ext  ExtRun
+		data []byte
 	)
 	if err = c.Bind(&ext); err != nil {
 		return jsonError(c, err)
 	}
-
+	if data, err = json.Marshal(ext); err != nil {
+		return jsonError(c, err)
+	}
 	user := c.(*Auth).User
 	rs := RunScript{
 		Name: ext.Name,
 		Open: ext.Open && cfg.HTTP.Host == Localhost,
+		Data: string(data),
 		User: *user,
 		/*		users.User{
 				ID:       users.XAdminID,
