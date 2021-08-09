@@ -319,8 +319,6 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		return ``, err
 	}
 	if !src.Linked[idname] || script.Settings.Name == SourceCode || len(node.Children) > 0 {
-		src.Linked[idname] = true
-
 		tmp, err := src.Tree(node.Children)
 		if err != nil {
 			return ``, err
@@ -342,6 +340,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			idname = fmt.Sprintf("%s%d", idname, src.Counter)
 			src.Counter++
 		}
+		src.Linked[idname] = true
 		code = strings.TrimRight(code, "\r\n")
 		var parNames, prefix, suffix, initcmd string
 		if script.Settings.Name != SourceCode {

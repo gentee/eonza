@@ -31,6 +31,12 @@ type CSV struct {
 	Columns []string
 }
 
+func ObjHandle(handle interface{}) *core.Obj {
+	var ret = core.NewObj()
+	ret.Data = handle
+	return ret
+}
+
 func YamlToMap(in string) (*core.Map, error) {
 	var (
 		tmp map[string]string

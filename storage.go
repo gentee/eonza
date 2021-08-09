@@ -59,6 +59,7 @@ type Storage struct {
 	Scripts     map[string]*Script
 	Timers      map[uint32]*Timer
 	Events      map[string]*Event
+	Browsers    []*Browser
 }
 
 var (
@@ -70,9 +71,10 @@ var (
 			MaxTasks:    DefMaxTasks,
 			RemoveAfter: DefRemoveAfter,
 		},
-		Users:   make(map[uint32]*User),
-		Scripts: make(map[string]*Script),
-		Timers:  make(map[uint32]*Timer),
+		Users:    make(map[uint32]*User),
+		Scripts:  make(map[string]*Script),
+		Timers:   make(map[uint32]*Timer),
+		Browsers: make([]*Browser, 0),
 		Events: map[string]*Event{
 			`test`: {
 				ID:        lib.RndNum(),

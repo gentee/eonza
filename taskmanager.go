@@ -161,6 +161,9 @@ func NewTask(header script.Header) (err error) {
 		Port:      header.HTTP.Port,
 		LocalPort: header.HTTP.LocalPort,
 	}
+	if header.Role.ID >= users.ResRoleID {
+		task.RoleID = header.Role.ID
+	}
 	if err = SaveTrace(&task); err != nil {
 		return
 	}

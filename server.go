@@ -243,7 +243,9 @@ func markdownHandle(c echo.Context) error {
 }
 
 func allowOrigin(origin string) (bool, error) {
-	return strings.HasPrefix(origin, `https://`+cfg.HTTP.Host), nil
+	return strings.HasPrefix(origin, `https://`+cfg.HTTP.Host) ||
+		strings.HasPrefix(origin, `chrome-extension://`), nil
+	//origin == `chrome-extension://`+ChromeExtension, nil
 }
 
 func RunServer(options lib.HTTPConfig) *echo.Echo {
@@ -255,10 +257,10 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 	e.Use(AuthHandle)
 	e.Use(Logger)
 	e.Use(md.Recover())
-	if !IsScript && options.Host != Localhost {
+	if !IsScript /*&& options.Host != Localhost*/ {
 		e.Use(md.CORSWithConfig(md.CORSConfig{
 			AllowOriginFunc: allowOrigin,
-			AllowMethods:    []string{http.MethodGet},
+			AllowMethods:    []string{http.MethodGet, http.MethodHead, http.MethodOptions, http.MethodPost},
 		}))
 	}
 	//e.HTTPErrorHandler = customHTTPErrorHandler
@@ -287,26 +289,31 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.GET("/api/savereport", saveReportHandle) // +
 		e.GET("/api/reload", reloadHandle)         // +
 		e.GET("/api/logout", logoutHandle)
-		e.GET("/api/run", runHandle)                     // +
-		e.GET("/api/script", getScriptHandle)            // +
-		e.GET("/api/list", listScriptHandle)             // +
-		e.GET("/api/listrun", listRunHandle)             // +
-		e.GET("/api/notifications", nfyHandle)           // +
-		e.GET("/api/tasks", tasksHandle)                 // +
-		e.GET("/api/timers", timersHandle)               // +
-		e.GET("/api/events", eventsHandle)               // +
-		e.GET("/api/prosettings", proSettingsHandle)     // +
-		e.GET("/api/randid", randidHandle)               // +
-		e.GET("/api/remove/:id", removeTaskHandle)       // +
-		e.GET("/api/lock/:id", lockTaskHandle)           // +
-		e.GET("/api/removenfy/:id", removeNfyHandle)     // +
-		e.GET("/api/removetimer/:id", removeTimerHandle) // +
-		e.GET("/api/removeevent/:id", removeEventHandle) // +
-		e.GET("/api/sys", sysTaskHandle)                 //
-		e.GET("/api/settings", settingsHandle)           // +
-		e.GET("/api/latest", latestVerHandle)            //
-		e.GET("/api/trial/:id", trialHandle)             // +
-		e.POST("/api/install", installHandle)            // +
+		e.GET("/api/run", runHandle)                         // +
+		e.GET("/api/script", getScriptHandle)                // +
+		e.GET("/api/list", listScriptHandle)                 // +
+		e.GET("/api/listrun", listRunHandle)                 // +
+		e.GET("/api/notifications", nfyHandle)               // +
+		e.GET("/api/tasks", tasksHandle)                     // +
+		e.GET("/api/timers", timersHandle)                   // +
+		e.GET("/api/events", eventsHandle)                   // +
+		e.GET("/api/prosettings", proSettingsHandle)         // +
+		e.GET("/api/randid", randidHandle)                   // +
+		e.GET("/api/remove/:id", removeTaskHandle)           // +
+		e.GET("/api/lock/:id", lockTaskHandle)               // +
+		e.GET("/api/removenfy/:id", removeNfyHandle)         // +
+		e.GET("/api/removetimer/:id", removeTimerHandle)     // +
+		e.GET("/api/removeevent/:id", removeEventHandle)     // +
+		e.GET("/api/sys", sysTaskHandle)                     //
+		e.GET("/api/settings", settingsHandle)               // +
+		e.GET("/api/latest", latestVerHandle)                //
+		e.GET("/api/trial/:id", trialHandle)                 // +
+		e.GET("/api/browsers", browsersHandle)               // +
+		e.GET("/api/removebrowser/:id", removeBrowserHandle) // +
+		e.POST("/api/browserrun", browserRunHandle)
+		e.POST("/api/browserext", browserExtHandle)
+		e.POST("/api/savebrowser", saveBrowserHandle) // +
+		e.POST("/api/install", installHandle)         // +
 		e.POST("/api/login", loginHandle)
 		e.POST("/api/script", saveScriptHandle)   // +
 		e.POST("/api/delete", deleteScriptHandle) // +
