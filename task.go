@@ -434,6 +434,9 @@ func initTask() script.Settings {
 	(*glob)[`s`] = " "
 	(*glob)[`data`] = strings.TrimSpace(scriptTask.Header.Data)
 	(*glob)[`eonzaport`] = fmt.Sprint(scriptTask.Header.ServerPort)
+	for _, dynvar := range []string{`date`, `time`, `year`, `month`, `day`} {
+		(*glob)[dynvar] = script.EonzaDynamic
+	}
 
 	script.InitData(chLogout, chForm, chReport, glob)
 	return script.Settings{

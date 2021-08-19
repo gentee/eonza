@@ -35,6 +35,8 @@ const (
 	PButton
 	PDynamic
 	PPassword
+
+	EonzaDynamic = `eonza.dynamic.constant`
 )
 
 type PostNfy struct {
@@ -208,6 +210,23 @@ var (
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
 	}
 )
+
+func GetEonzaDynamic(name string) (ret string) {
+	now := time.Now()
+	switch name {
+	case `date`:
+		ret = now.Format(`20060102`)
+	case `day`:
+		ret = now.Format(`02`)
+	case `month`:
+		ret = now.Format(`01`)
+	case `time`:
+		ret = now.Format(`150405`)
+	case `year`:
+		ret = now.Format(`2006`)
+	}
+	return
+}
 
 func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	var (
@@ -597,6 +616,9 @@ func replace(values map[string]string, input []rune, stack *[]string,
 				if key[0] == '.' {
 					if glob != nil {
 						value, ok = (*glob)[key[1:]]
+						if value == EonzaDynamic {
+							value = GetEonzaDynamic(key[1:])
+						}
 					}
 				} else if key[0] == '@' && scriptTask.Header.SecureConsts != nil {
 					value, ok = scriptTask.Header.SecureConsts[key[1:]]
