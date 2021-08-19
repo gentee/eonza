@@ -65,12 +65,12 @@ func (src *Source) FindStrConst(value string) string {
 	return fmt.Sprintf(`STR%d`, id)
 }
 
-func (src *Source) Value(value string) string {
+func (src *Source) Value(value string, nomacro bool) string {
 	var f string
 	if len(value) > 2 && value[0] == '<' && value[len(value)-1] == '>' &&
 		!strings.Contains(value[1:], `<`) {
 		f = `File`
-	} else if strings.ContainsRune(value, es.VarChar) {
+	} else if strings.ContainsRune(value, es.VarChar) && !nomacro {
 		f = `Macro`
 	}
 	value = src.FindStrConst(value)
@@ -92,11 +92,11 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 		}
 		if value != `false` && value != `true` &&
 			!(strings.HasPrefix(value, `bool(`) && strings.HasSuffix(value, `)`)) {
-			value = src.Value(value) + `?`
+			value = src.Value(value, false) + `?`
 		}
 	case es.PTextarea, es.PSingleText, es.PPassword:
 		if script.Settings.Name != SourceCode {
-			value = src.Value(value)
+			value = src.Value(value, strings.Contains(par.Options.Flags, `nomacro`))
 		}
 	case es.PSelect:
 		if len(par.Options.Type) > 0 {
@@ -105,7 +105,7 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 			ptype = `str`
 		}
 		if ptype == `str` {
-			value = src.Value(value) //src.FindStrConst(value)
+			value = src.Value(value, false) //src.FindStrConst(value)
 		}
 	case es.PNumber:
 		ptype = `int`
@@ -173,7 +173,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 				}
 			case string:
 				if par.Type == es.PNumber || par.Type == es.PCheckbox {
-					val = src.Value(v)
+					val = src.Value(v, false)
 					if par.Type == es.PNumber {
 						val = fmt.Sprintf(`int(%s)`, val)
 					} else if par.Type == es.PCheckbox {
@@ -468,7 +468,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 			params = append(params, fmt.Sprintf(`arr.obj %s%d`, par.Name, i))
 			setvar = fmt.Sprintf(`SetVar("%s", obj(%[1]s%d))`, par.Name, i)
 		default:
-			setvar = fmt.Sprintf(`SetVar("%s", %s)`, par.Name, src.Value(pval))
+			setvar = fmt.Sprintf(`SetVar("%s", %s)`, par.Name, src.Value(pval, false))
 		}
 		if par.Type != es.PList && !par.Options.Optional {
 			parOpt, err := json.Marshal(par.Options)
@@ -489,7 +489,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		if err != nil {
 			return ``, err
 		}
-		params = append(params, fmt.Sprintf("initcmd(`form`, %s)\r\nForm( %[1]s )", src.Value(string(outForm))))
+		params = append(params, fmt.Sprintf("initcmd(`form`, %s)\r\nForm( %[1]s )", src.Value(string(outForm), false)))
 	}
 	for _, par := range script.Params {
 		var ptype string
