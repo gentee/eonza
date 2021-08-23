@@ -191,3 +191,40 @@ func ResultVarObj(name string, value *core.Obj) error {
 func SetVarObj(name string, value *core.Obj) error {
 	return setRawVarObj(0, name, value)
 }
+
+func AppendToArray(name, value string) error {
+	obj, err := GetVarObj(name)
+	if err != nil {
+		if strings.ContainsAny(name, `[]`) || len(name) == 0 {
+			return err
+		}
+		names := strings.Split(name, `.`)
+		arr := core.NewArray()
+		obj = core.NewObj()
+		obj.Data = arr
+		if len(names) == 1 {
+			SetVarObj(name, obj)
+		} else {
+			ownerName := strings.Join(names[:len(names)-1], `.`)
+			owner, err := GetVarObj(ownerName)
+			if err != nil {
+				return err
+			}
+			imap, ok := owner.Data.(*core.Map)
+			if !ok {
+				return fmt.Errorf(`%s is not map object`, ownerName)
+			}
+			imap.SetIndex(names[len(names)-1], obj)
+		}
+	}
+	if vm.IsArrayºObj(obj) == 0 {
+		return fmt.Errorf(`%s is not array object`, name)
+	}
+	var val *core.Obj
+	if val, err = GetVarObj(value); err != nil {
+		val = core.NewObj()
+		val.Data = value
+	}
+	obj.Data.(*core.Array).Data = append(obj.Data.(*core.Array).Data, val)
+	return nil
+}
