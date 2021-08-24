@@ -179,6 +179,7 @@ var (
 		{Prototype: `GetIniValue(handle,str,str,str,str) bool`, Object: GetIniValue},
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
+		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
