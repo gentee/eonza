@@ -16,10 +16,12 @@ import (
 const (
 	DocxFile = iota
 	OdtFile
+	OdsFile
 )
 
 var extTemplates = []string{
 	"word/document.xml",
+	"content.xml",
 	"content.xml",
 }
 
@@ -146,4 +148,8 @@ func DocxTemplate(src string, dest string) error {
 
 func OdtTemplate(src string, dest string) error {
 	return replaceTemplate(src, dest, OdtFile)
+}
+
+func OdsTemplate(src string, dest string) error {
+	return replaceTemplate(src, dest, OdsFile)
 }
