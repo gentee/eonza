@@ -257,6 +257,8 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 		}
 	}
 	switch item.Cmp {
+	case `contains`:
+		item.result = strings.Contains(varVal, val)
 	case `equal`:
 		if len(item.Value) == 0 {
 			var i int64
