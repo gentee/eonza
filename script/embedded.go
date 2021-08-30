@@ -180,6 +180,8 @@ var (
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
 		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
+		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
+		{Prototype: `OdtTemplate(str,str)`, Object: OdtTemplate},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
@@ -756,9 +758,9 @@ func InitData(chLogout chan string, chForm chan FormInfo, chReport chan Report, 
 	dataScript.Global = glob
 }
 
-func InitEngine() error {
+func InitEngine(outerLib []gentee.EmbedItem) error {
 	return gentee.Customize(&gentee.Custom{
-		Embedded: customLib,
+		Embedded: append(customLib, outerLib...),
 	})
 }
 

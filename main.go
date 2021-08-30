@@ -15,6 +15,8 @@ import (
 
 	"eonza/script"
 
+	"github.com/gentee/gentee"
+
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
 )
@@ -24,6 +26,9 @@ var (
 	scriptTask  *script.Script
 	consoleData []byte
 	isShutdown  bool
+	outerLib    = []gentee.EmbedItem{
+		{Prototype: `Asset(str,str)`, Object: Asset},
+	}
 )
 
 func main() {
@@ -41,7 +46,7 @@ func main() {
 	flag.StringVar(&psw, "psw", "", "The login password")
 	flag.BoolVar(&install, "install", false, "only install")
 	flag.Parse()
-	if err := script.InitEngine(); err != nil {
+	if err := script.InitEngine(outerLib); err != nil {
 		golog.Fatal(err)
 	}
 	script.InitWorkspace()
