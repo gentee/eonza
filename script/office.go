@@ -17,12 +17,14 @@ const (
 	DocxFile = iota
 	OdtFile
 	OdsFile
+	XlsxFile
 )
 
 var extTemplates = []string{
 	"word/document.xml",
 	"content.xml",
 	"content.xml",
+	"xl/sharedStrings.xml",
 }
 
 func parseDocx(in string, regexp *regexp.Regexp) (out string) {
@@ -104,7 +106,8 @@ func replaceTemplate(src, dest string, template int) error {
 			isMacro bool
 			out     string
 		)
-		if f.Name == extTemplates[template] {
+		if f.Name == extTemplates[template] || (template == XlsxFile &&
+			strings.HasPrefix(f.Name, `xl/worksheets/sheet`)) {
 			isMacro = true
 			input := make([]byte, size)
 			if read, err := io.ReadFull(rc, input); err != nil || read != int(size) {
@@ -152,4 +155,8 @@ func OdtTemplate(src string, dest string) error {
 
 func OdsTemplate(src string, dest string) error {
 	return replaceTemplate(src, dest, OdsFile)
+}
+
+func XlsxTemplate(src string, dest string) error {
+	return replaceTemplate(src, dest, XlsxFile)
 }

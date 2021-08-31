@@ -183,6 +183,7 @@ var (
 		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
 		{Prototype: `OdtTemplate(str,str)`, Object: OdtTemplate},
 		{Prototype: `OdsTemplate(str,str)`, Object: OdsTemplate},
+		{Prototype: `XlsxTemplate(str,str)`, Object: XlsxTemplate},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
