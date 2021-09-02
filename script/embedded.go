@@ -247,7 +247,7 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	}
 	if len(item.Var) > 0 {
 		if varVal, err = GetVar(item.Var); err != nil || (IsVar(item.Var) == 0 &&
-			strings.ContainsAny(item.Var, ` #[.`)) {
+			(strings.ContainsAny(item.Var, ` #[.`) || IsVarObj(item.Var) > 0)) {
 			var found bool
 			if varVal, found = ReplaceObj(item.Var); !found {
 				if varVal, err = Macro(item.Var); err != nil {
