@@ -57,6 +57,7 @@ var (
 		"fe80::/10",      // IPv6 link-local
 		"fc00::/7",       // IPv6 unique local addr
 	}
+	reSysName, _ = regexp.Compile(`^[a-z][a-z\d\._-]*$`)
 )
 
 // AppPath returns the full path of the current application file
@@ -121,8 +122,7 @@ func IdName(value string) string {
 
 // ValidateSysName checks the system name
 func ValidateSysName(value string) bool {
-	re, _ := regexp.Compile(`^[a-z][a-z\d\._-]*$`)
-	return re.MatchString(value)
+	return reSysName.MatchString(value)
 }
 
 func RndNum() uint32 {

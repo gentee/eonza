@@ -35,6 +35,8 @@ const (
 	PButton
 	PDynamic
 	PPassword
+
+	EonzaDynamic = `eonza.dynamic.constant`
 )
 
 type PostNfy struct {
@@ -176,6 +178,18 @@ var (
 		{Prototype: `LoadIni(buf) handle`, Object: LoadIni},
 		{Prototype: `GetIniValue(handle,str,str,str,str) bool`, Object: GetIniValue},
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
+		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
+		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
+		// Office functions
+		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
+		{Prototype: `OdtTemplate(str,str)`, Object: OdtTemplate},
+		{Prototype: `OdsTemplate(str,str)`, Object: OdsTemplate},
+		{Prototype: `XlsxTemplate(str,str)`, Object: XlsxTemplate},
+		{Prototype: `OpenXLSX(str) handle`, Object: OpenXLSX},
+		{Prototype: `XlsxSheetName(handle,int) str`, Object: XLSheetName},
+		{Prototype: `XlsxRows(handle,str,str) handle`, Object: XLRows},
+		{Prototype: `XlsxNextRow(handle) bool`, Object: XLNextRow},
+		{Prototype: `XlsxGetRow(handle) obj`, Object: XLGetRow},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
@@ -209,6 +223,23 @@ var (
 	}
 )
 
+func GetEonzaDynamic(name string) (ret string) {
+	now := time.Now()
+	switch name {
+	case `date`:
+		ret = now.Format(`20060102`)
+	case `day`:
+		ret = now.Format(`02`)
+	case `month`:
+		ret = now.Format(`01`)
+	case `time`:
+		ret = now.Format(`150405`)
+	case `year`:
+		ret = now.Format(`2006`)
+	}
+	return
+}
+
 func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	var (
 		i              int64
@@ -222,7 +253,7 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 	}
 	if len(item.Var) > 0 {
 		if varVal, err = GetVar(item.Var); err != nil || (IsVar(item.Var) == 0 &&
-			strings.ContainsAny(item.Var, ` #[.`)) {
+			(strings.ContainsAny(item.Var, ` #[.`) || IsVarObj(item.Var) > 0)) {
 			var found bool
 			if varVal, found = ReplaceObj(item.Var); !found {
 				if varVal, err = Macro(item.Var); err != nil {
@@ -233,6 +264,8 @@ func IsCond(rt *vm.Runtime, item *ConditionItem) (err error) {
 		}
 	}
 	switch item.Cmp {
+	case `contains`:
+		item.result = strings.Contains(varVal, val)
 	case `equal`:
 		if len(item.Value) == 0 {
 			var i int64
@@ -597,6 +630,9 @@ func replace(values map[string]string, input []rune, stack *[]string,
 				if key[0] == '.' {
 					if glob != nil {
 						value, ok = (*glob)[key[1:]]
+						if value == EonzaDynamic {
+							value = GetEonzaDynamic(key[1:])
+						}
 					}
 				} else if key[0] == '@' && scriptTask.Header.SecureConsts != nil {
 					value, ok = scriptTask.Header.SecureConsts[key[1:]]
@@ -732,9 +768,9 @@ func InitData(chLogout chan string, chForm chan FormInfo, chReport chan Report, 
 	dataScript.Global = glob
 }
 
-func InitEngine() error {
+func InitEngine(outerLib []gentee.EmbedItem) error {
 	return gentee.Customize(&gentee.Custom{
-		Embedded: customLib,
+		Embedded: append(customLib, outerLib...),
 	})
 }
 

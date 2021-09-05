@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -55,6 +56,14 @@ func FileAsset(fname string) (data []byte) {
 	}
 	data, _ = FSByte(false, path.Join(`/eonza-assets`, fname))
 	return
+}
+
+func Asset(assetname, filename string) error {
+	data := FileAsset(assetname)
+	if len(data) == 0 {
+		return fmt.Errorf(`asset %s doesn't exist`, assetname)
+	}
+	return os.WriteFile(filename, data, 0666)
 }
 
 // WebAsset return the file data
