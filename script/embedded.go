@@ -180,10 +180,16 @@ var (
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
 		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
+		// Office functions
 		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
 		{Prototype: `OdtTemplate(str,str)`, Object: OdtTemplate},
 		{Prototype: `OdsTemplate(str,str)`, Object: OdsTemplate},
 		{Prototype: `XlsxTemplate(str,str)`, Object: XlsxTemplate},
+		{Prototype: `OpenXLSX(str) handle`, Object: OpenXLSX},
+		{Prototype: `XlsxSheetName(handle,int) str`, Object: XLSheetName},
+		{Prototype: `XlsxRows(handle,str,str) handle`, Object: XLRows},
+		{Prototype: `XlsxNextRow(handle) bool`, Object: XLNextRow},
+		{Prototype: `XlsxGetRow(handle) obj`, Object: XLGetRow},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
