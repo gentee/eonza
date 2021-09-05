@@ -2395,18 +2395,18 @@ MhWoX4X+8AWlhacQJ6TWiCk65EP4MeFxHS6qEwL9yvqjKvw/9bM6fFvs0flj+Y5/8YbXfMU/yvPyPfiS
 	"/eonza-assets/scripts/foreach-xlsx.yaml": {
 		name:    "foreach-xlsx.yaml",
 		local:   "../eonza-assets/scripts/foreach-xlsx.yaml",
-		size:    943,
-		modtime: 1630769524,
+		size:    939,
+		modtime: 1630821054,
 		compressed: `
-H4sIAAAAAAAC/5xSTWvVQBTdz6848ih9T9sqLlwEigtBN1LhFaS7kib3NYHpTJyZNK+oULtxI3TjQtz4
-Fx5S5Nln41+4+Ucyk+R96M5sMtxz5pxz71xLzuXq1EYCUPEZRZhoQ3GS7U6lnQrA5U5ShO3BsYcH2wIo
-Ypf5yp51qcxPBg8He3oyyZMWTckmge8PoSL1qaRzkhGeCKBUplQRnClJABnJYuUpc0W7iT3vABmr0wim
-FEVs4jMbid0uo882ySWt59vzhWVGd1FQhMcC0IXLtQoNAobelLmhtPPv9c5j4w8bcl3tP9QSLcszZTeG
-19U21Hq+zYjcBjtUNrh+FMGVVOvdK0Z4trQDjtvpjylOcfTy8AhGVzi58L8Wbx2ft/PGWFfIVWC2cDCO
-cOh/OGhHYsq/Hfkr17zgmu/4lufrxvytueS6+cjz5opnzVXzqY3Bv7luPjRXHXrH9Xoc/syL5hp8yzP+
-wTdc8080l8013/AM/P3ffPyFf/kLC557VZ6JRKcU4d0DvzmxSiUh80uCfbwqSHmBYb80IwHkE9y7H8Se
-onsA7ONI2mlo3Xc+DAI7eDRaaRpd2Y431pXtKeH+Tv/unl9luaTAO6CpG+tq6K+O8Da04b9Dcq9jM+y2
-bCdwX9CKOloyt050erElgPdC/AkAAP//I6HM7K8DAAA=
+H4sIAAAAAAAC/5ySwW7TThDG7/sU319R1eRPWxAHDpYqDkhwQUVKJJRb5cST2NLGa3bXdSJAKrlwQeqF
+A+LCK0SoQqGh5hXGb4R2bacJveGLVzO//b6Z2TFkbZJOTSCANJxRgInSFI7j47k0cwHYxEoKcNg5d+nO
+oQCy0MYucmJsJJNR52HnRE0mybjORmTGnncHH5FqKumCZIAnAshTnacBrM5JADHJ7J6nC8ownQbQuchC
+Hc5MII6b+hwzSSTt1nbiAtv67CKjAI8FoDKbqNQ3B2h6kyeaosa71bsItTvsyTWxf1AbK5nPUrM3uCa2
+p9byJiaye7SP7LFuFN6V0tq7VQzwbGsHnNeT71MYYfhyMIRWBUYL96vztePzetboqwJJ6sk67Y0DDNwP
+Z/VIdP63I3/lkjdc8i3f8HrXmL9Vl1xWH3ldLXlVLatPdRn8m8vqQ7Vssrdc7pbDn3lTXYFveMU/+JpL
+/onqsrria16Bv9+vj7/wL3dhw2unyisxVhEFePfAbU6YRpIQuyXBKV5llDqBbrs0PQEkE/z3vxd7iuYB
+cIqhNHPfuuu86wWO8Kh3p6lVYRqurwrTIv7+Ufvuji/iRJLnzmhu+6rouqs9vPVtuG9A9nWou82WHXn2
+Bd2hvS15MFLR4kAA74X4EwAA//83B3HnqwMAAA==
 `,
 	},
 
