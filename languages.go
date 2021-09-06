@@ -45,7 +45,7 @@ func InitLang() {
 }
 
 func GetLangCode(user *users.User) (ret string) {
-	if user == nil && IsScript {
+	if /*user == nil &&*/ IsScript {
 		return scriptTask.Header.Lang
 	}
 	if u, ok := userSettings[user.ID]; ok {
@@ -55,7 +55,7 @@ func GetLangCode(user *users.User) (ret string) {
 }
 
 func GetLangId(user *users.User) (ret int) {
-	if user == nil && IsScript {
+	if /*user == nil &&*/ IsScript {
 		return langsId[scriptTask.Header.Lang]
 	}
 	if u, ok := userSettings[user.ID]; ok {
