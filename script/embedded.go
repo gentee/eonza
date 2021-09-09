@@ -145,6 +145,7 @@ var (
 		{Prototype: `CopyClipboard(str)`, Object: CopyClipboard},
 		{Prototype: `File(str) str`, Object: FileLoad},
 		{Prototype: `Form(str)`, Object: Form},
+		{Prototype: `FillForm(str,str)`, Object: FillForm},
 		{Prototype: `GetClipboard() str`, Object: GetClipboard},
 		{Prototype: `IsEntry() bool`, Object: IsEntry},
 		{Prototype: `IsVarObj(str) bool`, Object: IsVarObj},

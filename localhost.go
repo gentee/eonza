@@ -187,6 +187,7 @@ func RunLocalServer(port int) *echo.Echo {
 		e.POST("/api/notification", notificationHandle)
 		e.POST("/api/taskstatus", taskStatusHandle)
 		e.POST("/api/runscript", runScriptHandle)
+		e.POST("/api/extqueue", extQueueHandle)
 	}
 	go func() {
 		if IsScript {
