@@ -165,6 +165,7 @@ var (
 		{Prototype: `GetVarBytes(str) str`, Object: GetVarBytes},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
+		{Prototype: `GetConst(str) str`, Object: GetConst},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
 		{Prototype: `SendEmail(obj, obj)`, Object: SendEmail},
 		{Prototype: `SQLClose(str)`, Object: SQLClose},
@@ -377,6 +378,19 @@ func FileLoad(rt *vm.Runtime, fname string) (ret string, err error) {
 		ret = ret[1 : len(ret)-1]
 	}
 	return vm.ReadFileºStr(rt, ret)
+}
+
+func GetConst(name string) (ret string, err error) {
+	if len(name) == 0 {
+		err = fmt.Errorf("invalid value")
+		return
+	}
+	var ok bool
+	ret, ok = (*dataScript.Global)[name]
+	if ok && ret == EonzaDynamic {
+		ret = GetEonzaDynamic(name)
+	}
+	return
 }
 
 func GetVar(name string) (ret string, err error) {
