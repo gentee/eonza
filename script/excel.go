@@ -76,3 +76,7 @@ func XLGetRow(rows *ExcelRows) (*core.Obj, error) {
 	}
 	return ifaceToObj(mapcols)
 }
+
+func XLGetCell(xls *Excel, sheet, axis string) (string, error) {
+	return xls.File.GetCellValue(sheet, axis)
+}

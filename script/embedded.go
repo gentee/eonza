@@ -192,6 +192,7 @@ var (
 		{Prototype: `XlsxRows(handle,str,str) handle`, Object: XLRows},
 		{Prototype: `XlsxNextRow(handle) bool`, Object: XLNextRow},
 		{Prototype: `XlsxGetRow(handle) obj`, Object: XLGetRow},
+		{Prototype: `XlsxGetCell(handle,str,str) str`, Object: XLGetCell},
 		// Windows functions
 		{Prototype: `RegistrySubkeys(int,str,int) arr.str`, Object: RegistrySubkeys},
 		{Prototype: `CreateRegistryKey(int,str,int) handle`, Object: CreateRegistryKey},
