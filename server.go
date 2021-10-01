@@ -310,6 +310,7 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.GET("/api/trial/:id", trialHandle)                 // +
 		e.GET("/api/browsers", browsersHandle)               // +
 		e.GET("/api/removebrowser/:id", removeBrowserHandle) // +
+		e.POST("/api/fillform", fillFormHandle)
 		e.POST("/api/browserrun", browserRunHandle)
 		e.POST("/api/browserext", browserExtHandle)
 		e.POST("/api/savebrowser", saveBrowserHandle) // +

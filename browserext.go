@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -59,6 +61,23 @@ type ExtListResponse struct {
 type ExtInfo struct {
 	Url string `json:"url"`
 }
+
+type ExtTask struct {
+	TaskId uint32 `json:"taskid"`
+}
+
+type FillFormResponse struct {
+	List     []es.ExtFill `json:"list,omitempty"`
+	Finished bool         `json:"finished"`
+	Error    string       `json:"error,omitempty"`
+}
+
+const ExtQueueTimeLimit = 5
+
+var (
+	extMutex = sync.Mutex{}
+	extQueue = make([]*es.ExtForm, 0)
+)
 
 func browserExtHandle(c echo.Context) error {
 	var (
@@ -228,4 +247,67 @@ func removeBrowserHandle(c echo.Context) error {
 		}
 	}
 	return browsersResponse(c)
+}
+
+func extQueueHandle(c echo.Context) error {
+	var (
+		extForm es.ExtForm
+		err     error
+	)
+	if err = c.Bind(&extForm); err != nil {
+		return jsonError(c, err)
+	}
+	extMutex.Lock()
+	defer extMutex.Unlock()
+
+	var added bool
+	for i := 0; i < len(extQueue); i++ {
+		if time.Since(extQueue[i].Created).Seconds() > ExtQueueTimeLimit {
+			extQueue[i] = &extForm
+			added = true
+			break
+		}
+	}
+	if !added {
+		extQueue = append(extQueue, &extForm)
+	}
+	return jsonSuccess(c)
+}
+
+func fillFormHandle(c echo.Context) error {
+	var (
+		err  error
+		ext  ExtTask
+		form FillFormResponse
+	)
+	if err = c.Bind(&ext); err != nil {
+		return jsonError(c, err)
+	}
+	if task, ok := tasks[ext.TaskId]; ok {
+		if task.Status >= TaskFinished {
+			form.Finished = true
+		}
+	} else {
+		return jsonError(c, fmt.Errorf(`unknown task %d`, ext.TaskId))
+	}
+
+	extMutex.Lock()
+	defer extMutex.Unlock()
+
+	form.List = make([]es.ExtFill, 0)
+	newQueue := make([]*es.ExtForm, 0)
+	for i, item := range extQueue {
+		if time.Since(item.Created).Seconds() > ExtQueueTimeLimit {
+			extQueue[i] = nil
+			continue
+		}
+		if item.TaskId == ext.TaskId {
+			form.List = append(form.List, item.List...)
+			extQueue[i] = nil
+			continue
+		}
+		newQueue = append(newQueue, item)
+	}
+	extQueue = newQueue
+	return c.JSON(http.StatusOK, &form)
 }
