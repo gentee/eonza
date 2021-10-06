@@ -345,9 +345,13 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		var parNames, prefix, suffix, initcmd string
 		if script.Settings.Name != SourceCode {
 			var vars []string
-			for _, par := range values {
+			for i, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
-				parNames += `,` + par.Name
+				if script.Params[i].Options.Flags == "password" {
+					parNames += `,"***"`
+				} else {
+					parNames += `,` + par.Name
+				}
 				vars = append(vars, fmt.Sprintf(`"%s", %[1]s`, par.Name))
 			}
 			/*			// Now log info is without optional parameters

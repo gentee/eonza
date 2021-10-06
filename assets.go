@@ -213,7 +213,7 @@ var _escData = map[string]*_escFile{
 		name:    "list.xlsx",
 		local:   "../eonza-assets/files/tests/list.xlsx",
 		size:    9029,
-		modtime: 1632563173,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/+x6ZVSUe9f+PYN0h1LSLQ0jLRIiJSAcGmmGHrq7JCSFIZRuJRQRhpIYWkoY6Q7pbiTk
 vzzP86xzDn/PWu96P7xfnnPNWvesWbP2/vDb1/7ta+99P1VGu0UGYABYAAAwAH72aXfsQQCQgw4ApAAW
@@ -323,7 +323,7 @@ T9b/uVKfKqNj/PwT7+cHDQCY6H/++n8BAAD//8yY2QJFIwAA
 		name:    "pattern.docx",
 		local:   "../eonza-assets/files/tests/pattern.docx",
 		size:    13531,
-		modtime: 1632562857,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/+y7dVdc3bI9vJHgGiS4u7u7a+Pu7hDcCe4QnACB4MFdgrskuLu7OwR/R5575Dn55b5f
 4J75xx57jx41u3r1mqtqraqtKAsBiQ5AATAAABADsGRhgQFgABD7BgDQABhwHVEHexczexcDVc/3Zs56
@@ -513,7 +513,7 @@ HyFAUfYN1K/PEAAEABYCAFqZfz39fwEAAP//oDa73ds0AAA=
 		name:    "pattern.ods",
 		local:   "../eonza-assets/files/tests/pattern.ods",
 		size:    9557,
-		modtime: 1632456710,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/9y6dVAc3fY1PCS4hQT34BAIJLgGt+CuCTIM7jM4g0vw4E5wD+4a3CW4De7uGuCr3O93
 35s8dZ+8z+/f91R110zVrNXd+5xZa+/dR1HmKTwOAIAMALhQcKv4W/IEMwMAgJ8HMgAAsDKzAkFcbEEG
@@ -655,7 +655,7 @@ v/1/AQAA//9EeUQXVSUAAA==
 		name:    "pattern.odt",
 		local:   "../eonza-assets/files/tests/pattern.odt",
 		size:    9536,
-		modtime: 1632456543,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/8x6Z1BU27ptoyAZBEFyEiXnJFkEJGdBUaChgW5ohKYlZ8k5ZwHJOeccJWdoQJLQSJSM
 5NyvPO+ee3XX2b59/71ZtarWqu4x1prf/OobYwYN5bvoJAAAFgDAwCD8EtjDh8cMAAB+XlgAAMAKagW2
@@ -797,7 +797,7 @@ vGh3SAB/f3bh9/bvkwx/Rf31kML/NNU/HFn4N8u/B/fX9WHc31gm7v225fRX4K9TOpzfgHy4vy4m/xX3
 		name:    "pattern.xlsx",
 		local:   "../eonza-assets/files/tests/pattern.xlsx",
 		size:    10049,
-		modtime: 1632929608,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/+x6dVAd27L+bDw4BIK7u7u7Bne3TZCNu4bgBA2a4O4EDxbcQnBIcHf34IFfnXPv7+Uc
 bm7V+/+db1dN1dSu1TWzVnd/PV+3igI0DBYAByAAAEAGkEVJ87uDACAKFgCeAwhQ+hIO9q5ge1djDS9H
@@ -1763,7 +1763,7 @@ d2M/7a7t1t6XV9+WrY9W0l8DAAD//4J53ooQBwAA
 		name:    "test-files.yaml",
 		local:   "../eonza-assets/init/test-files.yaml",
 		size:    13150,
-		modtime: 1632634553,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/+Rb3Y7bxhW+11NMqCbSJqvflbxZom7gxE3SoC4Kb9peVMViRB5Jg5IzzMxQuxvHQOK2
 F0UK5BEKFL0tsC1iwE1Q5xWoNypm+DekSK1+vGmALmAvTXLO+c7/mcOxACkJnQu7gRDFPthIgpCdGfFA
@@ -1870,7 +1870,7 @@ rAVtbNa+vtxo6eQ83MN+6LbnItu67MNNXSnTTfmC/wIAAP//Le1ohr0OAAA=
 		name:    "test-office.yaml",
 		local:   "../eonza-assets/init/test-office.yaml",
 		size:    5854,
-		modtime: 1632912553,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/9xY327bNhe/91McyCicfJ/k2s7XL52KXnQtWrRol2IZigJFETAiHXOjRI2k0gRdga67
 2M2A3e5urzAUK5BtWJ9BfqOBlEhTsuN/7YBhN4l1dM6Ph+fPj0eURCmanci4A5ChlMSgiFQRH49pQjoA
@@ -2397,7 +2397,7 @@ VBTuHC+MdypXGBhCeLZw8pWJPoQFUWE80EZF8RLOFi+jrayQJowHYylZFPdhJKSBUR9GI4/dQk541qzT
 		name:    "auto-increment-filename.yaml",
 		local:   "../eonza-assets/scripts/auto-increment-filename.yaml",
 		size:    1117,
-		modtime: 1631865888,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/5RSwWrbShTdz1ecZz9epNjxy8viLQSipDSBdlFKA93EJplYY3uoPFJnRmlKmkWcQCl0
 0UU/JDUY3KbNN9z5ozKSLce0FGowSPfce+4598gIa6UamogBio9FBF7YbEuqvhZjoezWQKbCAwyw0qYi
@@ -2433,15 +2433,17 @@ Q5GmbZzjt1amonuTvnbhitUj6ueDbgBHvjJhrdzBQjr0YCVxp00osinaRbqvd02XbhdQNkdO3WKAbiMS
 	"/eonza-assets/scripts/bash.yaml": {
 		name:    "bash.yaml",
 		local:   "../eonza-assets/scripts/bash.yaml",
-		size:    570,
-		modtime: 1607779636,
+		size:    901,
+		modtime: 1633529087,
 		compressed: `
-H4sIAAAAAAAC/3yQTW4aMRTH9z7FX54FILW0SF152SOULRIyMw/GkvG4/miVXcI2WeU0KFHCFTw3ijyG
-AJGSnf0+fu/3nqcQlNl4wQAjtySwkr5lQFBBk8Dv8mvI1wKjapkf1YgBVoZWgFdTHxqtVtWPaiqt1aqW
-QXXGV5wButto+kda4BcDonHRCAQXiQEtafs+LH+0NBsBF5mVTm69YN+PQr6Lrqaz0qha5jZfO2XD4BJu
-LAnMGNDZYXreBnD0NypHzXHmifdfqnBJm+bAWhnl2wvaz480ZVRQUgvwGWdZdoiTKdlludCfaCCHrVD8
-SvLsWy6K+Snp4lV/euzv0yG9puf0kvb9rn8osP4uPfW3aZ8O/e4T5FVJ3TUkwNV62BYC2Wy84Llrwb/B
-h0YZgVVcj8t5J5OFIe0pl86DdOHrYnD2FgAA///GqfP8OgIAAA==
+H4sIAAAAAAAC/6SSTW4TMRiG9z7FK88iLW0CRay8QeIEiGyRImfGSSxcj/EPFQKk0i1dcQGuwLICQa5g
+3wjZHpJJ+Nl0Y42/n+d732/shPdSrx0jgOaXgmHJ3YYAXnolGJ7VWydcyzBpFvmjmRDAcL9hoM3M+U7J
+ZfOwmXFjlGy5l712DSWA6tdKvBGK4QkBgrZBM3gbBAE2QpndsHxRXK8ZbCCGW37pGJkOglwfbCv2kibN
+Ire51krjixb/1giGCwL0pkzPbgArXgdpRTfM3PFC1x/QcsBw50asx7n/mLdSfO0YaK696m1Hd8grLv0Y
+OcuBldTSbUbQR8dAqaWXXDHQC0qy/xIXumYXdekvggYvi0K1XJP7FdSfhPko+dtRNYvng2AC2HAAj5/T
+p7iNP+P3+CPepZt0Wyelj/Fbuo53cZtu/jHvz5L91Pglfk3XGZtu677bvhMM76e5Uq7wIAef4h1KZwnl
+laHYPaE5S89Bp/NyvspnFkDP4XwnNcMyrE6KtzPQl5ribHgmp6cDUSgnwDD33Pr7Az+QgjyS+RfCqOdQ
+wX9qya8AAAD//zA7ZgKFAwAA
 `,
 	},
 
@@ -2589,7 +2591,7 @@ XTrm18uD//ne9eZHvbB8VbZeq+8AAAD//66pvj+0AQAA
 		name:    "create-docs-from-excel.yaml",
 		local:   "../eonza-assets/scripts/create-docs-from-excel.yaml",
 		size:    3053,
-		modtime: 1632755867,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/7RWwY7bNhO+6ykG8sH2/1cOWqA9CDB6SLqHAkV6yC0IDFmi11rQokpShou2QLLtbQv0
 0lNvvfXoBgnibhr3FUZvVAxJUZSDbZpsejHk4cw333wccqiY1mV1rtIIoMo2LIVcskyzpBC5SlZSbBK2
@@ -3033,7 +3035,7 @@ uXNGlMH2cffVekX6vw5/KzEY6ynleX94e17rRE07wMlkMhmPj45OTura2jXJc1FTkE+TvwEAAP//MNZ6
 		name:    "fill-in-form.yaml",
 		local:   "../eonza-assets/scripts/fill-in-form.yaml",
 		size:    817,
-		modtime: 1631373943,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/3xRzW4TPxC/+yl+6h76/0tskJDg4DOqqBQ4IDhXm6yTWHLsxfa24tYGxAnEkTNvECpF
 ishHX2H8Rsj2pmUbidPOzM7va+yE91JPHWeAruaCYyKVKqUuJ8bOGeClV4LjtLiIv4tTBtTCjdMkFmnS
@@ -3241,7 +3243,7 @@ NZ1gjwIAAA==
 		name:    "get-excel-cells.yaml",
 		local:   "../eonza-assets/scripts/get-excel-cells.yaml",
 		size:    1188,
-		modtime: 1632913917,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/4RSwW7TTBC++ynmbw51qiQ/QoLDShEHBJUQoocglBvaJJNkq41tdtdWEHCgIPWC1Afg
 wCOQS0XaqjzD+o3QzNqpTQtcovib7/vmm5m16JxKFlZEAIlcoYAFuj6up6j7U9TaRgBOOY0C9juvidHZ
@@ -3551,7 +3553,7 @@ GBU5tX0P0vcdiu8AAAD///mGejLtAQAA
 		name:    "parse-filename.yaml",
 		local:   "../eonza-assets/scripts/parse-filename.yaml",
 		size:    895,
-		modtime: 1632636007,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/5SSz4oTQRDG7/0UH5PD/iGJ6MFDQxDEPxcRQfAisvRmKtmWSc/Y07Mk4CGugh5EH0Ef
 IYKLo6t5huo3ku6ZyW7WXLxNVX3fr75qpiTntJmWUgBGzUiiULakwURnFGoBOO0yktjrHYVGb08AhXIn
@@ -3955,7 +3957,7 @@ cyvs2bm38pkAHAplEt9zbHJCyL8AAAD//905rSNABQAA
 		name:    "set-variable.yaml",
 		local:   "../eonza-assets/scripts/set-variable.yaml",
 		size:    4844,
-		modtime: 1631771236,
+		modtime: 1633058554,
 		compressed: `
 H4sIAAAAAAAC/4xXXW8TzRW+96843Uh9bep8onAxkotSCE0RgaoBpIhFeG2P46XrWXdmbDeqIiWkiFZQ
 qCqk9qaioup9SDHkg4S/cOYfVTOzu94vp28u4njOeZ7zMc+cmQgqpc92BKkAMK9PCQgq50ce971WQCsA
