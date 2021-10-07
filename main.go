@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"eonza/lib"
 	"eonza/script"
 
 	"github.com/gentee/gentee"
@@ -113,12 +114,17 @@ func main() {
 		e = RunServer(cfg.HTTP)
 	}
 	signal.Notify(stopchan, os.Kill, os.Interrupt, syscall.SIGTERM)
-	<-stopchan
-
+	sig := <-stopchan
 	if !IsScript {
 		CloseTaskManager()
+	} else if sig != os.Kill && task.Status < TaskFinished {
+		lib.LocalPost(scriptTask.Header.ServerPort, `api/taskstatus`,
+			TaskStatus{
+				TaskID: task.ID,
+				Status: TaskTerminated,
+				Time:   time.Now().Unix(),
+			})
 	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
 	defer cancel()
 	isShutdown = true
