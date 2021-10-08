@@ -48,6 +48,7 @@ type Settings struct {
 	AutoUpdate     string            `json:"autoupdate"`
 	RemoveAfter    int               `json:"removeafter"`
 	MaxTasks       int               `json:"maxtasks"`
+	HideDupTasks   bool              `json:"hideduptasks"`
 }
 
 // Storage contains all application data
