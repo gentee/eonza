@@ -13,6 +13,8 @@ const (
 	DefTheme = `default`
 	// DefAssets is the default name of assets directory
 	DefAssets = `assets`
+	// DefExts is the default name of extension directory
+	DefExts = `extensions`
 	// DefLogs is the default name of log directory
 	DefLog = `log`
 	// DefUsers is the default name of users directory

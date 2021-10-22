@@ -36,9 +36,11 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version    string               `yaml:"version"`             // Version of the application
-	Mode       string               `yaml:"mode"`                // Mode: default, develop, playground
-	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file. empty - dir of cfg file
+	Version string `yaml:"version"` // Version of the application
+	Mode    string `yaml:"mode"`    // Mode: default, develop, playground
+	// Empty dir means subfolder in dir of cfg file
+	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file.
+	ExtsDir    string               `yaml:"extsdir"`             // Directory for extensions files.
 	Log        LogConfig            `yaml:"log"`                 // Log settings
 	Users      UsersConfig          `yaml:"users"`               // Users settings
 	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
@@ -113,6 +115,7 @@ func LoadConfig() {
 		}
 	}
 	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
+	cfg.ExtsDir = defDir(cfg.ExtsDir, DefExts)
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
 	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	//	dataFile := defDir(cfg.DataDir)
