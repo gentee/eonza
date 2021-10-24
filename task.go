@@ -166,14 +166,16 @@ func sendReport(client WsClient) error {
 }
 
 func sendStdout(client WsClient) error {
+	var out string
 	for i := client.StdoutCount; i < iStdout; i++ {
-		if err := client.Conn.WriteJSON(WsCmd{
-			TaskID:  task.ID,
-			Cmd:     WcStdout,
-			Message: stdoutBuf[i],
-		}); err != nil {
-			return err
-		}
+		out += stdoutBuf[i] + "\n"
+	}
+	if err := client.Conn.WriteJSON(WsCmd{
+		TaskID:  task.ID,
+		Cmd:     WcStdout,
+		Message: out,
+	}); err != nil {
+		return err
 	}
 	return client.Conn.WriteJSON(WsCmd{
 		TaskID:  task.ID,
