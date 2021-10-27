@@ -66,10 +66,11 @@ func Asset(assetname, filename string) error {
 	return os.WriteFile(filename, data, 0666)
 }
 
+/*
 // WebAsset return the file data
 func WebAsset(fname string) (data []byte) {
 	return FileAsset(path.Join(`themes`, assetsTheme, fname))
-}
+}*/
 
 // TemplateAsset returns the template of the web-page
 func TemplateAsset(fname string) []byte {

@@ -61,6 +61,7 @@ func main() {
 		}
 		isRun = fi.Mode()&os.ModeNamedPipe != 0
 	}
+	LoadAssets(isRun)
 	if isRun {
 		var err error
 		IsScript = true
