@@ -1,0 +1,25 @@
+templates:
+  - browser.tpl
+  - card.tpl
+  - cardlist.tpl
+  - deflists.tpl
+  - dialogs.tpl
+  - dyncomp.tpl
+  - editor.tpl
+  - help.tpl
+  - home.tpl
+  - index.tpl
+  - install.tpl
+  - login.tpl
+  - notifications.tpl
+  - pro.tpl
+  - scheduler.tpl
+  - script.tpl
+  - settings.tpl
+  - shutdown.tpl
+  - tasks.tpl
+  - tree.tpl
+
+languages:
+  - en.yaml
+  - ru.yaml

@@ -200,7 +200,7 @@ func reloadHandle(c echo.Context) error {
 	if err := CheckAdmin(c); err != nil {
 		return jsonError(c, err)
 	}
-	ClearAsset()
+	RedefineAsset()
 	InitTemplates()
 	InitLang()
 	InitScripts()

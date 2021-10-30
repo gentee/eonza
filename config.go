@@ -9,7 +9,6 @@ import (
 	"eonza/users"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/kataras/golog"
@@ -169,19 +168,18 @@ func Install() {
 
 	firstRun = true
 	scripts = make(map[string]*Script)
-	for _, tpl := range _escDirs["../eonza-assets/init"] {
+	InitAssets()
+	for _, f := range InitFS.Files {
 		var script Script
-		fname := tpl.Name()
-		data := FileAsset(path.Join(`init`, fname))
-		if err := yaml.Unmarshal(data, &script); err != nil {
+		if f.Dir {
+			continue
+		}
+		if err := yaml.Unmarshal(f.Data, &script); err != nil {
 			golog.Fatal(err)
 		}
 		if err := setScript(&script); err != nil {
 			golog.Fatal(err)
 		}
-		/*		for _, item := range script.Tree {
-				retypeValues(item.Values)
-			}*/
 		storage.Scripts[lib.IdName(script.Settings.Name)] = &script
 	}
 	if err = SaveConfig(); err != nil {
@@ -198,7 +196,6 @@ func Install() {
 		Lang: appInfo.Lang,
 		Favs: []Fav{
 			{Name: `welcome`},
-			{Name: `tests`},
 			{Name: `Tools`, IsFolder: true, Children: []Fav{
 				{Name: `copy-files`},
 				{Name: `create-archive`},

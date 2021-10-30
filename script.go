@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"eonza/lib"
 	"fmt"
-	"path"
 	"strings"
 
 	es "eonza/script"
@@ -127,11 +126,9 @@ func InitScripts() {
 		return script.Settings.Name == SourceCode ||
 			strings.Contains(script.Code, `%body%`)
 	}
-	for _, tpl := range _escDirs["../eonza-assets/scripts"] {
+	for _, f := range StdlibFS.Files {
 		var script Script
-		fname := tpl.Name()
-		data := FileAsset(path.Join(`scripts`, fname))
-		if err := yaml.Unmarshal(data, &script); err != nil {
+		if err := yaml.Unmarshal(f.Data, &script); err != nil {
 			golog.Fatal(err)
 		}
 		script.embedded = true

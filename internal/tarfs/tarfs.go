@@ -12,7 +12,10 @@ import (
 )
 
 type FileFS struct {
-	Data []byte
+	Name     string
+	Dir      bool
+	Data     []byte
+	Original []byte
 }
 
 type TarFS struct {
@@ -48,6 +51,8 @@ func NewTarFS(data []byte) (*TarFS, error) {
 		}
 		ifile := FileFS{
 			Data: make([]byte, hdr.Size),
+			Dir:  hdr.Typeflag == tar.TypeDir,
+			Name: hdr.Name,
 		}
 		if _, err = tr.Read(ifile.Data); err != nil && err != io.EOF {
 			return nil, err
@@ -63,4 +68,25 @@ func (tfs *TarFS) File(name string) []byte {
 		return f.Data
 	}
 	return []byte{}
+}
+
+// Restore restores original data.
+func (tfs *TarFS) Restore() {
+	for name, f := range tfs.Files {
+		if f.Original != nil {
+			tfs.Files[name].Data = f.Original
+			tfs.Files[name].Original = nil
+		}
+	}
+}
+
+// Redefine redefines asset data.
+func (tfs *TarFS) Redefine(name string, data []byte) {
+	if f, ok := tfs.Files[name]; ok {
+		if f.Original == nil {
+			f.Original = make([]byte, len(f.Data))
+			copy(f.Original, f.Data)
+		}
+		f.Data = data
+	}
 }
