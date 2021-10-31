@@ -35,8 +35,7 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version string `yaml:"version"` // Version of the application
-	Mode    string `yaml:"mode"`    // Mode: default, develop, playground
+	Mode string `yaml:"mode"` // Mode: default, develop, playground
 	// Empty dir means subfolder in dir of cfg file
 	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file.
 	ExtsDir    string               `yaml:"extsdir"`             // Directory for extensions files.
@@ -53,8 +52,7 @@ type Config struct {
 
 var (
 	cfg = Config{
-		Version: GetVersion(),
-		Mode:    ModeDefault,
+		Mode: ModeDefault,
 		Log: LogConfig{
 			Mode:  logModeFile,
 			Level: logLevelInfo,
@@ -113,7 +111,7 @@ func LoadConfig() {
 			golog.Fatal(err)
 		}
 	}
-	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
+	//	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
 	cfg.ExtsDir = defDir(cfg.ExtsDir, DefExts)
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
 	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)

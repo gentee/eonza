@@ -1,4 +1,4 @@
-// Copyright 2020 Alexey Krivonogov. All rights reserved.
+// Copyright 2020-21 Alexey Krivonogov. All rights reserved.
 // Use of this source code is governed by a MIT license
 // that can be found in the LICENSE file.
 
@@ -53,6 +53,7 @@ type Settings struct {
 
 // Storage contains all application data
 type Storage struct {
+	Version     string
 	Settings    Settings
 	Trial       Trial
 	PassCounter int64
@@ -65,6 +66,7 @@ type Storage struct {
 
 var (
 	storage = Storage{
+		Version: GetVersion(),
 		Settings: Settings{
 			LogLevel:    script.LOG_INFO,
 			Constants:   make(map[string]string),
@@ -133,6 +135,7 @@ func LoadStorage(psw string) {
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)
 	}
+	var save bool
 	if len(psw) > 0 {
 		var hash []byte
 		if psw != `reset` {
@@ -143,6 +146,16 @@ func LoadStorage(psw string) {
 		}
 		storage.Settings.PasswordHash = hash
 		storage.PassCounter++
+		save = true
+		if err = SaveStorage(); err != nil {
+			golog.Fatal(err)
+		}
+	}
+	if storage.Version != GetVersion() {
+		Migrate()
+		save = true
+	}
+	if save {
 		if err = SaveStorage(); err != nil {
 			golog.Fatal(err)
 		}
