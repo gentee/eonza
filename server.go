@@ -204,6 +204,7 @@ func reloadHandle(c echo.Context) error {
 	InitTemplates()
 	InitLang()
 	InitScripts()
+	LoadExtensions()
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 

@@ -25,9 +25,10 @@ type Extensions struct {
 }
 
 type Extension struct {
-	ExtensionInfo
-	Langs  map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
-	Params []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
+	ExtensionInfo `yaml:"info"`
+	Version       string                       `yaml:"version"`
+	Langs         map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
+	Params        []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
 }
 
 type ExtSettings struct {

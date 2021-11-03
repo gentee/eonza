@@ -6,6 +6,7 @@ templates:
   - dialogs.tpl
   - dyncomp.tpl
   - editor.tpl
+  - extensions.tpl
   - help.tpl
   - home.tpl
   - index.tpl
@@ -23,3 +24,17 @@ templates:
 languages:
   - en.yaml
   - ru.yaml
+
+extensions:
+  tests:
+    version: 1.0
+    info:
+      title: "Tests"
+      desc: '#_desc#'
+    langs:
+      en:
+        _desc: Tests for the standard library
+      ru:
+        _desc: Тесты для стандартной библиотеки
+        
+    

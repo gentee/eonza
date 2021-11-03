@@ -7,6 +7,9 @@ package main
 import "fmt"
 
 func Migrate() {
+	// update all installed extensions with newer version
+	// ...
+
 	storage.Version = GetVersion()
 	fmt.Println(`Migrate`)
 }
