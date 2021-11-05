@@ -204,7 +204,6 @@ func reloadHandle(c echo.Context) error {
 	InitTemplates()
 	InitLang()
 	InitScripts()
-	LoadExtensions()
 	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
@@ -295,6 +294,7 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.GET("/api/list", listScriptHandle)                 // +
 		e.GET("/api/listrun", listRunHandle)                 // +
 		e.GET("/api/notifications", nfyHandle)               // +
+		e.GET("/api/extensions", extsHandle)                 // +
 		e.GET("/api/tasks", tasksHandle)                     // +
 		e.GET("/api/timers", timersHandle)                   // +
 		e.GET("/api/events", eventsHandle)                   // +

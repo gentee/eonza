@@ -165,6 +165,7 @@ var (
 		{Prototype: `GetVarBytes(str) str`, Object: GetVarBytes},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
+		{Prototype: `GetVarRaw(str) str`, Object: GetVarRaw},
 		{Prototype: `GetConst(str) str`, Object: GetConst},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
 		{Prototype: `SendEmail(obj, obj)`, Object: SendEmail},
@@ -428,6 +429,13 @@ func GetVarInt(name string) (ret int64, err error) {
 	var tmp string
 	if tmp, err = GetVar(name); err == nil {
 		ret, _ = strconv.ParseInt(tmp, 10, 64)
+	}
+	return
+}
+
+func GetVarRaw(name string) (ret string, err error) {
+	if IsVar(name) != 0 {
+		ret = dataScript.Vars[len(dataScript.Vars)-1][name]
 	}
 	return
 }

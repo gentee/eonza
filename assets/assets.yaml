@@ -25,11 +25,11 @@ languages:
   - en.yaml
   - ru.yaml
 
-extensions:
+extensions: 
   tests:
     version: 1.0
     info:
-      title: "Tests"
+      title: "#.tests#"
       desc: '#_desc#'
     langs:
       en:

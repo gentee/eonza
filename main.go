@@ -110,7 +110,6 @@ func main() {
 		}
 		LoadNotifications()
 		InitScripts()
-		LoadExtensions()
 		CreateSysTray()
 		RunCron()
 		e = RunServer(cfg.HTTP)
