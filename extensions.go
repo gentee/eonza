@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type ExtensionInfo struct {
+type PackageInfo struct {
 	Title    string `json:"title" yaml:"title"`
 	Desc     string `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Help     string `json:"help,omitempty" yaml:"help,omitempty"`
@@ -22,59 +22,65 @@ type ExtensionInfo struct {
 	Installed bool `json:"installed"`
 }
 
-type ExtensionReview struct {
-	ExtensionInfo
+type PackageReview struct {
+	PackageInfo
 	Name string `json:"name"`
 }
 
-type ExtensionsResponse struct {
-	List  []ExtensionReview `json:"list,omitempty"`
-	Error string            `json:"error,omitempty"`
+type PackagesResponse struct {
+	List  []PackageReview `json:"list,omitempty"`
+	Error string          `json:"error,omitempty"`
 }
 
-type Extension struct {
-	ExtensionInfo `yaml:"info"`
-	Version       string                       `yaml:"version"`
-	Langs         map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
-	Params        []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
+type ExtResponse struct {
+	Params []es.ScriptParam  `json:"params,omitempty"`
+	Values map[string]string `json:"values,omitempty"`
+	Error  string            `json:"error,omitempty"`
+}
+
+type Package struct {
+	PackageInfo `yaml:"info"`
+	Version     string                       `yaml:"version"`
+	Langs       map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
+	Params      []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
 }
 
 type ExtSettings struct {
 	Values map[string]interface{}
 }
 
-func LoadExtensions() {
-	// TODO: Check installed extensions
-	for name, ext := range Assets.Extensions {
+func LoadPackages() {
+	// TODO: Check installed packages
+	for name, ext := range Assets.Packages {
 		ext.Installed = false
-		Assets.Extensions[name] = ext
+		Assets.Packages[name] = ext
 	}
 }
 
-func InstallExtension(name string) {
+func InstallPackage(name string) {
 	if cfg.playground {
 		// TODO: error
 	}
 	fmt.Println(`Install`, name)
 }
 
-func UninstallExtension(name string) {
+func UninstallPackage(name string) {
 	if cfg.playground {
 		// TODO: error
 	}
 	fmt.Println(`Uninstall`, name)
 }
 
-func ExtensionsList(c echo.Context) *ExtensionsResponse {
+func PackagesList(c echo.Context) *PackagesResponse {
 	lang := c.(*Auth).Lang
 	glob := &langRes[GetLangId(c.(*Auth).User)]
-	ret := make([]ExtensionReview, 0)
-	for name, ext := range Assets.Extensions {
+	ret := make([]PackageReview, 0)
+	for name, ext := range Assets.Packages {
 		ext.Title = es.ReplaceVars(ext.Title, ext.Langs[lang], glob)
 		ext.Desc = es.ReplaceVars(ext.Desc, ext.Langs[lang], glob)
-		ret = append(ret, ExtensionReview{
-			ExtensionInfo: ext.ExtensionInfo,
-			Name:          name,
+		ret = append(ret, PackageReview{
+			PackageInfo: ext.PackageInfo,
+			Name:        name,
 		})
 	}
 	sort.Slice(ret, func(i, j int) bool {
@@ -83,14 +89,38 @@ func ExtensionsList(c echo.Context) *ExtensionsResponse {
 		}
 		return ret[i].Installed
 	})
-	return &ExtensionsResponse{
+	return &PackagesResponse{
 		List: ret,
 	}
 }
 
-func extsHandle(c echo.Context) error {
+func packagesHandle(c echo.Context) error {
 	if err := CheckAdmin(c); err != nil {
 		return jsonError(c, err)
 	}
-	return c.JSON(http.StatusOK, ExtensionsList(c))
+	return c.JSON(http.StatusOK, PackagesList(c))
+}
+
+func findPackage(name string) (*Package, error) {
+	v, ok := Assets.Packages[name]
+	if !ok {
+		return nil, fmt.Errorf(`Cannot find %s package`, name)
+	}
+	return &v, nil
+}
+
+func packageHandle(c echo.Context) error {
+	var (
+		err error
+		ext *Package
+	)
+	if err = CheckAdmin(c); err != nil {
+		return jsonError(c, err)
+	}
+	if ext, err = findPackage(c.Param("name")); err != nil {
+		return jsonError(c, err)
+	}
+	return c.JSON(http.StatusOK, &ExtResponse{
+		Params: ext.Params,
+	})
 }

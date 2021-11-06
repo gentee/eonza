@@ -6,13 +6,13 @@ templates:
   - dialogs.tpl
   - dyncomp.tpl
   - editor.tpl
-  - extensions.tpl
   - help.tpl
   - home.tpl
   - index.tpl
   - install.tpl
   - login.tpl
   - notifications.tpl
+  - packages.tpl
   - pro.tpl
   - scheduler.tpl
   - script.tpl
@@ -25,7 +25,7 @@ languages:
   - en.yaml
   - ru.yaml
 
-extensions: 
+packages: 
   tests:
     version: 1.0
     info:
@@ -34,7 +34,12 @@ extensions:
     langs:
       en:
         _desc: Tests for the standard library
+        _dir: Path for test folder
       ru:
         _desc: Тесты для стандартной библиотеки
-        
+        _dir: Путь для папки тестирования
+    params:
+    - name: tests.dir
+      title: '#_dir#'
+      type: 2
     

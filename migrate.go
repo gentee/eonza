@@ -5,7 +5,7 @@
 package main
 
 func Migrate() {
-	// TODO: update all installed extensions with newer version
+	// TODO: update all installed packages with newer version
 	// ...
 
 	storage.Version = GetVersion()

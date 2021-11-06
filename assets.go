@@ -28,13 +28,13 @@ var stdlibTar []byte
 //go:embed assets/init.tar.gz
 var initTar []byte
 
-//go:embed assets/extensions.tar.gz
+//go:embed assets/packages.tar.gz
 var extsTar []byte
 
 type CfgAssets struct {
-	Templates  []string             `yaml:"templates"`
-	Languages  []string             `yaml:"languages"`
-	Extensions map[string]Extension `yaml:"extensions"`
+	Templates []string           `yaml:"templates"`
+	Languages []string           `yaml:"languages"`
+	Packages  map[string]Package `yaml:"packages"`
 }
 
 var (

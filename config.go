@@ -37,13 +37,13 @@ type UsersConfig struct {
 type Config struct {
 	Mode string `yaml:"mode"` // Mode: default, develop, playground
 	// Empty dir means subfolder in dir of cfg file
-	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file.
-	ExtsDir    string               `yaml:"extsdir"`             // Directory for extensions files.
-	Log        LogConfig            `yaml:"log"`                 // Log settings
-	Users      UsersConfig          `yaml:"users"`               // Users settings
-	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
-	Playground lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
-	Whitelist  []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
+	AssetsDir   string               `yaml:"assetsdir"`           // Directory for assets file.
+	PackagesDir string               `yaml:"packagesdir"`         // Directory for packages files.
+	Log         LogConfig            `yaml:"log"`                 // Log settings
+	Users       UsersConfig          `yaml:"users"`               // Users settings
+	HTTP        lib.HTTPConfig       `yaml:"http"`                // Web-server settings
+	Playground  lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
+	Whitelist   []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
 
 	path       string // path to cfg file
 	develop    bool

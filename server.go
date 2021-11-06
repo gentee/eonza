@@ -294,7 +294,8 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		e.GET("/api/list", listScriptHandle)                 // +
 		e.GET("/api/listrun", listRunHandle)                 // +
 		e.GET("/api/notifications", nfyHandle)               // +
-		e.GET("/api/extensions", extsHandle)                 // +
+		e.GET("/api/packages", packagesHandle)               // +
+		e.GET("/api/package/:name", packageHandle)           // +
 		e.GET("/api/tasks", tasksHandle)                     // +
 		e.GET("/api/timers", timersHandle)                   // +
 		e.GET("/api/events", eventsHandle)                   // +

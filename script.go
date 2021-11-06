@@ -137,7 +137,7 @@ func InitScripts() {
 			golog.Fatal(err)
 		}
 	}
-	LoadExtensions()
+	LoadPackages()
 	for name, item := range storage.Scripts {
 		if scripts[lib.IdName(name)] != nil {
 			golog.Errorf(`The '%s' script has been loaded as embedded script`, name)
