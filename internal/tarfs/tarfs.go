@@ -19,7 +19,8 @@ type FileFS struct {
 }
 
 type TarFS struct {
-	Files map[string]*FileFS
+	List  []*FileFS
+	Files map[string]int
 }
 
 // NewTarFS decompresses input tar.gz data.
@@ -39,7 +40,8 @@ func NewTarFS(data []byte) (*TarFS, error) {
 	if err := zr.Close(); err != nil {
 		return nil, err
 	}
-	tfs.Files = make(map[string]*FileFS, 16)
+	tfs.List = make([]*FileFS, 0, 16)
+	tfs.Files = make(map[string]int, 16)
 	tr := tar.NewReader(&buf)
 	for {
 		hdr, err := tr.Next()
@@ -57,32 +59,34 @@ func NewTarFS(data []byte) (*TarFS, error) {
 		if _, err = tr.Read(ifile.Data); err != nil && err != io.EOF {
 			return nil, err
 		}
-		tfs.Files[hdr.Name] = &ifile
+		tfs.Files[hdr.Name] = len(tfs.List)
+		tfs.List = append(tfs.List, &ifile)
 	}
 	return &tfs, nil
 }
 
 // File returns the content of the specified file.
 func (tfs *TarFS) File(name string) []byte {
-	if f, ok := tfs.Files[name]; ok {
-		return f.Data
+	if i, ok := tfs.Files[name]; ok {
+		return tfs.List[i].Data
 	}
 	return []byte{}
 }
 
 // Restore restores original data.
 func (tfs *TarFS) Restore() {
-	for name, f := range tfs.Files {
+	for i, f := range tfs.List {
 		if f.Original != nil {
-			tfs.Files[name].Data = f.Original
-			tfs.Files[name].Original = nil
+			tfs.List[i].Data = f.Original
+			tfs.List[i].Original = nil
 		}
 	}
 }
 
 // Redefine redefines asset data.
 func (tfs *TarFS) Redefine(name string, data []byte) {
-	if f, ok := tfs.Files[name]; ok {
+	if i, ok := tfs.Files[name]; ok {
+		f := tfs.List[i]
 		if f.Original == nil {
 			f.Original = make([]byte, len(f.Data))
 			copy(f.Original, f.Data)

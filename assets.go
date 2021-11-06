@@ -29,7 +29,7 @@ var stdlibTar []byte
 var initTar []byte
 
 //go:embed assets/packages.tar.gz
-var extsTar []byte
+var packagesTar []byte
 
 type CfgAssets struct {
 	Templates []string           `yaml:"templates"`
@@ -44,7 +44,7 @@ var (
 	WebFS        *tarfs.TarFS
 	StdlibFS     *tarfs.TarFS
 	InitFS       *tarfs.TarFS
-	ExtsFS       *tarfs.TarFS
+	PackagesFS   *tarfs.TarFS
 )
 
 func LoadAssets(run bool) {
@@ -61,7 +61,7 @@ func LoadAssets(run bool) {
 		if err != nil {
 			golog.Fatal(err)
 		}
-		ExtsFS, err = tarfs.NewTarFS(extsTar)
+		PackagesFS, err = tarfs.NewTarFS(packagesTar)
 		if err != nil {
 			golog.Fatal(err)
 		}

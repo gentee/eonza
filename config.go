@@ -112,7 +112,7 @@ func LoadConfig() {
 		}
 	}
 	//	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
-	cfg.ExtsDir = defDir(cfg.ExtsDir, DefExts)
+	cfg.PackagesDir = defDir(cfg.PackagesDir, DefPackages)
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
 	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	//	dataFile := defDir(cfg.DataDir)
@@ -167,7 +167,7 @@ func Install() {
 	firstRun = true
 	scripts = make(map[string]*Script)
 	InitAssets()
-	for _, f := range InitFS.Files {
+	for _, f := range InitFS.List {
 		var script Script
 		if f.Dir {
 			continue

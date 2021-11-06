@@ -170,12 +170,14 @@ func sendStdout(client WsClient) error {
 	for i := client.StdoutCount; i < iStdout; i++ {
 		out += stdoutBuf[i] + "\n"
 	}
-	if err := client.Conn.WriteJSON(WsCmd{
-		TaskID:  task.ID,
-		Cmd:     WcStdout,
-		Message: out,
-	}); err != nil {
-		return err
+	if len(out) > 0 {
+		if err := client.Conn.WriteJSON(WsCmd{
+			TaskID:  task.ID,
+			Cmd:     WcStdout,
+			Message: out,
+		}); err != nil {
+			return err
+		}
 	}
 	return client.Conn.WriteJSON(WsCmd{
 		TaskID:  task.ID,
@@ -184,19 +186,19 @@ func sendStdout(client WsClient) error {
 	})
 }
 
-func sendLogout(client WsClient) error {
+func sendLogout(client WsClient) (err error) {
 	var out string
 	for i := client.LogoutCount; i < iLogout; i++ {
 		out += logoutBuf[i] + "\n"
 	}
-	if err := client.Conn.WriteJSON(WsCmd{
-		TaskID:  task.ID,
-		Cmd:     WcLogout,
-		Message: out,
-	}); err != nil {
-		return err
+	if len(out) > 0 {
+		err = client.Conn.WriteJSON(WsCmd{
+			TaskID:  task.ID,
+			Cmd:     WcLogout,
+			Message: out,
+		})
 	}
-	return nil
+	return
 }
 
 func sendProgress(client WsClient, msg string) error {

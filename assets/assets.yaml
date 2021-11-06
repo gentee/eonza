@@ -39,7 +39,9 @@ packages:
         _desc: Тесты для стандартной библиотеки
         _dir: Путь для папки тестирования
     params:
-    - name: tests.dir
+    - name: dir
       title: '#_dir#'
       type: 2
+      options: 
+        initial: "#.temppath#"
     

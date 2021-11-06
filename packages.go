@@ -5,10 +5,14 @@
 package main
 
 import (
+	"eonza/lib"
 	es "eonza/script"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -52,16 +56,11 @@ type ExtSettings struct {
 func LoadPackages() {
 	// TODO: Check installed packages
 	for name, ext := range Assets.Packages {
-		ext.Installed = false
-		Assets.Packages[name] = ext
+		if _, err := os.Stat(filepath.Join(cfg.PackagesDir, name)); err == nil {
+			ext.Installed = true
+			Assets.Packages[name] = ext
+		}
 	}
-}
-
-func InstallPackage(name string) {
-	if cfg.playground {
-		// TODO: error
-	}
-	fmt.Println(`Install`, name)
 }
 
 func UninstallPackage(name string) {
@@ -101,7 +100,10 @@ func packagesHandle(c echo.Context) error {
 	return c.JSON(http.StatusOK, PackagesList(c))
 }
 
-func findPackage(name string) (*Package, error) {
+func findPackage(c echo.Context, name string) (*Package, error) {
+	if err := CheckAdmin(c); err != nil {
+		return nil, err
+	}
 	v, ok := Assets.Packages[name]
 	if !ok {
 		return nil, fmt.Errorf(`Cannot find %s package`, name)
@@ -114,13 +116,84 @@ func packageHandle(c echo.Context) error {
 		err error
 		ext *Package
 	)
-	if err = CheckAdmin(c); err != nil {
-		return jsonError(c, err)
-	}
-	if ext, err = findPackage(c.Param("name")); err != nil {
+	if ext, err = findPackage(c, c.Param("name")); err != nil {
 		return jsonError(c, err)
 	}
 	return c.JSON(http.StatusOK, &ExtResponse{
 		Params: ext.Params,
 	})
+}
+
+func packageInstallHandle(c echo.Context) error {
+	var (
+		err error
+		ext *Package
+	)
+	if cfg.playground {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
+	name := c.Param("name")
+	if ext, err = findPackage(c, name); err != nil {
+		return jsonError(c, err)
+	}
+	if name == `tests` {
+		storage.Events[`test`] = &Event{
+			ID:        lib.RndNum(),
+			Name:      `test`,
+			Script:    `data-print`,
+			Token:     `TEST_TOKEN`,
+			Whitelist: `::1/128, 127.0.0.0/31`,
+			Active:    true,
+		}
+		if err = SaveStorage(); err != nil {
+			return jsonError(c, err)
+		}
+	}
+	path := filepath.Join(cfg.PackagesDir, name)
+	if err := os.MkdirAll(path, 0777); err != nil {
+		return jsonError(c, err)
+	}
+	for _, f := range PackagesFS.List {
+		if strings.HasPrefix(f.Name, name+`/files`) {
+			fullName := filepath.Join(cfg.PackagesDir, f.Name)
+			if f.Dir {
+				if err := os.MkdirAll(fullName, 0777); err != nil {
+					os.RemoveAll(path)
+					return jsonError(c, err)
+				}
+			} else if err = os.WriteFile(fullName, f.Data, 0666); err != nil {
+				os.RemoveAll(path)
+				return jsonError(c, err)
+			}
+		}
+	}
+	ext.Installed = true
+	Assets.Packages[name] = *ext
+	return c.JSON(http.StatusOK, PackagesList(c))
+}
+
+func packageUninstallHandle(c echo.Context) error {
+	var (
+		err error
+		ext *Package
+	)
+	if cfg.playground {
+		return jsonError(c, fmt.Errorf(`Access denied`))
+	}
+	name := c.Param("name")
+	if ext, err = findPackage(c, name); err != nil {
+		return jsonError(c, err)
+	}
+	// TODO: проверка на зависимости для каждого скрипта пакета
+	path := filepath.Join(cfg.PackagesDir, name)
+	if err := os.RemoveAll(path); err != nil {
+		return jsonError(c, err)
+	}
+	ext.Installed = false
+	Assets.Packages[name] = *ext
+	if name == `tests` {
+		delete(storage.Events, `test`)
+		SaveStorage()
+	}
+	return c.JSON(http.StatusOK, PackagesList(c))
 }

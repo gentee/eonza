@@ -126,7 +126,7 @@ func InitScripts() {
 		return script.Settings.Name == SourceCode ||
 			strings.Contains(script.Code, `%body%`)
 	}
-	for _, f := range StdlibFS.Files {
+	for _, f := range StdlibFS.List {
 		var script Script
 		if err := yaml.Unmarshal(f.Data, &script); err != nil {
 			golog.Fatal(err)

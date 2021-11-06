@@ -78,16 +78,7 @@ var (
 		Scripts:  make(map[string]*Script),
 		Timers:   make(map[uint32]*Timer),
 		Browsers: make([]*Browser, 0),
-		Events:   map[string]*Event{
-			/*			`test`: {
-						ID:        lib.RndNum(),
-						Name:      `test`,
-						Script:    `data-print`,
-						Token:     `TEST_TOKEN`,
-						Whitelist: `::1/128, 127.0.0.0/31`,
-						Active:    true,
-					},*/
-		},
+		Events:   map[string]*Event{},
 	}
 	mutex = &sync.Mutex{}
 )
