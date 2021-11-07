@@ -14,7 +14,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
+	"gopkg.in/yaml.v2"
 )
 
 type PackageInfo struct {
@@ -36,10 +38,10 @@ type PackagesResponse struct {
 	Error string          `json:"error,omitempty"`
 }
 
-type ExtResponse struct {
-	Params []es.ScriptParam  `json:"params,omitempty"`
-	Values map[string]string `json:"values,omitempty"`
-	Error  string            `json:"error,omitempty"`
+type PackageResponse struct {
+	Params []es.ScriptParam       `json:"params,omitempty"`
+	Values map[string]interface{} `json:"values,omitempty"`
+	Error  string                 `json:"error,omitempty"`
 }
 
 type Package struct {
@@ -49,25 +51,61 @@ type Package struct {
 	Params      []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
 }
 
-type ExtSettings struct {
-	Values map[string]interface{}
+func LoadPackageScripts(name string) {
+	isfolder := func(script *Script) bool {
+		return script.Settings.Name == SourceCode ||
+			strings.Contains(script.Code, `%body%`)
+	}
+	for _, f := range PackagesFS.List {
+		if strings.HasPrefix(f.Name, name) && filepath.Ext(f.Name) == `.yaml` &&
+			filepath.Base(f.Name) != `package.yaml` {
+			var script Script
+			if err := yaml.Unmarshal(f.Data, &script); err != nil {
+				golog.Error(err)
+			}
+			script.embedded = true
+			script.folder = isfolder(&script)
+			if err := setScript(&script); err != nil {
+				golog.Error(err)
+			}
+		}
+	}
+	hotVersion++
+}
+
+func UnloadPackageScripts(c echo.Context, name string) error {
+	todel := make(map[string]bool)
+
+	for _, f := range PackagesFS.List {
+		if strings.HasPrefix(f.Name, name) && filepath.Ext(f.Name) == `.yaml` &&
+			filepath.Base(f.Name) != `package.yaml` {
+			sname := filepath.Base(f.Name)
+			todel[sname[:len(sname)-5]] = true
+		}
+	}
+
+	for key := range todel {
+		if script := getScript(key); script != nil {
+			if err := checkDep(c, key, script.Settings.Title); err != nil {
+				return err
+			}
+		}
+	}
+	for key := range todel {
+		delScript(key)
+	}
+	hotVersion++
+	return nil
 }
 
 func LoadPackages() {
-	// TODO: Check installed packages
 	for name, ext := range Assets.Packages {
 		if _, err := os.Stat(filepath.Join(cfg.PackagesDir, name)); err == nil {
 			ext.Installed = true
+			LoadPackageScripts(name)
 			Assets.Packages[name] = ext
 		}
 	}
-}
-
-func UninstallPackage(name string) {
-	if cfg.playground {
-		// TODO: error
-	}
-	fmt.Println(`Uninstall`, name)
 }
 
 func PackagesList(c echo.Context) *PackagesResponse {
@@ -116,12 +154,46 @@ func packageHandle(c echo.Context) error {
 		err error
 		ext *Package
 	)
-	if ext, err = findPackage(c, c.Param("name")); err != nil {
+	name := c.Param("name")
+	if ext, err = findPackage(c, name); err != nil {
 		return jsonError(c, err)
 	}
-	return c.JSON(http.StatusOK, &ExtResponse{
-		Params: ext.Params,
+	ret := make([]es.ScriptParam, len(ext.Params))
+	copy(ret, ext.Params)
+	lang := c.(*Auth).Lang
+	glob := &langRes[GetLangId(c.(*Auth).User)]
+	for i, par := range ret {
+		ret[i].Title = es.ReplaceVars(par.Title, ext.Langs[lang], glob)
+	}
+	return c.JSON(http.StatusOK, &PackageResponse{
+		Params: ret,
+		Values: storage.PkgValues[name],
 	})
+}
+
+func savePackageHandle(c echo.Context) error {
+	var err error
+
+	errResult := func() error {
+		return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
+	}
+	if err = CheckAdmin(c); err != nil {
+		return errResult()
+	}
+	name := c.Param("name")
+	if _, err = findPackage(c, name); err != nil {
+		return jsonError(c, err)
+	}
+	values := make(map[string]interface{})
+	if err = c.Bind(&values); err != nil {
+		return errResult()
+	}
+	delete(values, `name`)
+	storage.PkgValues[name] = values
+	if err = SaveStorage(); err != nil {
+		return errResult()
+	}
+	return c.JSON(http.StatusOK, Response{Success: true})
 }
 
 func packageInstallHandle(c echo.Context) error {
@@ -145,6 +217,19 @@ func packageInstallHandle(c echo.Context) error {
 			Whitelist: `::1/128, 127.0.0.0/31`,
 			Active:    true,
 		}
+	}
+	vals := make(map[string]interface{})
+	cur := storage.PkgValues[name]
+	for _, par := range ext.Params {
+		vals[par.Name] = par.Options.Initial
+		if cur != nil {
+			if v, ok := cur[par.Name]; ok {
+				vals[par.Name] = v
+			}
+		}
+	}
+	if len(vals) > 0 {
+		storage.PkgValues[name] = vals
 		if err = SaveStorage(); err != nil {
 			return jsonError(c, err)
 		}
@@ -167,6 +252,7 @@ func packageInstallHandle(c echo.Context) error {
 			}
 		}
 	}
+	LoadPackageScripts(name)
 	ext.Installed = true
 	Assets.Packages[name] = *ext
 	return c.JSON(http.StatusOK, PackagesList(c))
@@ -175,22 +261,24 @@ func packageInstallHandle(c echo.Context) error {
 func packageUninstallHandle(c echo.Context) error {
 	var (
 		err error
-		ext *Package
+		pkg *Package
 	)
 	if cfg.playground {
 		return jsonError(c, fmt.Errorf(`Access denied`))
 	}
 	name := c.Param("name")
-	if ext, err = findPackage(c, name); err != nil {
+	if pkg, err = findPackage(c, name); err != nil {
 		return jsonError(c, err)
 	}
-	// TODO: проверка на зависимости для каждого скрипта пакета
+	if err = UnloadPackageScripts(c, name); err != nil {
+		return jsonError(c, err)
+	}
 	path := filepath.Join(cfg.PackagesDir, name)
 	if err := os.RemoveAll(path); err != nil {
 		return jsonError(c, err)
 	}
-	ext.Installed = false
-	Assets.Packages[name] = *ext
+	pkg.Installed = false
+	Assets.Packages[name] = *pkg
 	if name == `tests` {
 		delete(storage.Events, `test`)
 		SaveStorage()
