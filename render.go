@@ -195,7 +195,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 
 		render.Login = len(storage.Settings.PasswordHash) > 0
 		render.Localhost = cfg.HTTP.Host == Localhost
-		render.Favs = userSettings[user.ID].Favs
+		render.Favs = FilterFavs(userSettings[user.ID].Favs)
 		render.Nfy = NfyList(false, user.ID, user.RoleID)
 		//		render.Update = nfyData.Update
 		//		render.Update.Notify = GetNewVersion(GetLangCode(c.(*Auth).User))

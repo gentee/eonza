@@ -106,6 +106,22 @@ func setPasswordHandle(c echo.Context) error {
 	return jsonSuccess(c)
 }
 
+func FilterFavs(favs []Fav) []Fav {
+	ret := make([]Fav, 0, len(favs))
+	for _, fav := range favs {
+		if fav.IsFolder {
+			fav.Children = FilterFavs(fav.Children)
+			if len(fav.Children) == 0 {
+				continue
+			}
+		} else if getScript(fav.Name) == nil {
+			continue
+		}
+		ret = append(ret, fav)
+	}
+	return ret
+}
+
 func saveFavsHandle(c echo.Context) error {
 	var (
 		favs []Fav
@@ -116,7 +132,7 @@ func saveFavsHandle(c echo.Context) error {
 	}
 	id := c.(*Auth).User.ID
 	user := userSettings[id]
-	user.Favs = favs
+	user.Favs = FilterFavs(favs)
 	userSettings[id] = user
 	if err = SaveUser(id); err != nil {
 		return jsonError(c, err)
