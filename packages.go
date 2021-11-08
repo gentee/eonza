@@ -49,6 +49,8 @@ type Package struct {
 	Version     string                       `yaml:"version"`
 	Langs       map[string]map[string]string `json:"langs,omitempty" yaml:"langs,omitempty"`
 	Params      []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
+
+	json string // json of package values
 }
 
 func LoadPackageScripts(name string) {
@@ -65,6 +67,7 @@ func LoadPackageScripts(name string) {
 			}
 			script.embedded = true
 			script.folder = isfolder(&script)
+			script.pkg = name
 			if err := setScript(&script); err != nil {
 				golog.Error(err)
 			}
@@ -146,24 +149,24 @@ func findPackage(c echo.Context, name string) (*Package, error) {
 	if !ok {
 		return nil, fmt.Errorf(`Cannot find %s package`, name)
 	}
-	return &v, nil
+	return v, nil
 }
 
 func packageHandle(c echo.Context) error {
 	var (
 		err error
-		ext *Package
+		pkg *Package
 	)
 	name := c.Param("name")
-	if ext, err = findPackage(c, name); err != nil {
+	if pkg, err = findPackage(c, name); err != nil {
 		return jsonError(c, err)
 	}
-	ret := make([]es.ScriptParam, len(ext.Params))
-	copy(ret, ext.Params)
+	ret := make([]es.ScriptParam, len(pkg.Params))
+	copy(ret, pkg.Params)
 	lang := c.(*Auth).Lang
 	glob := &langRes[GetLangId(c.(*Auth).User)]
 	for i, par := range ret {
-		ret[i].Title = es.ReplaceVars(par.Title, ext.Langs[lang], glob)
+		ret[i].Title = es.ReplaceVars(par.Title, pkg.Langs[lang], glob)
 	}
 	return c.JSON(http.StatusOK, &PackageResponse{
 		Params: ret,
@@ -172,7 +175,10 @@ func packageHandle(c echo.Context) error {
 }
 
 func savePackageHandle(c echo.Context) error {
-	var err error
+	var (
+		err error
+		pkg *Package
+	)
 
 	errResult := func() error {
 		return c.JSON(http.StatusOK, Response{Error: fmt.Sprint(err)})
@@ -181,7 +187,7 @@ func savePackageHandle(c echo.Context) error {
 		return errResult()
 	}
 	name := c.Param("name")
-	if _, err = findPackage(c, name); err != nil {
+	if pkg, err = findPackage(c, name); err != nil {
 		return jsonError(c, err)
 	}
 	values := make(map[string]interface{})
@@ -190,6 +196,7 @@ func savePackageHandle(c echo.Context) error {
 	}
 	delete(values, `name`)
 	storage.PkgValues[name] = values
+	pkg.json = ""
 	if err = SaveStorage(); err != nil {
 		return errResult()
 	}
@@ -199,13 +206,13 @@ func savePackageHandle(c echo.Context) error {
 func packageInstallHandle(c echo.Context) error {
 	var (
 		err error
-		ext *Package
+		pkg *Package
 	)
 	if cfg.playground {
 		return jsonError(c, fmt.Errorf(`Access denied`))
 	}
 	name := c.Param("name")
-	if ext, err = findPackage(c, name); err != nil {
+	if pkg, err = findPackage(c, name); err != nil {
 		return jsonError(c, err)
 	}
 	if name == `tests` {
@@ -220,7 +227,7 @@ func packageInstallHandle(c echo.Context) error {
 	}
 	vals := make(map[string]interface{})
 	cur := storage.PkgValues[name]
-	for _, par := range ext.Params {
+	for _, par := range pkg.Params {
 		vals[par.Name] = par.Options.Initial
 		if cur != nil {
 			if v, ok := cur[par.Name]; ok {
@@ -253,8 +260,7 @@ func packageInstallHandle(c echo.Context) error {
 		}
 	}
 	LoadPackageScripts(name)
-	ext.Installed = true
-	Assets.Packages[name] = *ext
+	pkg.Installed = true
 	return c.JSON(http.StatusOK, PackagesList(c))
 }
 
@@ -278,7 +284,6 @@ func packageUninstallHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	pkg.Installed = false
-	Assets.Packages[name] = *pkg
 	if name == `tests` {
 		delete(storage.Events, `test`)
 		SaveStorage()

@@ -32,9 +32,9 @@ var initTar []byte
 var packagesTar []byte
 
 type CfgAssets struct {
-	Templates []string           `yaml:"templates"`
-	Languages []string           `yaml:"languages"`
-	Packages  map[string]Package `yaml:"packages"`
+	Templates []string            `yaml:"templates"`
+	Languages []string            `yaml:"languages"`
+	Packages  map[string]*Package `yaml:"packages"`
 }
 
 var (

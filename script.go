@@ -49,6 +49,7 @@ type Script struct {
 	folder   bool                         // can have other commands inside
 	embedded bool                         // Embedded script
 	initial  string                       // Initial value
+	pkg      string                       // Package name
 }
 
 func getScript(name string) (script *Script) {
