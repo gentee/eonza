@@ -160,6 +160,7 @@ var (
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
 		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
 		{Prototype: `SetVar(str,obj)`, Object: SetVarObj},
+		{Prototype: `SetJsonVar(str,str)`, Object: SetJsonVar},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		{Prototype: `GetVarBytes(str) str`, Object: GetVarBytes},
