@@ -397,6 +397,11 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		if len(script.Tree) == 0 || len(predef) > 0 {
 			initcmd += "\r\n" + predef
 		}
+		if len(script.pkg) > 0 {
+			if jsonVals := GetPackageJSON(script.pkg); len(jsonVals) > 0 {
+				initcmd += fmt.Sprintf(`SetJsonVar(%q, %s)`, script.pkg, src.FindStrConst(jsonVals))
+			}
+		}
 		code = initcmd + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"
@@ -488,6 +493,13 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		}
 		params = append(params, setvar)
 	}
+	if len(script.pkg) > 0 {
+		if jsonVals := GetPackageJSON(script.pkg); len(jsonVals) > 0 {
+			params = append(params, fmt.Sprintf(`SetJsonVar(%q, %s)`, script.pkg,
+				src.FindStrConst(jsonVals)))
+		}
+	}
+
 	if len(jsonForm) > 0 {
 		outForm, err := json.Marshal(jsonForm)
 		if err != nil {

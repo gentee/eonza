@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"eonza/lib"
 	es "eonza/script"
 	"fmt"
@@ -30,7 +31,8 @@ type PackageInfo struct {
 
 type PackageReview struct {
 	PackageInfo
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	HasParams bool   `json:"hasparams"`
 }
 
 type PackagesResponse struct {
@@ -51,6 +53,19 @@ type Package struct {
 	Params      []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
 
 	json string // json of package values
+}
+
+func GetPackageJSON(name string) string {
+	pkg := Assets.Packages[name]
+	if pkg == nil || !pkg.Installed || len(pkg.Params) == 0 {
+		return ``
+	}
+	if len(pkg.json) == 0 {
+		if out, err := json.Marshal(storage.PkgValues[name]); err == nil {
+			pkg.json = string(out)
+		}
+	}
+	return pkg.json
 }
 
 func LoadPackageScripts(name string) {
@@ -115,12 +130,13 @@ func PackagesList(c echo.Context) *PackagesResponse {
 	lang := c.(*Auth).Lang
 	glob := &langRes[GetLangId(c.(*Auth).User)]
 	ret := make([]PackageReview, 0)
-	for name, ext := range Assets.Packages {
-		ext.Title = es.ReplaceVars(ext.Title, ext.Langs[lang], glob)
-		ext.Desc = es.ReplaceVars(ext.Desc, ext.Langs[lang], glob)
+	for name, pkg := range Assets.Packages {
+		pkg.Title = es.ReplaceVars(pkg.Title, pkg.Langs[lang], glob)
+		pkg.Desc = es.ReplaceVars(pkg.Desc, pkg.Langs[lang], glob)
 		ret = append(ret, PackageReview{
-			PackageInfo: ext.PackageInfo,
+			PackageInfo: pkg.PackageInfo,
 			Name:        name,
+			HasParams:   len(pkg.Params) > 0,
 		})
 	}
 	sort.Slice(ret, func(i, j int) bool {
