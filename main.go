@@ -28,7 +28,7 @@ var (
 	consoleData []byte
 	isShutdown  bool
 	outerLib    = []gentee.EmbedItem{
-		{Prototype: `Asset(str,str)`, Object: Asset},
+		{Prototype: `PkgFile(str,str)`, Object: PkgFile},
 	}
 )
 

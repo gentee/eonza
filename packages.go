@@ -306,3 +306,11 @@ func packageUninstallHandle(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, PackagesList(c))
 }
+
+func PkgFile(assetname, filename string) error {
+	data, err := os.ReadFile(filepath.Join(scriptTask.Header.PkgPath, assetname))
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filename, data, 0666)
+}

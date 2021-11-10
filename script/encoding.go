@@ -33,6 +33,7 @@ type Header struct {
 	User         users.User
 	Role         users.Role
 	ClaimKey     string
+	PkgPath      string
 	IsPro        bool
 	IP           string
 	TaskID       uint32
