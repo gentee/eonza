@@ -225,6 +225,7 @@ var (
 		{Prototype: `CloseCSV(handle)`, Object: CloseCSV},
 		{Prototype: `ReadCSV(handle) bool`, Object: ReadCSV},
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
+		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 	}
 )
 

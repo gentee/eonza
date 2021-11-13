@@ -45,3 +45,30 @@ packages:
       options: 
         initial: "#.temppath#"
     
+  todoist:
+    version: 1.0
+    info:
+      title: Todoist
+      desc: '#_desc#'
+    langs:
+      en:
+        _desc: Scripts for Todoist service
+        _api: API URL
+        _token: Token
+      ru:
+        _desc: Скрипты для сервиса Todoist
+        _api: API URL
+        _token: Токен
+    params:
+    - name: api
+      title: '#_api#'
+      type: 2
+      options: 
+        required: true
+        initial: "https://api.todoist.com/rest/v1"
+    - name: token
+      title: '#_token#'
+      type: 2
+      options: 
+        required: true
+    

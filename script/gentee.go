@@ -6,9 +6,12 @@ package script
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/csv"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -255,4 +258,41 @@ func ReadCSV(hcsv *CSV) (int64, error) {
 		return 0, err
 	}
 	return 1, nil
+}
+
+func JSONRequest(urlPath string, jsonData string, headers *core.Map, response string) (ret string, err error) {
+	var (
+		req *http.Request
+		buf []byte
+	)
+	method := `POST`
+	if len(jsonData) == 0 {
+		method = `GET`
+	}
+
+	if scriptTask.Header.IsPlayground {
+		return ``, fmt.Errorf(`Access denied`)
+	}
+	if req, err = http.NewRequest(method, urlPath, bytes.NewBuffer([]byte(jsonData))); err != nil {
+		return
+	}
+	for _, key := range headers.Keys {
+		req.Header.Set(key, headers.Data[key].(string))
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	res, err := http.DefaultClient.Do(req)
+	if err == nil {
+		if len(response) > 0 {
+			obj, _ := vm.JsonToObj(fmt.Sprintf(`{"statuscode": %d, "status": "%s"}`,
+				res.StatusCode, res.Status))
+			SetVarObj(response, obj)
+		}
+		buf, err = ioutil.ReadAll(res.Body)
+		res.Body.Close()
+		if err == nil {
+			ret = string(buf)
+		}
+	}
+	return
 }
