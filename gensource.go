@@ -254,6 +254,11 @@ func (src *Source) Predefined(script *Script) (ret string, err error) {
 			ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
 		}
 	}
+	if len(script.pkg) > 0 {
+		if jsonVals := GetPackageJSON(script.pkg); len(jsonVals) > 0 {
+			ret += fmt.Sprintf("SetJsonVar(%q, %s)\r\n", script.pkg, src.FindStrConst(jsonVals))
+		}
+	}
 	return
 }
 
@@ -371,6 +376,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			}
 			if len(script.Tree) > 0 {
 				code += "\r\ninit(" + strings.Join(vars, `,`) + ")\r\n" + predef
+				predef = ``
 				code += "try {\r\n"
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
@@ -394,13 +400,8 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			name = `*` + name
 		}
 		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", name, parNames)
-		if len(script.Tree) == 0 || len(predef) > 0 {
+		if len(predef) > 0 {
 			initcmd += "\r\n" + predef
-		}
-		if len(script.pkg) > 0 {
-			if jsonVals := GetPackageJSON(script.pkg); len(jsonVals) > 0 {
-				initcmd += fmt.Sprintf(`SetJsonVar(%q, %s)`, script.pkg, src.FindStrConst(jsonVals))
-			}
 		}
 		code = initcmd + code
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
@@ -492,12 +493,6 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 			})
 		}
 		params = append(params, setvar)
-	}
-	if len(script.pkg) > 0 {
-		if jsonVals := GetPackageJSON(script.pkg); len(jsonVals) > 0 {
-			params = append(params, fmt.Sprintf(`SetJsonVar(%q, %s)`, script.pkg,
-				src.FindStrConst(jsonVals)))
-		}
 	}
 
 	if len(jsonForm) > 0 {
