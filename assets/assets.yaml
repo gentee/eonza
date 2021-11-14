@@ -31,6 +31,8 @@ packages:
     info:
       title: "#.tests#"
       desc: '#_desc#'
+      help: tests
+      helplang: ru
     langs:
       en:
         _desc: Tests for the standard library
@@ -50,6 +52,8 @@ packages:
     info:
       title: Todoist
       desc: '#_desc#'
+      help: todoist
+      helplang: ru
     langs:
       en:
         _desc: Scripts for Todoist service
