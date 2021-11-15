@@ -194,6 +194,7 @@ func tasksHandle(c echo.Context) error {
 			taskFlag = role.Tasks
 		}
 	}
+	dup := make(map[string]bool)
 	for _, item := range list {
 		var finish string
 		if item.FinishTime > 0 {
@@ -209,6 +210,14 @@ func tasksHandle(c echo.Context) error {
 				(taskFlag&0x200 == 0x200 && user.RoleID == item.RoleID)
 			var userName, roleName string
 			userName, roleName = GetUserRole(item.UserID, item.RoleID)
+			if storage.Settings.HideDupTasks && item.Status >= TaskFinished && !item.Locked {
+				key := fmt.Sprintf(`%d%s%s`, item.Status, item.Name, userName)
+				if dup[key] {
+					continue
+				} else {
+					dup[key] = true
+				}
+			}
 			listInfo = append(listInfo, TaskInfo{
 				ID:         item.ID,
 				Status:     item.Status,

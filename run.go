@@ -9,6 +9,7 @@ import (
 	"eonza/script"
 	"eonza/users"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -101,6 +102,9 @@ func systemRun(rs *RunScript) error {
 			Cert:      cfg.HTTP.Cert,
 			Priv:      cfg.HTTP.Priv,
 		},
+	}
+	if len(item.pkg) > 0 {
+		header.PkgPath = filepath.Join(cfg.PackagesDir, item.pkg)
 	}
 	if header.IsPlayground {
 		header.Playground = &cfg.Playground

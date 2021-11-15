@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"eonza/lib"
 	"fmt"
-	"path"
 	"strings"
 
 	es "eonza/script"
@@ -50,6 +49,7 @@ type Script struct {
 	folder   bool                         // can have other commands inside
 	embedded bool                         // Embedded script
 	initial  string                       // Initial value
+	pkg      string                       // Package name
 }
 
 func getScript(name string) (script *Script) {
@@ -127,11 +127,9 @@ func InitScripts() {
 		return script.Settings.Name == SourceCode ||
 			strings.Contains(script.Code, `%body%`)
 	}
-	for _, tpl := range _escDirs["../eonza-assets/scripts"] {
+	for _, f := range StdlibFS.List {
 		var script Script
-		fname := tpl.Name()
-		data := FileAsset(path.Join(`scripts`, fname))
-		if err := yaml.Unmarshal(data, &script); err != nil {
+		if err := yaml.Unmarshal(f.Data, &script); err != nil {
 			golog.Fatal(err)
 		}
 		script.embedded = true
@@ -140,6 +138,7 @@ func InitScripts() {
 			golog.Fatal(err)
 		}
 	}
+	LoadPackages()
 	for name, item := range storage.Scripts {
 		if scripts[lib.IdName(name)] != nil {
 			golog.Errorf(`The '%s' script has been loaded as embedded script`, name)

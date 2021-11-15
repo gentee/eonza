@@ -27,8 +27,7 @@ var (
 
 // InitLang loads language resources
 func InitLang() {
-	for _, tpl := range _escDirs["../eonza-assets/languages"] {
-		lang := tpl.Name()
+	for _, lang := range Assets.Languages {
 		lang = lang[:len(lang)-5]
 		res := make(map[string]string, 32)
 		if err := yaml.Unmarshal(LanguageAsset(lang), &res); err != nil {

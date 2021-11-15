@@ -254,6 +254,11 @@ func (src *Source) Predefined(script *Script) (ret string, err error) {
 			ret = `SetYamlVars(` + src.FindStrConst(string(data)) + ")\r\n"
 		}
 	}
+	if len(script.pkg) > 0 {
+		if jsonVals := GetPackageJSON(script.pkg); len(jsonVals) > 0 {
+			ret += fmt.Sprintf("SetJsonVar(%q, %s)\r\n", script.pkg, src.FindStrConst(jsonVals))
+		}
+	}
 	return
 }
 
@@ -345,9 +350,13 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		var parNames, prefix, suffix, initcmd string
 		if script.Settings.Name != SourceCode {
 			var vars []string
-			for _, par := range values {
+			for i, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
-				parNames += `,` + par.Name
+				if script.Params[i].Options.Flags == "password" {
+					parNames += `,"***"`
+				} else {
+					parNames += `,` + par.Name
+				}
 				vars = append(vars, fmt.Sprintf(`"%s", %[1]s`, par.Name))
 			}
 			/*			// Now log info is without optional parameters
@@ -367,6 +376,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			}
 			if len(script.Tree) > 0 {
 				code += "\r\ninit(" + strings.Join(vars, `,`) + ")\r\n" + predef
+				predef = ``
 				code += "try {\r\n"
 				tmp, err = src.Tree(script.Tree)
 				if err != nil {
@@ -390,7 +400,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			name = `*` + name
 		}
 		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", name, parNames)
-		if len(script.Tree) == 0 || len(predef) > 0 {
+		if len(predef) > 0 {
 			initcmd += "\r\n" + predef
 		}
 		code = initcmd + code
@@ -484,6 +494,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		}
 		params = append(params, setvar)
 	}
+
 	if len(jsonForm) > 0 {
 		outForm, err := json.Marshal(jsonForm)
 		if err != nil {

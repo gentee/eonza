@@ -6,13 +6,15 @@ package main
 
 const (
 	// Version of the application
-	Version = "1.22.0"
+	Version = "1.23.0"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
 	DefTheme = `default`
 	// DefAssets is the default name of assets directory
 	DefAssets = `assets`
+	// DefPackages is the default name of package directory
+	DefPackages = `packages`
 	// DefLogs is the default name of log directory
 	DefLog = `log`
 	// DefUsers is the default name of users directory

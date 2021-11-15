@@ -52,6 +52,10 @@ func ObjToStr(key string) (string, bool) {
 			switch vm.Type(v.(*core.Obj)) {
 			case `int`, `float`, `str`, `bool`:
 				return fmt.Sprint(v.(*core.Obj).Data), true
+			case `arr.obj`, `map.obj`:
+				if ret, err := vm.Json(v.(*core.Obj)); err == nil {
+					return ret, true
+				}
 			}
 		}
 	}
@@ -137,6 +141,10 @@ func ReplaceObj(key string) (ret string, found bool) {
 			ret = v.Text()
 			found = true
 		case *core.Array, *core.Map:
+			if jsonret, err := vm.Json(obj); err == nil {
+				ret = jsonret
+				found = true
+			}
 		default:
 			ret = fmt.Sprint(v)
 			found = true
@@ -190,6 +198,14 @@ func ResultVarObj(name string, value *core.Obj) error {
 
 func SetVarObj(name string, value *core.Obj) error {
 	return setRawVarObj(0, name, value)
+}
+
+func SetJsonVar(name, input string) error {
+	obj, err := vm.JsonToObj(input)
+	if err != nil {
+		return err
+	}
+	return setRawVarObj(0, name, obj)
 }
 
 func AppendToArray(name, value string) error {

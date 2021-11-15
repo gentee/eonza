@@ -160,11 +160,13 @@ var (
 		{Prototype: `SetVar(str,str)`, Object: SetVar},
 		{Prototype: `SetVar(str,int)`, Object: SetVarInt},
 		{Prototype: `SetVar(str,obj)`, Object: SetVarObj},
+		{Prototype: `SetJsonVar(str,str)`, Object: SetJsonVar},
 		{Prototype: `GetVar(str) str`, Object: GetVar},
 		{Prototype: `GetVarBool(str) bool`, Object: GetVarBool},
 		{Prototype: `GetVarBytes(str) str`, Object: GetVarBytes},
 		{Prototype: `GetVarInt(str) int`, Object: GetVarInt},
 		{Prototype: `GetVarObj(str) obj`, Object: GetVarObj},
+		{Prototype: `GetVarRaw(str) str`, Object: GetVarRaw},
 		{Prototype: `GetConst(str) str`, Object: GetConst},
 		{Prototype: `SendNotification(str)`, Object: SendNotification},
 		{Prototype: `SendEmail(obj, obj)`, Object: SendEmail},
@@ -223,6 +225,7 @@ var (
 		{Prototype: `CloseCSV(handle)`, Object: CloseCSV},
 		{Prototype: `ReadCSV(handle) bool`, Object: ReadCSV},
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
+		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 	}
 )
 
@@ -428,6 +431,13 @@ func GetVarInt(name string) (ret int64, err error) {
 	var tmp string
 	if tmp, err = GetVar(name); err == nil {
 		ret, _ = strconv.ParseInt(tmp, 10, 64)
+	}
+	return
+}
+
+func GetVarRaw(name string) (ret string, err error) {
+	if IsVar(name) != 0 {
+		ret = dataScript.Vars[len(dataScript.Vars)-1][name]
 	}
 	return
 }

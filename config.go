@@ -9,7 +9,6 @@ import (
 	"eonza/users"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/kataras/golog"
@@ -36,14 +35,15 @@ type UsersConfig struct {
 
 // Config stores application's settings
 type Config struct {
-	Version    string               `yaml:"version"`             // Version of the application
-	Mode       string               `yaml:"mode"`                // Mode: default, develop, playground
-	AssetsDir  string               `yaml:"assetsdir"`           // Directory for assets file. empty - dir of cfg file
-	Log        LogConfig            `yaml:"log"`                 // Log settings
-	Users      UsersConfig          `yaml:"users"`               // Users settings
-	HTTP       lib.HTTPConfig       `yaml:"http"`                // Web-server settings
-	Playground lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
-	Whitelist  []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
+	Mode string `yaml:"mode"` // Mode: default, develop, playground
+	// Empty dir means subfolder in dir of cfg file
+	AssetsDir   string               `yaml:"assetsdir"`           // Directory for assets file.
+	PackagesDir string               `yaml:"packagesdir"`         // Directory for packages files.
+	Log         LogConfig            `yaml:"log"`                 // Log settings
+	Users       UsersConfig          `yaml:"users"`               // Users settings
+	HTTP        lib.HTTPConfig       `yaml:"http"`                // Web-server settings
+	Playground  lib.PlaygroundConfig `yaml:"playground"`          // Playground settings
+	Whitelist   []string             `yaml:"whitelist,omitempty"` // Whitelist of IP-addresses
 
 	path       string // path to cfg file
 	develop    bool
@@ -52,8 +52,7 @@ type Config struct {
 
 var (
 	cfg = Config{
-		Version: GetVersion(),
-		Mode:    ModeDefault,
+		Mode: ModeDefault,
 		Log: LogConfig{
 			Mode:  logModeFile,
 			Level: logLevelInfo,
@@ -112,7 +111,8 @@ func LoadConfig() {
 			golog.Fatal(err)
 		}
 	}
-	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
+	//	cfg.AssetsDir = defDir(cfg.AssetsDir, DefAssets)
+	cfg.PackagesDir = defDir(cfg.PackagesDir, DefPackages)
 	cfg.Log.Dir = defDir(cfg.Log.Dir, DefLog)
 	cfg.Users.Dir = defDir(cfg.Users.Dir, DefUsers)
 	//	dataFile := defDir(cfg.DataDir)
@@ -166,19 +166,18 @@ func Install() {
 
 	firstRun = true
 	scripts = make(map[string]*Script)
-	for _, tpl := range _escDirs["../eonza-assets/init"] {
+	InitAssets()
+	for _, f := range InitFS.List {
 		var script Script
-		fname := tpl.Name()
-		data := FileAsset(path.Join(`init`, fname))
-		if err := yaml.Unmarshal(data, &script); err != nil {
+		if f.Dir {
+			continue
+		}
+		if err := yaml.Unmarshal(f.Data, &script); err != nil {
 			golog.Fatal(err)
 		}
 		if err := setScript(&script); err != nil {
 			golog.Fatal(err)
 		}
-		/*		for _, item := range script.Tree {
-				retypeValues(item.Values)
-			}*/
 		storage.Scripts[lib.IdName(script.Settings.Name)] = &script
 	}
 	if err = SaveConfig(); err != nil {
@@ -195,7 +194,6 @@ func Install() {
 		Lang: appInfo.Lang,
 		Favs: []Fav{
 			{Name: `welcome`},
-			{Name: `tests`},
 			{Name: `Tools`, IsFolder: true, Children: []Fav{
 				{Name: `copy-files`},
 				{Name: `create-archive`},

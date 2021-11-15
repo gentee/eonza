@@ -1,4 +1,4 @@
-// Copyright 2020 Alexey Krivonogov. All rights reserved.
+// Copyright 2020-21 Alexey Krivonogov. All rights reserved.
 // Use of this source code is governed by a MIT license
 // that can be found in the LICENSE file.
 
@@ -48,10 +48,12 @@ type Settings struct {
 	AutoUpdate     string            `json:"autoupdate"`
 	RemoveAfter    int               `json:"removeafter"`
 	MaxTasks       int               `json:"maxtasks"`
+	HideDupTasks   bool              `json:"hideduptasks"`
 }
 
 // Storage contains all application data
 type Storage struct {
+	Version     string
 	Settings    Settings
 	Trial       Trial
 	PassCounter int64
@@ -60,10 +62,12 @@ type Storage struct {
 	Timers      map[uint32]*Timer
 	Events      map[string]*Event
 	Browsers    []*Browser
+	PkgValues   map[string]map[string]interface{}
 }
 
 var (
 	storage = Storage{
+		Version: GetVersion(),
 		Settings: Settings{
 			LogLevel:    script.LOG_INFO,
 			Constants:   make(map[string]string),
@@ -71,20 +75,12 @@ var (
 			MaxTasks:    DefMaxTasks,
 			RemoveAfter: DefRemoveAfter,
 		},
-		Users:    make(map[uint32]*User),
-		Scripts:  make(map[string]*Script),
-		Timers:   make(map[uint32]*Timer),
-		Browsers: make([]*Browser, 0),
-		Events: map[string]*Event{
-			`test`: {
-				ID:        lib.RndNum(),
-				Name:      `test`,
-				Script:    `data-print`,
-				Token:     `TEST_TOKEN`,
-				Whitelist: `::1/128, 127.0.0.0/31`,
-				Active:    true,
-			},
-		},
+		Users:     make(map[uint32]*User),
+		Scripts:   make(map[string]*Script),
+		Timers:    make(map[uint32]*Timer),
+		Browsers:  make([]*Browser, 0),
+		Events:    make(map[string]*Event),
+		PkgValues: make(map[string]map[string]interface{}),
 	}
 	mutex = &sync.Mutex{}
 )
@@ -132,6 +128,7 @@ func LoadStorage(psw string) {
 	if !storage.Settings.NotAskPassword {
 		sessionKey = lib.UniqueName(5)
 	}
+	var save bool
 	if len(psw) > 0 {
 		var hash []byte
 		if psw != `reset` {
@@ -142,6 +139,16 @@ func LoadStorage(psw string) {
 		}
 		storage.Settings.PasswordHash = hash
 		storage.PassCounter++
+		save = true
+		if err = SaveStorage(); err != nil {
+			golog.Fatal(err)
+		}
+	}
+	if storage.Version != GetVersion() {
+		Migrate()
+		save = true
+	}
+	if save {
 		if err = SaveStorage(); err != nil {
 			golog.Fatal(err)
 		}
