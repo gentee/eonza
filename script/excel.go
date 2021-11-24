@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	excel "github.com/xuri/excelize/v2"
 )
 
@@ -64,7 +65,7 @@ func XLGetRow(rows *ExcelRows) (*core.Obj, error) {
 		return nil, err
 	}
 	if len(rows.Columns) == 0 {
-		return ifaceToObj(cols)
+		return vm.IfaceToObj(cols)
 	}
 	mapcols := make(map[string]interface{})
 	for i, col := range rows.Columns {
@@ -74,7 +75,7 @@ func XLGetRow(rows *ExcelRows) (*core.Obj, error) {
 		}
 		mapcols[col] = val
 	}
-	return ifaceToObj(mapcols)
+	return vm.IfaceToObj(mapcols)
 }
 
 func XLGetCell(xls *Excel, sheet, axis string) (string, error) {

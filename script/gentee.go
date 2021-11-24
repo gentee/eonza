@@ -113,6 +113,7 @@ func ScanLines(flines *FileLines) int64 {
 	return 0
 }
 
+/*
 func ifaceToObj(val interface{}) (*core.Obj, error) {
 	ret := core.NewObj()
 	switch v := val.(type) {
@@ -180,27 +181,15 @@ func ifaceToObj(val interface{}) (*core.Obj, error) {
 	}
 	return ret, nil
 }
-
+*/
 // YamlToObj converts json to object
 func YamlToObj(input string) (ret *core.Obj, err error) {
 	var v interface{}
 	if err = yaml.Unmarshal([]byte(input), &v); err != nil {
 		return
 	}
-	return ifaceToObj(v)
+	return vm.IfaceToObj(v)
 }
-
-/*
-// Subbuf(buf, int, int) buf
-func Subbuf(buf *core.Buffer, off int64, size int64) (*core.Buffer, error) {
-	if off < 0 || off+size > int64(len(buf.Data)) {
-		return nil, fmt.Errorf(vm.ErrorText(core.ErrInvalidParam))
-	}
-	ret := core.NewBuffer()
-	ret.Data = append(ret.Data, buf.Data[off:off+size]...)
-	return ret, nil
-}
-*/
 
 func CloseCSV(hcsv *CSV) error {
 	return hcsv.File.Close()
@@ -227,7 +216,7 @@ func GetCSV(hcsv *CSV) (ret *core.Obj, err error) {
 		ret.Data = data
 		return
 	}
-	return ifaceToObj(hcsv.Row)
+	return vm.IfaceToObj(hcsv.Row)
 }
 
 func OpenCSV(filename, delim, columns string) (*CSV, error) {

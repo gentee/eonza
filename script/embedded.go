@@ -211,10 +211,10 @@ var (
 		{Prototype: `AttribHTML(handle,str) str`, Object: AttribHTML},
 		{Prototype: `TextHTML(handle) str`, Object: TextHTML},
 		{Prototype: `ChildrenHTML(handle) arr.handle`, Object: ChildrenHTML},
+		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 		// For gentee
 		{Prototype: `obj(handle) obj`, Object: ObjHandle},
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
-		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
 		{Prototype: `YamlToObj(str) obj`, Object: YamlToObj},
 		{Prototype: `CopyName(str) str`, Object: CopyName},
 		{Prototype: `CloseLines(handle)`, Object: CloseLines},
@@ -225,7 +225,6 @@ var (
 		{Prototype: `CloseCSV(handle)`, Object: CloseCSV},
 		{Prototype: `ReadCSV(handle) bool`, Object: ReadCSV},
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
-		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 	}
 )
 
