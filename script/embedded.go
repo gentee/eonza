@@ -134,11 +134,20 @@ type Data struct {
 }
 
 var (
+	Logs = map[string]int{
+		`DISABLE`: LOG_DISABLE,
+		`ERROR`:   LOG_ERROR,
+		`WARN`:    LOG_WARN,
+		`FORM`:    LOG_FORM,
+		`INFO`:    LOG_INFO,
+		`DEBUG`:   LOG_DEBUG,
+		`INHERIT`: LOG_INHERIT,
+	}
 	formID     uint32
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
 		{Prototype: `init()`, Object: Init},
-		{Prototype: `initcmd(str)`, Object: InitCmd},
+		{Prototype: `initcmd(int,str) int`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `Condition(map.obj) bool`, Object: MapCondition},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
@@ -452,7 +461,8 @@ func Init(pars ...interface{}) {
 	dataScript.ObjVars = append(dataScript.ObjVars, sync.Map{})
 }
 
-func InitCmd(name string, pars ...interface{}) bool {
+func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
+	prevLevel := dataScript.LogLevel
 	params := make([]string, len(pars))
 	for i, par := range pars {
 		val := fmt.Sprint(par)
@@ -466,15 +476,12 @@ func InitCmd(name string, pars ...interface{}) bool {
 			params[i] = val
 		}
 	}
-	level := int64(LOG_DEBUG)
-	info := name[0] == '*'
-	if info {
-		name = name[1:]
-		level = LOG_INFO
+	LogOutput(LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+
+	if logLevel != LOG_INHERIT {
+		SetLogLevel(logLevel)
 	}
-	msg := fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `))
-	LogOutput(level, msg)
-	return true
+	return prevLevel
 }
 
 func IsEntry() int64 {

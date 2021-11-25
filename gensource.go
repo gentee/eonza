@@ -34,6 +34,10 @@ type Param struct {
 	Name  string
 }
 
+type Advanced struct {
+	LogLevel int
+}
+
 func (src *Source) Tree(tree []scriptTree) (string, error) {
 	var (
 		body, tmp string
@@ -113,9 +117,13 @@ func (src *Source) getTypeValue(script *Script, par es.ScriptParam, value string
 	return ptype, value
 }
 
-func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Param, error) {
+func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Param, Advanced, error) {
 	values := make([]Param, 0, len(script.Params))
 	var optvalues []Param
+
+	more := Advanced{
+		LogLevel: script.Settings.LogLevel,
+	}
 
 	errField := func(field string) error {
 		glob := langRes[langsId[src.Header.Lang]]
@@ -130,7 +138,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 	if optional, ok := node.Values[`_optional`]; ok {
 		if v, ok := optional.(string); ok {
 			if err := yaml.Unmarshal([]byte(v), &opt); err != nil {
-				return nil, nil, err
+				return nil, nil, more, err
 			}
 		}
 	}
@@ -138,13 +146,18 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 		var advanced map[string]interface{}
 		if v, ok := adv.(string); ok {
 			if err := yaml.Unmarshal([]byte(v), &advanced); err != nil {
-				return nil, nil, err
+				return nil, nil, more, err
 			}
 			retypeValues(advanced)
 		}
 		if v, ok := advanced[`params`]; ok {
 			if pars, ok := v.(map[string]interface{}); ok {
 				params = pars
+			}
+		}
+		if v, ok := advanced[`log`]; ok {
+			if level, ok := es.Logs[strings.ToUpper(fmt.Sprint(v))]; ok {
+				more.LogLevel = level
 			}
 		}
 	}
@@ -198,19 +211,19 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 		switch par.Type {
 		case es.PTextarea, es.PSingleText, es.PNumber, es.PPassword:
 			if isEmpty && par.Options.Required && len(node.Name) != 0 {
-				return nil, nil, errField(par.Title)
+				return nil, nil, more, errField(par.Title)
 			}
 		case es.PList:
 			if val != nil && reflect.TypeOf(val).Kind() == reflect.Slice &&
 				reflect.ValueOf(val).Len() > 0 {
 				out, err := json.Marshal(val)
 				if err != nil {
-					return nil, nil, err
+					return nil, nil, more, err
 				}
 				value = src.FindStrConst(string(out))
 			} else {
 				if par.Options.Required {
-					return nil, nil, errField(par.Title)
+					return nil, nil, more, errField(par.Title)
 				}
 				value = src.FindStrConst(`[]`)
 			}
@@ -226,7 +239,7 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 			values = append(values, param)
 		}
 	}
-	return values, optvalues, nil
+	return values, optvalues, more, nil
 }
 
 func (src *Source) Predefined(script *Script) (ret string, err error) {
@@ -308,7 +321,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		return ``, fmt.Errorf(Lang(DefLang, `erropen`), node.Name)
 	}
 	idname := lib.IdName(script.Settings.Name)
-	values, optvalues, err := src.ScriptValues(script, node)
+	values, optvalues, advanced, err := src.ScriptValues(script, node)
 	if err != nil {
 		return ``, err
 	}
@@ -352,7 +365,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			var vars []string
 			for i, par := range values {
 				params = append(params, fmt.Sprintf("%s %s", par.Type, par.Name))
-				if script.Params[i].Options.Flags == "password" {
+				if strings.Contains(script.Params[i].Options.Flags, "password") {
 					parNames += `,"***"`
 				} else {
 					parNames += `,` + par.Name
@@ -391,15 +404,9 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	deinit()`
 			}
 		}
-		if script.Settings.LogLevel < es.LOG_INHERIT {
-			prefix += fmt.Sprintf("int prevLog = SetLogLevel(%d)\r\n", script.Settings.LogLevel)
-			suffix = "\r\nSetLogLevel(prevLog)"
-		}
-		name := script.Settings.Name
-		if script.Settings.LogLevel == es.LOG_INFO {
-			name = `*` + name
-		}
-		initcmd = fmt.Sprintf("initcmd(`%s`%s)\r\n", name, parNames)
+		suffix = "\r\nSetLogLevel(prevLog)"
+		initcmd = fmt.Sprintf("int prevLog = initcmd(%d, `%s`%s)\r\n", advanced.LogLevel,
+			script.Settings.Name, parNames)
 		if len(predef) > 0 {
 			initcmd += "\r\n" + predef
 		}
@@ -448,7 +455,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		Header:      header,
 	}
 	level := storage.Settings.LogLevel
-	if script.Settings.LogLevel < es.LOG_INHERIT {
+	if script.Settings.LogLevel != es.LOG_INHERIT {
 		level = script.Settings.LogLevel
 	}
 	params = append(params, fmt.Sprintf("SetLogLevel(%d)\r\ninit()", level))
@@ -500,7 +507,8 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		if err != nil {
 			return ``, err
 		}
-		params = append(params, fmt.Sprintf("initcmd(`form`, %s)\r\nForm( %[1]s )", src.Value(string(outForm), false)))
+		params = append(params, fmt.Sprintf("initcmd(%d,`form`, %s)\r\nForm( %[2]s )", level,
+			src.Value(string(outForm), false)))
 	}
 	for _, par := range script.Params {
 		var ptype string

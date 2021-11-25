@@ -624,6 +624,9 @@ func formHandle(c echo.Context) error {
 				if options.Required && !form.Skip && len(fmt.Sprint(form.Values[item.Var])) == 0 {
 					return jsonError(c, fmt.Errorf(Lang(GetLangId(nil), "errreq", item.Text)))
 				}
+				if strings.Contains(options.Flags, "password") {
+					psw[item.Var] = true
+				}
 			}
 		}
 		for key, val := range form.Values {
