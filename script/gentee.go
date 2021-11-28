@@ -285,3 +285,17 @@ func JSONRequest(urlPath string, jsonData string, headers *core.Map, response st
 	}
 	return
 }
+
+func TempFile(path, name, content string) (ret string, err error) {
+	var f *os.File
+	f, err = os.CreateTemp(path, name)
+	if err != nil {
+		return
+	}
+	if _, err = f.Write([]byte(content)); err != nil {
+		f.Close()
+		return
+	}
+	ret = f.Name()
+	return ret, f.Close()
+}
