@@ -316,7 +316,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	var (
 		ifcond string
 	)
-	script := getScript(node.Name)
+	script := getRunScript(node.Name)
 	if script == nil {
 		return ``, fmt.Errorf(Lang(DefLang, `erropen`), node.Name)
 	}
