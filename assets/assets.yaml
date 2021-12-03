@@ -76,3 +76,22 @@ packages:
       options: 
         required: true
     
+  veracrypt:
+    version: 1.0
+    info:
+      title: VeraCrypt
+      desc: '#_desc#'
+      help: veracrypt
+      helplang: ru
+    langs:
+      en:
+        _desc: Scripts for working with the VeraCrypt program
+      ru:
+        _desc: Скрипты для работы с программой VeraCrypt
+    params:
+    - name: app
+      title: '#.appfile#'
+      type: 2
+      options: 
+        required: true
+    
