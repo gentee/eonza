@@ -479,7 +479,9 @@ func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
 			params[i] = val
 		}
 	}
-	LogOutput(LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+	if name != `source-code` {
+		LogOutput(LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+	}
 
 	if logLevel != LOG_INHERIT {
 		SetLogLevel(logLevel)
