@@ -83,6 +83,11 @@ func LoadPackageScripts(name string) {
 			script.embedded = true
 			script.folder = isfolder(&script)
 			script.pkg = name
+			if override := overrides[script.Settings.Name]; override != nil {
+				override.pkg = script.pkg
+				script.override = override
+			}
+
 			if err := setScript(&script); err != nil {
 				golog.Error(err)
 			}

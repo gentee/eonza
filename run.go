@@ -52,7 +52,7 @@ func systemRun(rs *RunScript) error {
 		langCode = GetLangCode(&rs.User)
 		langid = GetLangId(&rs.User)
 	}
-	if item = getScript(rs.Name); item == nil {
+	if item = getRunScript(rs.Name); item == nil {
 		return fmt.Errorf(Lang(langid, `erropen`, rs.Name))
 	}
 	if err = ScriptAccess(item.Settings.Name, item.Settings.Path, rs.Role.ID); err != nil {

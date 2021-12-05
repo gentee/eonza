@@ -7,6 +7,7 @@ package main
 import (
 	"eonza/users"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -52,6 +53,9 @@ func saveSettingsHandle(c echo.Context) error {
 			options.Common.MaxTasks = DefMaxTasks
 		}
 		storage.Settings = options.Common
+		for key, val := range storage.Settings.Constants {
+			storage.Settings.Constants[key] = strings.TrimSpace(val)
+		}
 		if err = SaveStorage(); err != nil {
 			return jsonError(c, err)
 		}

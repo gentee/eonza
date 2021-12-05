@@ -134,11 +134,20 @@ type Data struct {
 }
 
 var (
+	Logs = map[string]int{
+		`DISABLE`: LOG_DISABLE,
+		`ERROR`:   LOG_ERROR,
+		`WARN`:    LOG_WARN,
+		`FORM`:    LOG_FORM,
+		`INFO`:    LOG_INFO,
+		`DEBUG`:   LOG_DEBUG,
+		`INHERIT`: LOG_INHERIT,
+	}
 	formID     uint32
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
 		{Prototype: `init()`, Object: Init},
-		{Prototype: `initcmd(str)`, Object: InitCmd},
+		{Prototype: `initcmd(int,str) int`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
 		{Prototype: `Condition(map.obj) bool`, Object: MapCondition},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
@@ -184,6 +193,7 @@ var (
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
 		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
+
 		// Office functions
 		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
 		{Prototype: `OdtTemplate(str,str)`, Object: OdtTemplate},
@@ -211,10 +221,12 @@ var (
 		{Prototype: `AttribHTML(handle,str) str`, Object: AttribHTML},
 		{Prototype: `TextHTML(handle) str`, Object: TextHTML},
 		{Prototype: `ChildrenHTML(handle) arr.handle`, Object: ChildrenHTML},
+		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 		// For gentee
+		{Prototype: `SplitQuoteLine(str) arr.str`, Object: SplitQuoteLine},
+		{Prototype: `TempFile(str,str,str) str`, Object: TempFile},
 		{Prototype: `obj(handle) obj`, Object: ObjHandle},
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
-		//		{Prototype: `Subbuf(buf,int,int) buf`, Object: Subbuf},
 		{Prototype: `YamlToObj(str) obj`, Object: YamlToObj},
 		{Prototype: `CopyName(str) str`, Object: CopyName},
 		{Prototype: `CloseLines(handle)`, Object: CloseLines},
@@ -225,7 +237,6 @@ var (
 		{Prototype: `CloseCSV(handle)`, Object: CloseCSV},
 		{Prototype: `ReadCSV(handle) bool`, Object: ReadCSV},
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
-		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 	}
 )
 
@@ -453,7 +464,8 @@ func Init(pars ...interface{}) {
 	dataScript.ObjVars = append(dataScript.ObjVars, sync.Map{})
 }
 
-func InitCmd(name string, pars ...interface{}) bool {
+func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
+	prevLevel := dataScript.LogLevel
 	params := make([]string, len(pars))
 	for i, par := range pars {
 		val := fmt.Sprint(par)
@@ -467,15 +479,14 @@ func InitCmd(name string, pars ...interface{}) bool {
 			params[i] = val
 		}
 	}
-	level := int64(LOG_DEBUG)
-	info := name[0] == '*'
-	if info {
-		name = name[1:]
-		level = LOG_INFO
+	if name != `source-code` {
+		LogOutput(LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
 	}
-	msg := fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `))
-	LogOutput(level, msg)
-	return true
+
+	if logLevel != LOG_INHERIT {
+		SetLogLevel(logLevel)
+	}
+	return prevLevel
 }
 
 func IsEntry() int64 {

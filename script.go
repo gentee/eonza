@@ -18,7 +18,12 @@ import (
 )
 
 var (
-	scripts map[string]*Script
+	scripts   map[string]*Script
+	overrides map[string]*Script
+)
+
+const (
+	Override = `.override`
 )
 
 type scriptSettings struct {
@@ -50,10 +55,19 @@ type Script struct {
 	embedded bool                         // Embedded script
 	initial  string                       // Initial value
 	pkg      string                       // Package name
+	override *Script                      // Override script
 }
 
-func getScript(name string) (script *Script) {
+func getScript(name string) *Script {
 	return scripts[lib.IdName(name)]
+}
+
+func getRunScript(name string) (script *Script) {
+	script = scripts[lib.IdName(name)]
+	if script != nil && script.override != nil {
+		script = script.override
+	}
+	return
 }
 
 func retypeValues(value interface{}) interface{} {
@@ -93,6 +107,14 @@ func retypeTree(tree []scriptTree) {
 func setScript(script *Script) error {
 	var ivalues map[string]interface{} //string
 
+	if !script.embedded && strings.HasSuffix(script.Settings.Name, Override) {
+		ownerName := script.Settings.Name[:len(script.Settings.Name)-len(Override)]
+		overrides[ownerName] = script
+		if owner := getScript(ownerName); owner != nil {
+			owner.override = script
+			script.pkg = owner.pkg
+		}
+	}
 	scripts[lib.IdName(script.Settings.Name)] = script
 	if len(script.Params) > 0 {
 		ivalues = make(map[string]interface{}) //string)
@@ -116,6 +138,13 @@ func setScript(script *Script) error {
 }
 
 func delScript(name string) {
+	if strings.HasSuffix(name, Override) {
+		ownerName := name[:len(name)-len(Override)]
+		if owner := getScript(ownerName); owner != nil {
+			owner.override = nil
+		}
+		delete(overrides, ownerName)
+	}
 	name = lib.IdName(name)
 	delete(scripts, name)
 	delete(storage.Scripts, name)
@@ -123,6 +152,7 @@ func delScript(name string) {
 
 func InitScripts() {
 	scripts = make(map[string]*Script)
+	overrides = make(map[string]*Script)
 	isfolder := func(script *Script) bool {
 		return script.Settings.Name == SourceCode ||
 			strings.Contains(script.Code, `%body%`)

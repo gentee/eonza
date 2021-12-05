@@ -113,6 +113,7 @@ func ScanLines(flines *FileLines) int64 {
 	return 0
 }
 
+/*
 func ifaceToObj(val interface{}) (*core.Obj, error) {
 	ret := core.NewObj()
 	switch v := val.(type) {
@@ -180,27 +181,15 @@ func ifaceToObj(val interface{}) (*core.Obj, error) {
 	}
 	return ret, nil
 }
-
+*/
 // YamlToObj converts json to object
 func YamlToObj(input string) (ret *core.Obj, err error) {
 	var v interface{}
 	if err = yaml.Unmarshal([]byte(input), &v); err != nil {
 		return
 	}
-	return ifaceToObj(v)
+	return vm.IfaceToObj(v)
 }
-
-/*
-// Subbuf(buf, int, int) buf
-func Subbuf(buf *core.Buffer, off int64, size int64) (*core.Buffer, error) {
-	if off < 0 || off+size > int64(len(buf.Data)) {
-		return nil, fmt.Errorf(vm.ErrorText(core.ErrInvalidParam))
-	}
-	ret := core.NewBuffer()
-	ret.Data = append(ret.Data, buf.Data[off:off+size]...)
-	return ret, nil
-}
-*/
 
 func CloseCSV(hcsv *CSV) error {
 	return hcsv.File.Close()
@@ -227,7 +216,7 @@ func GetCSV(hcsv *CSV) (ret *core.Obj, err error) {
 		ret.Data = data
 		return
 	}
-	return ifaceToObj(hcsv.Row)
+	return vm.IfaceToObj(hcsv.Row)
 }
 
 func OpenCSV(filename, delim, columns string) (*CSV, error) {
@@ -295,4 +284,56 @@ func JSONRequest(urlPath string, jsonData string, headers *core.Map, response st
 		}
 	}
 	return
+}
+
+func TempFile(path, name, content string) (ret string, err error) {
+	var f *os.File
+	f, err = os.CreateTemp(path, name)
+	if err != nil {
+		return
+	}
+	if _, err = f.Write([]byte(content)); err != nil {
+		f.Close()
+		return
+	}
+	ret = f.Name()
+	return ret, f.Close()
+}
+
+// SplitQuoteLine splits the command line parameters to the array of strings
+func SplitQuoteLine(cmdline string) *core.Array {
+	var (
+		isQuote   bool
+		quote, ch rune
+		off, i    int
+	)
+	ret := core.NewArray()
+
+	for i, ch = range cmdline {
+		switch ch {
+		case '\n', ' ':
+			if !isQuote {
+				if off < i {
+					ret.Data = append(ret.Data, strings.TrimSpace(cmdline[off:i]))
+				}
+				off = i + 1
+			}
+		case '"', '\'':
+			if isQuote {
+				if ch == quote {
+					isQuote = false
+					ret.Data = append(ret.Data, strings.TrimSpace(cmdline[off:i]))
+					off = i + 1
+				}
+			} else if i == off {
+				isQuote = true
+				quote = ch
+				off = i + 1
+			}
+		}
+	}
+	if off < i {
+		ret.Data = append(ret.Data, strings.TrimSpace(cmdline[off:]))
+	}
+	return ret
 }
