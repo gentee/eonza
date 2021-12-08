@@ -236,6 +236,7 @@ func initTask() script.Settings {
 	cmdFile = createFile(`trace`)
 	outFile = createFile(`out`)
 	logScript = createFile(`log`)
+	golog.SetOutput(logScript)
 
 	if _, err = cmdFile.Write([]byte(task.Head())); err != nil {
 		golog.Fatal(err)
