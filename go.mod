@@ -8,7 +8,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/gentee/eonza-pro v0.0.0-00010101000000-000000000000
-	github.com/gentee/gentee v1.21.0
+	github.com/gentee/gentee v1.22.0
 	github.com/gentee/systray v1.3.1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -23,12 +23,12 @@ require (
 	github.com/xuri/excelize/v2 v2.4.1
 	github.com/yuin/goldmark v1.4.4
 	github.com/yuin/goldmark-highlighting v0.0.0-20210516132338-9216f9c5aa01
-	golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8
-	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c
+	golang.org/x/crypto v0.0.0-20211209193657-4570a0811e8b
+	golang.org/x/sys v0.0.0-20211210111614-af8b64212486
 	golang.org/x/text v0.3.7
-	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/ini.v1 v1.64.0
+	gopkg.in/ini.v1 v1.66.2
 	gopkg.in/yaml.v2 v2.4.0
 )
 

@@ -223,7 +223,6 @@ var (
 		{Prototype: `ChildrenHTML(handle) arr.handle`, Object: ChildrenHTML},
 		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 		// For gentee
-		{Prototype: `SplitQuoteLine(str) arr.str`, Object: SplitQuoteLine},
 		{Prototype: `TempFile(str,str,str) str`, Object: TempFile},
 		{Prototype: `obj(handle) obj`, Object: ObjHandle},
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},

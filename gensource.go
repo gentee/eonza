@@ -36,6 +36,7 @@ type Param struct {
 
 type Advanced struct {
 	LogLevel int
+	Ref      string
 }
 
 func (src *Source) Tree(tree []scriptTree) (string, error) {
@@ -159,6 +160,9 @@ func (src *Source) ScriptValues(script *Script, node scriptTree) ([]Param, []Par
 			if level, ok := es.Logs[strings.ToUpper(fmt.Sprint(v))]; ok {
 				more.LogLevel = level
 			}
+		}
+		if v, ok := advanced[`ref`]; ok {
+			more.Ref = fmt.Sprint(v)
 		}
 	}
 	for _, par := range script.Params {
