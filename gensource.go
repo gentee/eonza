@@ -462,7 +462,7 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 	if script.Settings.LogLevel != es.LOG_INHERIT {
 		level = script.Settings.LogLevel
 	}
-	params = append(params, fmt.Sprintf("SetLogLevel(%d)\r\ninit()", level))
+	params = append(params, fmt.Sprintf("thread(%d)\r\ninit()", level))
 
 	if predef, err := src.Predefined(script); err != nil {
 		return ``, err

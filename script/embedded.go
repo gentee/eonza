@@ -88,6 +88,11 @@ type ScriptOptions struct {
 	If string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
+type ThreadOptions struct {
+	LogLevel int64
+	Refs     []string
+}
+
 const (
 	LOG_DISABLE = iota
 	LOG_ERROR
@@ -123,7 +128,7 @@ type FormInfo struct {
 }
 
 type Data struct {
-	LogLevel int64
+	//	LogLevel int64
 	Vars     []map[string]string
 	ObjVars  []sync.Map
 	Mutex    sync.Mutex
@@ -143,9 +148,11 @@ var (
 		`DEBUG`:   LOG_DEBUG,
 		`INHERIT`: LOG_INHERIT,
 	}
+	MainThread *vm.Runtime
 	formID     uint32
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
+		{Prototype: `thread(int)`, Object: Thread},
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(int,str) int`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
@@ -238,6 +245,16 @@ var (
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
 	}
 )
+
+func Thread(rt *vm.Runtime, level int64) {
+	if MainThread == nil {
+		MainThread = rt
+	}
+	rt.Custom = &ThreadOptions{
+		LogLevel: level,
+		Refs:     []string{scriptTask.Header.Name},
+	}
+}
 
 func GetEonzaDynamic(name string) (ret string) {
 	now := time.Now()
@@ -463,8 +480,8 @@ func Init(pars ...interface{}) {
 	dataScript.ObjVars = append(dataScript.ObjVars, sync.Map{})
 }
 
-func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
-	prevLevel := dataScript.LogLevel
+func InitCmd(rt *vm.Runtime, logLevel int64, name string, pars ...interface{}) int64 {
+	prevLevel := rt.Custom.(*ThreadOptions).LogLevel
 	params := make([]string, len(pars))
 	for i, par := range pars {
 		val := fmt.Sprint(par)
@@ -479,11 +496,11 @@ func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
 		}
 	}
 	if name != `source-code` {
-		LogOutput(LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+		LogOutput(rt, LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
 	}
 
 	if logLevel != LOG_INHERIT {
-		SetLogLevel(logLevel)
+		SetLogLevel(rt, logLevel)
 	}
 	return prevLevel
 }
@@ -602,14 +619,14 @@ func Form(data string) error {
 	return nil
 }
 
-func LogOutput(level int64, message string) {
+func LogOutput(rt *vm.Runtime, level int64, message string) {
 	var mode = []string{``, `ERROR`, `WARN`, `FORM`, `INFO`, `DEBUG`}
 	if level < LOG_ERROR || level > LOG_DEBUG {
 		return
 	}
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
-	if level > dataScript.LogLevel {
+	if level > rt.Custom.(*ThreadOptions).LogLevel {
 		return
 	}
 	dataScript.chLogout <- fmt.Sprintf("[%s] %s %s",
@@ -733,12 +750,12 @@ func Macro(in string) (string, error) {
 	return macro(in)
 }
 
-func SetLogLevel(level int64) int64 {
+func SetLogLevel(rt *vm.Runtime, level int64) int64 {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
-	ret := dataScript.LogLevel
+	ret := rt.Custom.(*ThreadOptions).LogLevel
 	if level >= LOG_DISABLE && level < LOG_INHERIT {
-		dataScript.LogLevel = level
+		rt.Custom.(*ThreadOptions).LogLevel = level
 	}
 	return ret
 }

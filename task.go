@@ -637,9 +637,9 @@ func formHandle(c echo.Context) error {
 			}
 		}
 		if forLog, err := json.Marshal(form.Values); err != nil {
-			script.LogOutput(script.LOG_ERROR, err.Error())
+			script.LogOutput(script.MainThread, script.LOG_ERROR, err.Error())
 		} else {
-			script.LogOutput(script.LOG_FORM, string(forLog))
+			script.LogOutput(script.MainThread, script.LOG_FORM, string(forLog))
 		}
 		formData[0].ChResponse <- true
 		formData = formData[1:]
