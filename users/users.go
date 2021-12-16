@@ -36,8 +36,9 @@ type LicenseInfo struct {
 }
 
 type ProSettings struct {
-	Twofa  bool   `json:"twofa"`
-	Master string `json:"master"`
+	Twofa    bool   `json:"twofa"`
+	Master   string `json:"master"`
+	AutoFill bool   `json:"autofill"`
 }
 
 type Role struct {
