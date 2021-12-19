@@ -67,6 +67,7 @@ type WsCmd struct {
 	Message string `json:"message,omitempty"`
 	Time    string `json:"finish,omitempty"`
 	Task    *Task  `json:"task,omitempty"`
+	Ref     string `json:"ref,omitempty"`
 }
 
 type StdinForm struct {
@@ -147,6 +148,7 @@ func sendForm(client WsClient) error {
 	return client.Conn.WriteJSON(WsCmd{
 		TaskID:  task.ID,
 		Cmd:     WcForm,
+		Ref:     formData[0].Ref,
 		Message: formData[0].Data,
 		Status:  int(formData[0].ID),
 	})

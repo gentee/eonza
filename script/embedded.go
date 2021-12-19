@@ -122,6 +122,7 @@ type ConditionItem struct {
 }
 
 type FormInfo struct {
+	Ref        string
 	ChResponse chan bool
 	Data       string
 	ID         uint32
@@ -153,6 +154,9 @@ var (
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
 		{Prototype: `thread(int)`, Object: Thread},
+		{Prototype: `pushref(str)`, Object: PushRef},
+		{Prototype: `popref()`, Object: PopRef},
+		{Prototype: `ref() str`, Object: GetRef},
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(int,str) int`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
@@ -254,6 +258,23 @@ func Thread(rt *vm.Runtime, level int64) {
 		LogLevel: level,
 		Refs:     []string{scriptTask.Header.Name},
 	}
+}
+
+func PushRef(rt *vm.Runtime, ref string) {
+	rt.Custom.(*ThreadOptions).Refs = append(rt.Custom.(*ThreadOptions).Refs, ref)
+}
+
+func PopRef(rt *vm.Runtime) error {
+	refs := rt.Custom.(*ThreadOptions).Refs
+	if len(refs) <= 1 {
+		return fmt.Errorf(`empty refs`)
+	}
+	rt.Custom.(*ThreadOptions).Refs = refs[:len(refs)-1]
+	return nil
+}
+
+func GetRef(rt *vm.Runtime) string {
+	return strings.Join(rt.Custom.(*ThreadOptions).Refs, `/`)
 }
 
 func GetEonzaDynamic(name string) (ret string) {
@@ -590,7 +611,7 @@ func loadForm(data string, form *[]map[string]interface{}) error {
 	return nil
 }
 
-func Form(data string) error {
+func Form(rt *vm.Runtime, data string) error {
 	ch := make(chan bool)
 	formList := make([]map[string]interface{}, 0, 32)
 
@@ -608,6 +629,7 @@ func Form(data string) error {
 	}
 
 	form := FormInfo{
+		Ref:        GetRef(rt),
 		ChResponse: ch,
 		Data:       data,
 		ID:         formID,

@@ -427,7 +427,14 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			params = append(params, fmt.Sprintf("%s: %s", par.Name, par.Value))
 		}
 	}
-	out := fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
+	var out string
+	if len(advanced.Ref) > 0 {
+		out = fmt.Sprintf("   pushref(%q)\r\n", advanced.Ref)
+	}
+	out += fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
+	if len(advanced.Ref) > 0 {
+		out += "  popref()\r\n"
+	}
 	/*	if script.Settings.Name == Return {
 		out += "     deinit();return\r\n"
 	}*/
@@ -511,8 +518,10 @@ func GenSource(script *Script, header *es.Header) (string, error) {
 		if err != nil {
 			return ``, err
 		}
+		params = append(params, `pushref("*")`)
 		params = append(params, fmt.Sprintf("initcmd(%d,`form`, %s)\r\nForm( %[2]s )", level,
 			src.Value(string(outForm), false)))
+		params = append(params, `popref()`)
 	}
 	for _, par := range script.Params {
 		var ptype string

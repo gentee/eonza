@@ -243,9 +243,12 @@ func markdownHandle(c echo.Context) error {
 }
 
 func allowOrigin(origin string) (bool, error) {
-	return strings.HasPrefix(origin, `https://`+cfg.HTTP.Host) ||
+	protocol := `https://`
+	if cfg.HTTP.Host == `localhost` {
+		protocol = `http://`
+	}
+	return strings.HasPrefix(origin, protocol+cfg.HTTP.Host) ||
 		strings.HasPrefix(origin, `chrome-extension://`), nil
-	//origin == `chrome-extension://`+ChromeExtension, nil
 }
 
 func RunServer(options lib.HTTPConfig) *echo.Echo {

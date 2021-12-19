@@ -26,6 +26,7 @@ type Header struct {
 	Data         string
 	Console      bool
 	IsPlayground bool
+	IsAutoFill   bool
 	SourceCode   []byte
 	Constants    map[string]string
 	SecureConsts map[string]string
