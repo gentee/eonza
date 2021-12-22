@@ -545,9 +545,12 @@ func IsVar(key string) int64 {
 	return 0
 }
 
-func loadForm(data string, form *[]map[string]interface{}) error {
+func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 
-	var dataList []map[string]interface{}
+	var (
+		dataList []map[string]interface{}
+		ref      string
+	)
 
 	ifcond := func(ifval string) (ret bool, err error) {
 		var (
@@ -588,7 +591,7 @@ func loadForm(data string, form *[]map[string]interface{}) error {
 					}
 				}
 				if ifok, err := ifcond(ifval); err != nil {
-					return err
+					return ``, err
 				} else if !ifok {
 					continue
 				}
@@ -599,6 +602,12 @@ func loadForm(data string, form *[]map[string]interface{}) error {
 				loadForm(val, form)
 				continue
 			}
+			if len(ref) < 12 {
+				if id, err := strconv.ParseInt(item["type"].(string), 10, 32); err == nil &&
+					id <= int64(PNumber) {
+					ref += varname
+				}
+			}
 			dataList[i]["value"] = val
 			val, _ = Macro(fmt.Sprint(item["text"]))
 			dataList[i]["text"] = val
@@ -608,14 +617,14 @@ func loadForm(data string, form *[]map[string]interface{}) error {
 			*form = append(*form, dataList[i])
 		}
 	}
-	return nil
+	return ref, nil
 }
 
 func Form(rt *vm.Runtime, data string) error {
 	ch := make(chan bool)
 	formList := make([]map[string]interface{}, 0, 32)
 
-	loadForm(data, &formList)
+	ref, _ := loadForm(data, &formList)
 	if len(formList) > 0 {
 		if out, err := json.Marshal(formList); err == nil {
 			data = string(out)
@@ -629,7 +638,7 @@ func Form(rt *vm.Runtime, data string) error {
 	}
 
 	form := FormInfo{
-		Ref:        GetRef(rt),
+		Ref:        GetRef(rt) + `:` + ref,
 		ChResponse: ch,
 		Data:       data,
 		ID:         formID,
