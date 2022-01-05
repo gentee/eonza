@@ -35,6 +35,7 @@ const (
 	PButton
 	PDynamic
 	PPassword
+	PCheckList
 
 	EonzaDynamic = `eonza.dynamic.constant`
 )
@@ -575,6 +576,7 @@ func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 	}
 	pbutton := fmt.Sprint(PButton)
 	pdynamic := fmt.Sprint(PDynamic)
+	pchecklist := fmt.Sprint(PCheckList)
 	if json.Unmarshal([]byte(data), &dataList) == nil {
 		for i, item := range dataList {
 			if opt, optok := item["options"]; optok {
@@ -597,22 +599,36 @@ func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 				}
 			}
 			varname := fmt.Sprint(item["var"])
-			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])
-			if item["type"] == pdynamic {
-				loadForm(val, form)
-				continue
-			}
-			if len(ref) < 12 {
-				if id, err := strconv.ParseInt(item["type"].(string), 10, 32); err == nil &&
-					id <= int64(PNumber) {
-					ref += varname
+			if item["type"] == pchecklist {
+				items, err := GetVarObj(varname)
+				if err != nil {
+					return ``, err
 				}
-			}
-			dataList[i]["value"] = val
-			val, _ = Macro(fmt.Sprint(item["text"]))
-			dataList[i]["text"] = val
-			if item["type"] == pbutton {
-				SetVar(varname, ``)
+				head, err := GetVarObj(fmt.Sprint(item["text"]))
+				if err != nil {
+					return ``, err
+				}
+				head.Data.(*core.Map).SetIndex("items", items)
+				dataList[i]["text"], _ = vm.Json(head)
+				dataList[i]["value"] = ""
+			} else {
+				val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])
+				if item["type"] == pdynamic {
+					loadForm(val, form)
+					continue
+				}
+				if len(ref) < 12 {
+					if id, err := strconv.ParseInt(item["type"].(string), 10, 32); err == nil &&
+						id <= int64(PNumber) {
+						ref += varname
+					}
+				}
+				dataList[i]["value"] = val
+				val, _ = Macro(fmt.Sprint(item["text"]))
+				dataList[i]["text"] = val
+				if item["type"] == pbutton {
+					SetVar(varname, ``)
+				}
 			}
 			*form = append(*form, dataList[i])
 		}
