@@ -546,6 +546,104 @@ func IsVar(key string) int64 {
 	return 0
 }
 
+func initCheckList(varname, headers string) (string, error) {
+	type headItem struct {
+		Value string `json:"value"`
+		Text  string `json:"text"`
+	}
+	var (
+		head     *core.Obj
+		out      []byte
+		retHeads []headItem
+		selected []int
+		check    string
+	)
+
+	items, err := GetVarObj(varname)
+	if err != nil {
+		return ``, err
+	}
+	if vm.IsArrayºObj(items) == 0 {
+		return ``, fmt.Errorf(`%s is not array object`, varname)
+	}
+	retItems := make([]map[string]interface{}, 0, len(items.Data.(*core.Array).Data))
+	if len(headers) > 0 {
+		head, err = GetVarObj(headers)
+		if err != nil {
+			return ``, err
+		}
+		if vm.IsArrayºObj(head) == 0 {
+			return ``, fmt.Errorf(`%s is not array object`, headers)
+		}
+		retHeads = make([]headItem, 0)
+		for i, v := range head.Data.(*core.Array).Data {
+			if vm.IsMapºObj(v.(*core.Obj)) == 0 {
+				continue
+			}
+			m := v.(*core.Obj).Data.(*core.Map).Data
+			val, ok := m["value"]
+			if !ok {
+				continue
+			}
+			text, istext := m["text"]
+			if i == 0 && !istext {
+				check = fmt.Sprint(val)
+				continue
+			}
+			retHeads = append(retHeads, headItem{
+				Value: fmt.Sprint(val),
+				Text:  fmt.Sprint(text),
+			})
+		}
+	}
+	if len(retHeads) == 0 {
+		retHeads = []headItem{
+			{
+				Value: "_name",
+			},
+		}
+		for _, v := range items.Data.(*core.Array).Data {
+			retItems = append(retItems, map[string]interface{}{
+				"_name": fmt.Sprint(v.(*core.Obj).Data),
+			})
+		}
+	} else {
+		for i, v := range items.Data.(*core.Array).Data {
+			if vm.IsMapºObj(v.(*core.Obj)) == 0 {
+				continue
+			}
+			vmap := v.(*core.Obj).Data.(*core.Map).Data
+			m := make(map[string]interface{})
+			for _, par := range retHeads {
+				if val, ok := vmap[par.Value]; ok {
+					m[par.Value] = val.(*core.Obj).Data
+				}
+			}
+			if len(check) > 0 {
+				if val, ok := vmap[check]; ok {
+					s := fmt.Sprint(val)
+					if len(s) > 0 && strings.ToLower(s) != `false` && s != `0` {
+						selected = append(selected, i)
+					}
+				}
+			}
+			retItems = append(retItems, m)
+		}
+	}
+	out, err = json.Marshal(struct {
+		Check    string                   `json:"check"`
+		Items    []map[string]interface{} `json:"items"`
+		Headers  []headItem               `json:"headers"`
+		Selected []int                    `json:"selected"`
+	}{
+		Check:    check,
+		Items:    retItems,
+		Headers:  retHeads,
+		Selected: selected,
+	})
+	return string(out), err
+}
+
 func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 
 	var (
@@ -600,16 +698,11 @@ func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 			}
 			varname := fmt.Sprint(item["var"])
 			if item["type"] == pchecklist {
-				items, err := GetVarObj(varname)
+				var err error
+				dataList[i]["text"], err = initCheckList(varname, fmt.Sprint(item["text"]))
 				if err != nil {
 					return ``, err
 				}
-				head, err := GetVarObj(fmt.Sprint(item["text"]))
-				if err != nil {
-					return ``, err
-				}
-				head.Data.(*core.Map).SetIndex("items", items)
-				dataList[i]["text"], _ = vm.Json(head)
 				dataList[i]["value"] = ""
 			} else {
 				val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])

@@ -21,6 +21,7 @@ import (
 
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	"github.com/gorilla/websocket"
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
@@ -653,20 +654,32 @@ func formHandle(c echo.Context) error {
 				if err != nil {
 					script.LogOutput(script.MainThread, script.LOG_ERROR, err.Error())
 				}
-				if checkList.Check == "_selected" {
+				if len(checkList.Check) == 0 {
 					newArr := core.NewArray()
 					for _, v := range checkList.Selected {
 						newArr.Data = append(newArr.Data, obj.Data.(*core.Array).Data[v])
 					}
 					obj.Data = newArr
 				} else {
-					/*data := obj.Data.(*core.Array).Data
+					data := obj.Data.(*core.Array).Data
+					for _, v := range data {
+						obj := v.(*core.Obj)
+						if vm.IsMapºObj(obj) != 0 {
+							vmap := obj.Data.(*core.Map)
+							vmap.SetIndex(checkList.Check, false)
+						}
+					}
 					for _, v := range checkList.Selected {
-						//						data.Data[v]
-					}*/
+						if len(data) <= v {
+							break
+						}
+						obj := data[v].(*core.Obj)
+						if vm.IsMapºObj(obj) != 0 {
+							vmap := obj.Data.(*core.Map)
+							vmap.SetIndex(checkList.Check, true)
+						}
+					}
 				}
-				fmt.Println(`OUT`, checkList)
-				fmt.Println(`obj`, obj.Data)
 				continue
 			}
 			script.SetVar(key, fmt.Sprint(val))
