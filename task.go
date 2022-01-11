@@ -613,12 +613,13 @@ func formHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if len(formData) > 0 && formData[0].ID == form.FormID {
-		var formParams []es.FormParam
-		if err = json.Unmarshal([]byte(formData[0].Data), &formParams); err != nil {
+		var fData es.FormDataStack
+		//		var formParams []es.FormParam
+		if err = json.Unmarshal([]byte(formData[0].Data), &fData); err != nil {
 			return jsonError(c, err)
 		}
 		psw := make(map[string]es.ParamType)
-		for _, item := range formParams {
+		for _, item := range fData.List {
 			var options es.ScriptOptions
 			ptype, _ := strconv.ParseInt(item.Type, 10, 62)
 			if es.ParamType(ptype) == es.PPassword {

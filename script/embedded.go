@@ -89,6 +89,16 @@ type ScriptOptions struct {
 	If string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
+type FormData struct {
+	AutoFill bool                     `json:"autofill"`
+	List     []map[string]interface{} `json:"list"`
+}
+
+type FormDataStack struct {
+	AutoFill bool        `json:"autofill"`
+	List     []FormParam `json:"list"`
+}
+
 type ThreadOptions struct {
 	LogLevel int64
 	Refs     []string
@@ -140,8 +150,16 @@ type Data struct {
 	Global   *map[string]string
 }
 
+const (
+	SYSF_ON         int64 = 0x10000000 // set flag
+	SYSF_OFF              = 0x20000000 // unset flag
+	SYSF_MODE             = 0xfffffff
+	SYSF_NOAUTOFILL       = 0x0001 // switch off auto fill feature
+)
+
 var (
-	Logs = map[string]int{
+	SysFlags int64
+	Logs     = map[string]int{
 		`DISABLE`: LOG_DISABLE,
 		`ERROR`:   LOG_ERROR,
 		`WARN`:    LOG_WARN,
@@ -175,6 +193,7 @@ var (
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `ResultVar(str,str)`, Object: ResultVar},
 		{Prototype: `ResultVar(str,obj)`, Object: ResultVarObj},
+		{Prototype: `GetResultVarObj(str) obj`, Object: GetResultVarObj},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
@@ -205,6 +224,8 @@ var (
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
 		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
+		{Prototype: `SetSystemFlags(int) int`, Object: SetSystemFlags},
+		{Prototype: `GetSystemFlags() int`, Object: GetSystemFlags},
 
 		// Office functions
 		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
@@ -730,14 +751,21 @@ func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 }
 
 func Form(rt *vm.Runtime, data string) error {
+	var formData FormData
+
 	ch := make(chan bool)
 	formList := make([]map[string]interface{}, 0, 32)
-
-	ref, _ := loadForm(data, &formList)
+	ref, err := loadForm(data, &formList)
+	formData.AutoFill = (SysFlags&SYSF_NOAUTOFILL) == 0 && scriptTask.Header.IsAutoFill
+	formData.List = formList
 	if len(formList) > 0 {
-		if out, err := json.Marshal(formList); err == nil {
+		var out []byte
+		if out, err = json.Marshal(formData); err == nil {
 			data = string(out)
 		}
+	}
+	if err != nil {
+		return err
 	}
 	dataScript.Mutex.Lock()
 	if (*dataScript.Global)[`isconsole`] == `true` {
@@ -1000,4 +1028,20 @@ func GetIniValue(cfg *ini.File, section, key, varname, defvalue string) (ret int
 		}
 	}
 	return
+}
+
+func SetSystemFlags(flags int64) int64 {
+	ret := SysFlags
+	if flags&SYSF_ON != 0 {
+		SysFlags |= SYSF_MODE & flags
+	} else if flags&SYSF_OFF != 0 {
+		SysFlags &^= SYSF_MODE & flags
+	} else {
+		SysFlags = SYSF_MODE & flags
+	}
+	return ret
+}
+
+func GetSystemFlags() int64 {
+	return SysFlags
 }

@@ -170,7 +170,7 @@ func GetVarObj(name string) (*core.Obj, error) {
 				}
 			}
 		}
-		return nil, fmt.Errorf(`object var %s doesn't exist`, name)
+		return nil, fmt.Errorf(`variable object "%s" doesn't exist`, name)
 	}
 	return val.(*core.Obj), nil
 }
@@ -192,8 +192,24 @@ func setRawVarObj(shift int, name string, value *core.Obj) error {
 	return nil
 }
 
+func getRawVarObj(shift int, name string) (*core.Obj, error) {
+	off := len(dataScript.ObjVars) - 1 - shift
+	if off < 0 {
+		return nil, fmt.Errorf(`set shift obj var %s error`, name)
+	}
+	ret, ok := dataScript.ObjVars[off].Load(name)
+	if !ok {
+		return nil, fmt.Errorf(`object variable %s doesn't exist`, name)
+	}
+	return ret.(*core.Obj), nil
+}
+
 func ResultVarObj(name string, value *core.Obj) error {
 	return setRawVarObj(1, name, value)
+}
+
+func GetResultVarObj(name string) (*core.Obj, error) {
+	return getRawVarObj(1, name)
 }
 
 func SetVarObj(name string, value *core.Obj) error {
