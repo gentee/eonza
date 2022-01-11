@@ -606,8 +606,8 @@ func initCheckList(varname, headers string) (string, error) {
 			if !ok {
 				continue
 			}
-			text, istext := m["text"]
-			if i == 0 && !istext {
+			text, ok := m["text"]
+			if i == 0 && (!ok || len(fmt.Sprint(text)) == 0) {
 				check = fmt.Sprint(val)
 				continue
 			}
