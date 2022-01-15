@@ -152,9 +152,9 @@ type Data struct {
 
 const (
 	SYSF_ON         int64 = 0x10000000 // set flag
-	SYSF_OFF              = 0x20000000 // unset flag
-	SYSF_MODE             = 0xfffffff
-	SYSF_NOAUTOFILL       = 0x0001 // switch off auto fill feature
+	SYSF_OFF        int64 = 0x20000000 // unset flag
+	SYSF_MODE       int64 = 0xfffffff
+	SYSF_NOAUTOFILL int64 = 0x0001 // switch off auto fill feature
 )
 
 var (
