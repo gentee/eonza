@@ -35,6 +35,7 @@ const (
 	PButton
 	PDynamic
 	PPassword
+	PCheckList
 
 	EonzaDynamic = `eonza.dynamic.constant`
 )
@@ -88,6 +89,21 @@ type ScriptOptions struct {
 	If string `json:"if,omitempty" yaml:"if,omitempty"`
 }
 
+type FormData struct {
+	AutoFill bool                     `json:"autofill"`
+	List     []map[string]interface{} `json:"list"`
+}
+
+type FormDataStack struct {
+	AutoFill bool        `json:"autofill"`
+	List     []FormParam `json:"list"`
+}
+
+type ThreadOptions struct {
+	LogLevel int64
+	Refs     []string
+}
+
 const (
 	LOG_DISABLE = iota
 	LOG_ERROR
@@ -117,13 +133,14 @@ type ConditionItem struct {
 }
 
 type FormInfo struct {
+	Ref        string
 	ChResponse chan bool
 	Data       string
 	ID         uint32
 }
 
 type Data struct {
-	LogLevel int64
+	//	LogLevel int64
 	Vars     []map[string]string
 	ObjVars  []sync.Map
 	Mutex    sync.Mutex
@@ -133,8 +150,16 @@ type Data struct {
 	Global   *map[string]string
 }
 
+const (
+	SYSF_ON         int64 = 0x10000000 // set flag
+	SYSF_OFF        int64 = 0x20000000 // unset flag
+	SYSF_MODE       int64 = 0xfffffff
+	SYSF_NOAUTOFILL int64 = 0x0001 // switch off auto fill feature
+)
+
 var (
-	Logs = map[string]int{
+	SysFlags int64
+	Logs     = map[string]int{
 		`DISABLE`: LOG_DISABLE,
 		`ERROR`:   LOG_ERROR,
 		`WARN`:    LOG_WARN,
@@ -143,9 +168,14 @@ var (
 		`DEBUG`:   LOG_DEBUG,
 		`INHERIT`: LOG_INHERIT,
 	}
+	MainThread *vm.Runtime
 	formID     uint32
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
+		{Prototype: `thread(int)`, Object: Thread},
+		{Prototype: `pushref(str)`, Object: PushRef},
+		{Prototype: `popref()`, Object: PopRef},
+		{Prototype: `ref() str`, Object: GetRef},
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(int,str) int`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
@@ -163,6 +193,7 @@ var (
 		{Prototype: `Macro(str) str`, Object: Macro},
 		{Prototype: `ResultVar(str,str)`, Object: ResultVar},
 		{Prototype: `ResultVar(str,obj)`, Object: ResultVarObj},
+		{Prototype: `GetResultVarObj(str) obj`, Object: GetResultVarObj},
 		{Prototype: `SetLogLevel(int) int`, Object: SetLogLevel},
 		{Prototype: `SetYamlVars(str)`, Object: SetYamlVars},
 		{Prototype: `SetVar(str,bool)`, Object: SetVarBool},
@@ -193,6 +224,8 @@ var (
 		{Prototype: `CreateReport(str,str)`, Object: CreateReport},
 		{Prototype: `AppendToArray(str,str)`, Object: AppendToArray},
 		{Prototype: `AppendToMap(str,str,str)`, Object: AppendToMap},
+		{Prototype: `SetSystemFlags(int) int`, Object: SetSystemFlags},
+		{Prototype: `GetSystemFlags() int`, Object: GetSystemFlags},
 
 		// Office functions
 		{Prototype: `DocxTemplate(str,str)`, Object: DocxTemplate},
@@ -223,7 +256,6 @@ var (
 		{Prototype: `ChildrenHTML(handle) arr.handle`, Object: ChildrenHTML},
 		{Prototype: `JSONRequest(str,str,map.str,str) str`, Object: JSONRequest},
 		// For gentee
-		{Prototype: `SplitQuoteLine(str) arr.str`, Object: SplitQuoteLine},
 		{Prototype: `TempFile(str,str,str) str`, Object: TempFile},
 		{Prototype: `obj(handle) obj`, Object: ObjHandle},
 		{Prototype: `YamlToMap(str) map`, Object: YamlToMap},
@@ -239,6 +271,33 @@ var (
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
 	}
 )
+
+func Thread(rt *vm.Runtime, level int64) {
+	if MainThread == nil {
+		MainThread = rt
+	}
+	rt.Custom = &ThreadOptions{
+		LogLevel: level,
+		Refs:     []string{scriptTask.Header.Name},
+	}
+}
+
+func PushRef(rt *vm.Runtime, ref string) {
+	rt.Custom.(*ThreadOptions).Refs = append(rt.Custom.(*ThreadOptions).Refs, ref)
+}
+
+func PopRef(rt *vm.Runtime) error {
+	refs := rt.Custom.(*ThreadOptions).Refs
+	if len(refs) <= 1 {
+		return fmt.Errorf(`empty refs`)
+	}
+	rt.Custom.(*ThreadOptions).Refs = refs[:len(refs)-1]
+	return nil
+}
+
+func GetRef(rt *vm.Runtime) string {
+	return strings.Join(rt.Custom.(*ThreadOptions).Refs, `/`)
+}
 
 func GetEonzaDynamic(name string) (ret string) {
 	now := time.Now()
@@ -464,8 +523,8 @@ func Init(pars ...interface{}) {
 	dataScript.ObjVars = append(dataScript.ObjVars, sync.Map{})
 }
 
-func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
-	prevLevel := dataScript.LogLevel
+func InitCmd(rt *vm.Runtime, logLevel int64, name string, pars ...interface{}) int64 {
+	prevLevel := rt.Custom.(*ThreadOptions).LogLevel
 	params := make([]string, len(pars))
 	for i, par := range pars {
 		val := fmt.Sprint(par)
@@ -480,11 +539,11 @@ func InitCmd(logLevel int64, name string, pars ...interface{}) int64 {
 		}
 	}
 	if name != `source-code` {
-		LogOutput(LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
+		LogOutput(rt, LOG_INFO, fmt.Sprintf("=> %s(%s)", name, strings.Join(params, `, `)))
 	}
 
 	if logLevel != LOG_INHERIT {
-		SetLogLevel(logLevel)
+		SetLogLevel(rt, logLevel)
 	}
 	return prevLevel
 }
@@ -508,9 +567,110 @@ func IsVar(key string) int64 {
 	return 0
 }
 
-func loadForm(data string, form *[]map[string]interface{}) error {
+func initCheckList(varname, headers string) (string, error) {
+	type headItem struct {
+		Value string `json:"value"`
+		Text  string `json:"text"`
+	}
+	var (
+		head     *core.Obj
+		out      []byte
+		retHeads []headItem
+		selected []int
+		check    string
+	)
 
-	var dataList []map[string]interface{}
+	items, err := GetVarObj(varname)
+	if err != nil {
+		return ``, err
+	}
+	if vm.IsArrayºObj(items) == 0 {
+		return ``, fmt.Errorf(`%s is not array object`, varname)
+	}
+	retItems := make([]map[string]interface{}, 0, len(items.Data.(*core.Array).Data))
+	if len(headers) > 0 {
+		head, err = GetVarObj(headers)
+		if err != nil {
+			return ``, err
+		}
+		if vm.IsArrayºObj(head) == 0 {
+			return ``, fmt.Errorf(`%s is not array object`, headers)
+		}
+		retHeads = make([]headItem, 0)
+		for i, v := range head.Data.(*core.Array).Data {
+			if vm.IsMapºObj(v.(*core.Obj)) == 0 {
+				continue
+			}
+			m := v.(*core.Obj).Data.(*core.Map).Data
+			val, ok := m["value"]
+			if !ok {
+				continue
+			}
+			text, ok := m["text"]
+			if i == 0 && (!ok || len(fmt.Sprint(text)) == 0) {
+				check = fmt.Sprint(val)
+				continue
+			}
+			retHeads = append(retHeads, headItem{
+				Value: fmt.Sprint(val),
+				Text:  fmt.Sprint(text),
+			})
+		}
+	}
+	if len(retHeads) == 0 {
+		retHeads = []headItem{
+			{
+				Value: "_name",
+			},
+		}
+		for _, v := range items.Data.(*core.Array).Data {
+			retItems = append(retItems, map[string]interface{}{
+				"_name": fmt.Sprint(v.(*core.Obj).Data),
+			})
+		}
+	} else {
+		for i, v := range items.Data.(*core.Array).Data {
+			if vm.IsMapºObj(v.(*core.Obj)) == 0 {
+				continue
+			}
+			vmap := v.(*core.Obj).Data.(*core.Map).Data
+			m := make(map[string]interface{})
+			for _, par := range retHeads {
+				if val, ok := vmap[par.Value]; ok {
+					m[par.Value] = val.(*core.Obj).Data
+				}
+			}
+			if len(check) > 0 {
+				if val, ok := vmap[check]; ok {
+					s := fmt.Sprint(val)
+					if len(s) > 0 && strings.ToLower(s) != `false` && s != `0` {
+						selected = append(selected, i)
+					}
+				}
+			}
+			retItems = append(retItems, m)
+		}
+	}
+	out, err = json.Marshal(struct {
+		Check    string                   `json:"check"`
+		Items    []map[string]interface{} `json:"items"`
+		Headers  []headItem               `json:"headers"`
+		Selected []int                    `json:"selected"`
+	}{
+		Check:    check,
+		Items:    retItems,
+		Headers:  retHeads,
+		Selected: selected,
+	})
+	return string(out), err
+}
+
+func loadForm(data string, form *[]map[string]interface{}) (string, error) {
+
+	var (
+		dataList []map[string]interface{}
+		ref      string
+	)
 
 	ifcond := func(ifval string) (ret bool, err error) {
 		var (
@@ -535,6 +695,7 @@ func loadForm(data string, form *[]map[string]interface{}) error {
 	}
 	pbutton := fmt.Sprint(PButton)
 	pdynamic := fmt.Sprint(PDynamic)
+	pchecklist := fmt.Sprint(PCheckList)
 	if json.Unmarshal([]byte(data), &dataList) == nil {
 		for i, item := range dataList {
 			if opt, optok := item["options"]; optok {
@@ -551,38 +712,60 @@ func loadForm(data string, form *[]map[string]interface{}) error {
 					}
 				}
 				if ifok, err := ifcond(ifval); err != nil {
-					return err
+					return ``, err
 				} else if !ifok {
 					continue
 				}
 			}
 			varname := fmt.Sprint(item["var"])
-			val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])
-			if item["type"] == pdynamic {
-				loadForm(val, form)
-				continue
-			}
-			dataList[i]["value"] = val
-			val, _ = Macro(fmt.Sprint(item["text"]))
-			dataList[i]["text"] = val
-			if item["type"] == pbutton {
-				SetVar(varname, ``)
+			if item["type"] == pchecklist {
+				var err error
+				dataList[i]["text"], err = initCheckList(varname, fmt.Sprint(item["text"]))
+				if err != nil {
+					return ``, err
+				}
+				dataList[i]["value"] = ""
+			} else {
+				val, _ := Macro(dataScript.Vars[len(dataScript.Vars)-1][varname])
+				if item["type"] == pdynamic {
+					loadForm(val, form)
+					continue
+				}
+				if len(ref) < 12 {
+					if id, err := strconv.ParseInt(item["type"].(string), 10, 32); err == nil &&
+						id <= int64(PNumber) {
+						ref += varname
+					}
+				}
+				dataList[i]["value"] = val
+				val, _ = Macro(fmt.Sprint(item["text"]))
+				dataList[i]["text"] = val
+				if item["type"] == pbutton {
+					SetVar(varname, ``)
+				}
 			}
 			*form = append(*form, dataList[i])
 		}
 	}
-	return nil
+	return ref, nil
 }
 
-func Form(data string) error {
+func Form(rt *vm.Runtime, data string) error {
+	var formData FormData
+
 	ch := make(chan bool)
 	formList := make([]map[string]interface{}, 0, 32)
-
-	loadForm(data, &formList)
+	ref, err := loadForm(data, &formList)
+	formData.AutoFill = (SysFlags&SYSF_NOAUTOFILL) == 0 && scriptTask.Header.IsAutoFill
+	formData.List = formList
 	if len(formList) > 0 {
-		if out, err := json.Marshal(formList); err == nil {
+		var out []byte
+		if out, err = json.Marshal(formData); err == nil {
 			data = string(out)
 		}
+	}
+	if err != nil {
+		return err
 	}
 	dataScript.Mutex.Lock()
 	if (*dataScript.Global)[`isconsole`] == `true` {
@@ -592,6 +775,7 @@ func Form(data string) error {
 	}
 
 	form := FormInfo{
+		Ref:        GetRef(rt) + `:` + ref,
 		ChResponse: ch,
 		Data:       data,
 		ID:         formID,
@@ -603,14 +787,14 @@ func Form(data string) error {
 	return nil
 }
 
-func LogOutput(level int64, message string) {
+func LogOutput(rt *vm.Runtime, level int64, message string) {
 	var mode = []string{``, `ERROR`, `WARN`, `FORM`, `INFO`, `DEBUG`}
 	if level < LOG_ERROR || level > LOG_DEBUG {
 		return
 	}
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
-	if level > dataScript.LogLevel {
+	if level > rt.Custom.(*ThreadOptions).LogLevel {
 		return
 	}
 	dataScript.chLogout <- fmt.Sprintf("[%s] %s %s",
@@ -734,12 +918,12 @@ func Macro(in string) (string, error) {
 	return macro(in)
 }
 
-func SetLogLevel(level int64) int64 {
+func SetLogLevel(rt *vm.Runtime, level int64) int64 {
 	dataScript.Mutex.Lock()
 	defer dataScript.Mutex.Unlock()
-	ret := dataScript.LogLevel
+	ret := rt.Custom.(*ThreadOptions).LogLevel
 	if level >= LOG_DISABLE && level < LOG_INHERIT {
-		dataScript.LogLevel = level
+		rt.Custom.(*ThreadOptions).LogLevel = level
 	}
 	return ret
 }
@@ -844,4 +1028,20 @@ func GetIniValue(cfg *ini.File, section, key, varname, defvalue string) (ret int
 		}
 	}
 	return
+}
+
+func SetSystemFlags(flags int64) int64 {
+	ret := SysFlags
+	if flags&SYSF_ON != 0 {
+		SysFlags |= SYSF_MODE & flags
+	} else if flags&SYSF_OFF != 0 {
+		SysFlags &^= SYSF_MODE & flags
+	} else {
+		SysFlags = SYSF_MODE & flags
+	}
+	return ret
+}
+
+func GetSystemFlags() int64 {
+	return SysFlags
 }

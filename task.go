@@ -20,6 +20,8 @@ import (
 	"time"
 
 	"github.com/gentee/gentee"
+	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	"github.com/gorilla/websocket"
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
@@ -45,6 +47,12 @@ const (
 	TExtReport
 )
 
+type CheckListForm struct {
+	Selected []int  `json:"selected"`
+	Check    string `json:"check"`
+	Var      string `json:"var"`
+}
+
 type FormResponse struct {
 	FormID uint32                 `json:"formid"`
 	Values map[string]interface{} `json:"values"`
@@ -67,6 +75,7 @@ type WsCmd struct {
 	Message string `json:"message,omitempty"`
 	Time    string `json:"finish,omitempty"`
 	Task    *Task  `json:"task,omitempty"`
+	Ref     string `json:"ref,omitempty"`
 }
 
 type StdinForm struct {
@@ -147,6 +156,7 @@ func sendForm(client WsClient) error {
 	return client.Conn.WriteJSON(WsCmd{
 		TaskID:  task.ID,
 		Cmd:     WcForm,
+		Ref:     formData[0].Ref,
 		Message: formData[0].Data,
 		Status:  int(formData[0].ID),
 	})
@@ -236,6 +246,7 @@ func initTask() script.Settings {
 	cmdFile = createFile(`trace`)
 	outFile = createFile(`out`)
 	logScript = createFile(`log`)
+	golog.SetOutput(logScript)
 
 	if _, err = cmdFile.Write([]byte(task.Head())); err != nil {
 		golog.Fatal(err)
@@ -602,16 +613,20 @@ func formHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	if len(formData) > 0 && formData[0].ID == form.FormID {
-		var formParams []es.FormParam
-		if err = json.Unmarshal([]byte(formData[0].Data), &formParams); err != nil {
+		var fData es.FormDataStack
+		//		var formParams []es.FormParam
+		if err = json.Unmarshal([]byte(formData[0].Data), &fData); err != nil {
 			return jsonError(c, err)
 		}
-		psw := make(map[string]bool)
-		for _, item := range formParams {
+		psw := make(map[string]es.ParamType)
+		for _, item := range fData.List {
 			var options es.ScriptOptions
 			ptype, _ := strconv.ParseInt(item.Type, 10, 62)
 			if es.ParamType(ptype) == es.PPassword {
-				psw[item.Var] = true
+				psw[item.Var] = es.PPassword
+			}
+			if es.ParamType(ptype) == es.PCheckList {
+				psw[item.Var] = es.PCheckList
 			}
 			if len(item.Options) == 0 {
 				continue
@@ -625,20 +640,58 @@ func formHandle(c echo.Context) error {
 					return jsonError(c, fmt.Errorf(Lang(GetLangId(nil), "errreq", item.Text)))
 				}
 				if strings.Contains(options.Flags, "password") {
-					psw[item.Var] = true
+					psw[item.Var] = es.PPassword
 				}
 			}
 		}
 		for key, val := range form.Values {
+			if psw[key] == es.PCheckList {
+				var checkList CheckListForm
+				if err := json.Unmarshal([]byte(fmt.Sprint(val)), &checkList); err != nil {
+					script.LogOutput(script.MainThread, script.LOG_ERROR, err.Error())
+				}
+				form.Values[key] = fmt.Sprint(checkList.Selected)
+				obj, err := script.GetVarObj(checkList.Var)
+				if err != nil {
+					script.LogOutput(script.MainThread, script.LOG_ERROR, err.Error())
+				}
+				if len(checkList.Check) == 0 {
+					newArr := core.NewArray()
+					for _, v := range checkList.Selected {
+						newArr.Data = append(newArr.Data, obj.Data.(*core.Array).Data[v])
+					}
+					obj.Data = newArr
+				} else {
+					data := obj.Data.(*core.Array).Data
+					for _, v := range data {
+						obj := v.(*core.Obj)
+						if vm.IsMapºObj(obj) != 0 {
+							vmap := obj.Data.(*core.Map)
+							vmap.SetIndex(checkList.Check, false)
+						}
+					}
+					for _, v := range checkList.Selected {
+						if len(data) <= v {
+							break
+						}
+						obj := data[v].(*core.Obj)
+						if vm.IsMapºObj(obj) != 0 {
+							vmap := obj.Data.(*core.Map)
+							vmap.SetIndex(checkList.Check, true)
+						}
+					}
+				}
+				continue
+			}
 			script.SetVar(key, fmt.Sprint(val))
-			if psw[key] {
+			if psw[key] == es.PPassword {
 				form.Values[key] = `***`
 			}
 		}
 		if forLog, err := json.Marshal(form.Values); err != nil {
-			script.LogOutput(script.LOG_ERROR, err.Error())
+			script.LogOutput(script.MainThread, script.LOG_ERROR, err.Error())
 		} else {
-			script.LogOutput(script.LOG_FORM, string(forLog))
+			script.LogOutput(script.MainThread, script.LOG_FORM, string(forLog))
 		}
 		formData[0].ChResponse <- true
 		formData = formData[1:]

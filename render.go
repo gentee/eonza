@@ -52,18 +52,19 @@ type Render struct {
 
 type RenderScript struct {
 	Task
-	Title    string
-	IsScript bool
-	URLPort  int
-	Start    string
-	Finish   string
-	CDN      string
-	Nickname string
-	Role     string
-	Source   template.HTML
-	Stdout   template.HTML
-	Logout   template.HTML
-	Reports  []script.Report
+	Title      string
+	IsScript   bool
+	IsAutoFill bool
+	URLPort    int
+	Start      string
+	Finish     string
+	CDN        string
+	Nickname   string
+	Role       string
+	Source     template.HTML
+	Stdout     template.HTML
+	Logout     template.HTML
+	Reports    []script.Report
 }
 
 var (
@@ -131,6 +132,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Nickname = scriptTask.Header.User.Nickname
 			renderScript.Role = scriptTask.Header.Role.Name
 			renderScript.URLPort = scriptTask.Header.URLPort
+			renderScript.IsAutoFill = scriptTask.Header.IsAutoFill
 		} else {
 			renderScript.URLPort = cfg.HTTP.Port
 			renderScript.Task = *c.Get(`Task`).(*Task)

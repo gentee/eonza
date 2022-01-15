@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT license
 // that can be found in the LICENSE file.
 
-// +build pro
+//go:build pro
 
 package main
 
@@ -101,6 +101,10 @@ func IsDecrypted() bool {
 	return pro.IsDecrypted()
 }
 
+func IsAutoFill() bool {
+	return pro.IsAutoFill()
+}
+
 func ValidateOTP(user users.User, otp string) error {
 	return pro.ValidateOTP(user, otp)
 }
@@ -123,7 +127,7 @@ func ProInit(psw []byte, counter uint32) {
 	pro.CallbackPassCounter = StoragePassCounter
 	pro.CallbackTitle = GetTitle
 	pro.CallbackTrial = GetTrialMode
-	pro.LoadPro(psw, counter, cfg.path)
+	pro.LoadPro(psw, counter, cfg.path, cfg.Users.Dir)
 }
 
 func proSettingsHandle(c echo.Context) error {

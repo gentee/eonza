@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT license
 // that can be found in the LICENSE file.
 
-// +build !pro
+//go:build !pro
 
 package main
 
@@ -128,6 +128,10 @@ func ValidateOTP(user users.User, otp string) error {
 
 func SecureConstants() map[string]string {
 	return nil
+}
+
+func IsAutoFill() bool {
+	return false
 }
 
 func ProApi(e *echo.Echo) {

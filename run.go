@@ -82,6 +82,7 @@ func systemRun(rs *RunScript) error {
 		Data:         rs.Data,
 		Console:      rs.Console,
 		IsPlayground: cfg.playground,
+		IsAutoFill:   IsAutoFill(),
 		IP:           rs.IP,
 		User:         rs.User,
 		Role:         rs.Role,
