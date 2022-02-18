@@ -21,6 +21,7 @@ type Header struct {
 	Title        string
 	AssetsDir    string
 	LogDir       string
+	PackagesDir  string
 	Theme        string
 	CDN          string
 	Data         string

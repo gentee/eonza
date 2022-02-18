@@ -172,6 +172,7 @@ var (
 	formID     uint32
 	dataScript Data
 	customLib  = []gentee.EmbedItem{
+		{Prototype: `cmdpkg(str,obj)`, Object: CmdPkg},
 		{Prototype: `thread(int)`, Object: Thread},
 		{Prototype: `pushref(str)`, Object: PushRef},
 		{Prototype: `popref()`, Object: PopRef},

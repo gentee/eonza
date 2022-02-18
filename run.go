@@ -76,6 +76,7 @@ func systemRun(rs *RunScript) error {
 	header := script.Header{
 		Name:         rs.Name,
 		Title:        title,
+		PackagesDir:  cfg.PackagesDir,
 		AssetsDir:    cfg.AssetsDir,
 		LogDir:       cfg.Log.Dir,
 		CDN:          cdn,

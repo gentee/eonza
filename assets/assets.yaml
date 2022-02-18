@@ -26,6 +26,22 @@ languages:
   - ru.yaml
 
 packages: 
+  files:
+    version: 1.0
+    info:
+      title: '#_name#'
+      desc: '#_desc#'
+      help: files
+      helplang: ru
+    langs:
+      en:
+        _name: Files
+        _desc: Scripts for working with files and directories
+      ru:
+        _name: Файлы
+        _desc: Скрипты для работы с файлами и директориями
+    
+    
   tests:
     version: 1.0
     info:
