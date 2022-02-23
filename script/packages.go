@@ -78,19 +78,35 @@ func CmdPkg(cmd string, obj *core.Obj) error {
 	if err != nil {
 		return err
 	}
-
+	fmt.Println(`CMD`, path[1])
 	return nil
 }
 
-func pkgHandle(c echo.Context) error {
-	if chPkgs != nil {
-		chPkgs <- `#` + c.Param("port")
+func cmdStart(cmd *CmdData) CmdData {
+	if v, ok := cmd.Value.(int); ok {
+		chPkgs <- fmt.Sprintf(`#%d`, v)
+	} else {
+		chPkgs <- fmt.Sprintf(`invalid port %v`, cmd.Value)
 	}
-	return c.HTML(http.StatusOK, fmt.Sprint(scriptTask.Header.TaskID))
+	return CmdData{}
 }
 
-func LocalServer(e *echo.Echo) {
-	e.GET(`pkg/:port`, pkgHandle)
+func cmdHandle(c echo.Context) error {
+	var response CmdData
+
+	cmd, err := ProcessCmd(scriptTask.Header.TaskID, c.Request().Body)
+	fmt.Println(`get cmd:`, cmd.Cmd)
+	if err == nil {
+		response = cmdStart(cmd)
+	} else {
+		response.Error = err.Error()
+	}
+	response.TaskID = scriptTask.Header.TaskID
+	return c.Blob(http.StatusOK, "application/octet-stream", ResponseCmd(&response))
+}
+
+func CmdServer(e *echo.Echo) {
+	e.POST(`/cmd`, cmdHandle)
 }
 
 func ClosePkgs() {
