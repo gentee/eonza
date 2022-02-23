@@ -147,6 +147,7 @@ func closeTask() {
 			os.Remove(item)
 		}
 	}
+	es.ClosePkgs()
 }
 
 func sendForm(client WsClient) error {

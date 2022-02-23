@@ -83,6 +83,7 @@ func CmdPkg(cmd string, obj *core.Obj) error {
 }
 
 func cmdStart(cmd *CmdData) CmdData {
+	fmt.Println(`START`, cmd)
 	if v, ok := cmd.Value.(int); ok {
 		chPkgs <- fmt.Sprintf(`#%d`, v)
 	} else {
@@ -91,13 +92,23 @@ func cmdStart(cmd *CmdData) CmdData {
 	return CmdData{}
 }
 
+func cmdPing(cmd *CmdData) CmdData {
+	return CmdData{}
+}
+
 func cmdHandle(c echo.Context) error {
 	var response CmdData
 
 	cmd, err := ProcessCmd(scriptTask.Header.TaskID, c.Request().Body)
-	fmt.Println(`get cmd:`, cmd.Cmd)
 	if err == nil {
-		response = cmdStart(cmd)
+		switch cmd.Cmd {
+		case CmdStart:
+			response = cmdStart(cmd)
+		case CmdPing:
+			response = cmdPing(cmd)
+		default:
+			response.Error = fmt.Sprintf(`unknown command %s`, cmd.Cmd)
+		}
 	} else {
 		response.Error = err.Error()
 	}
@@ -110,5 +121,10 @@ func CmdServer(e *echo.Echo) {
 }
 
 func ClosePkgs() {
-
+	for _, port := range Pkgs {
+		SendCmd(port, &CmdData{
+			Cmd:    CmdShutdown,
+			TaskID: scriptTask.Header.TaskID,
+		})
+	}
 }

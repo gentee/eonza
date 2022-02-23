@@ -21,7 +21,9 @@ type CmdData struct {
 }
 
 const (
-	CmdStart = "start"
+	CmdStart    = "start"
+	CmdPing     = "ping"
+	CmdShutdown = "shutdown"
 )
 
 func SendCmd(port int, cmd *CmdData) (ret *CmdData, err error) {
