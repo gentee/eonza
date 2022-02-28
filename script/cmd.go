@@ -13,11 +13,12 @@ import (
 )
 
 type CmdData struct {
-	TaskID uint32
-	Unique uint32
-	Cmd    string
-	Error  string
-	Value  interface{}
+	TaskID   uint32
+	Unique   uint32
+	Finished bool
+	Cmd      string
+	Error    string
+	Value    interface{}
 }
 
 const (

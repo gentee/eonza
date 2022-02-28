@@ -7,6 +7,7 @@ package script
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,19 +18,27 @@ import (
 	"time"
 
 	"github.com/gentee/gentee/core"
+	"github.com/gentee/gentee/vm"
 	"github.com/labstack/echo/v4"
 )
 
+type PkgHandle struct {
+	Obj      *core.Obj
+	Finished bool
+	Unique   uint32
+}
+
 var (
-	Pkgs   = make(map[string]int)
-	chPkgs chan string
-	muPkgs sync.Mutex
+	Pkgs       = make(map[string]int)
+	chPkgs     chan string
+	muPkgs     sync.Mutex
+	ResultPkgs = make(map[uint32]chan CmdData)
 )
 
-func CmdPkg(cmd string, obj *core.Obj) error {
+func CmdPkg(cmd string, obj *core.Obj) (*PkgHandle, error) {
 	path := strings.SplitN(cmd, `/`, 2)
 	if len(path) != 2 {
-		return fmt.Errorf(`invalid command %s`, cmd)
+		return nil, fmt.Errorf(`invalid command %s`, cmd)
 	}
 	pkg := path[0]
 
@@ -44,7 +53,7 @@ func CmdPkg(cmd string, obj *core.Obj) error {
 		app := filepath.Join(scriptTask.Header.PackagesDir, pkg)
 		if _, err = os.Stat(app); os.IsNotExist(err) {
 			muPkgs.Unlock()
-			return fmt.Errorf(`can't find '%s' package`, pkg)
+			return nil, fmt.Errorf(`can't find '%s' package`, pkg)
 		}
 		var out bytes.Buffer
 
@@ -76,14 +85,58 @@ func CmdPkg(cmd string, obj *core.Obj) error {
 	}
 	muPkgs.Unlock()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Println(`CMD`, path[1])
-	return nil
+	var val interface{}
+	if obj != nil {
+		val = ObjToIface(obj)
+	}
+	unique := rand.Uint32()
+	ResultPkgs[unique] = make(chan CmdData, 1)
+	_, err = SendCmd(port, &CmdData{
+		Cmd:    path[1],
+		TaskID: scriptTask.Header.TaskID,
+		Unique: unique,
+		Value:  val,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp := <-ResultPkgs[unique]
+	if resp.Finished {
+		close(ResultPkgs[unique])
+		delete(ResultPkgs, unique)
+	}
+	if len(resp.Error) != 0 {
+		return nil, fmt.Errorf(resp.Error)
+	}
+	handle := PkgHandle{
+		Unique:   unique,
+		Finished: resp.Finished,
+	}
+	if resp.Value != nil {
+		obj, err := vm.IfaceToObj(resp.Value)
+		if err != nil {
+			return nil, err
+		}
+		handle.Obj = obj
+	}
+
+	return &handle, nil
+}
+
+func CmdValue(handle *PkgHandle) *core.Obj {
+	return handle.Obj
+}
+
+func CmdFinished(handle *PkgHandle) int64 {
+	if handle.Finished {
+		return 1
+	}
+	return 0
 }
 
 func cmdStart(cmd *CmdData) CmdData {
-	fmt.Println(`START`, cmd)
 	if v, ok := cmd.Value.(int); ok {
 		chPkgs <- fmt.Sprintf(`#%d`, v)
 	} else {
@@ -116,8 +169,24 @@ func cmdHandle(c echo.Context) error {
 	return c.Blob(http.StatusOK, "application/octet-stream", ResponseCmd(&response))
 }
 
+func cmdResultHandle(c echo.Context) error {
+	var response CmdData
+
+	cmd, err := ProcessCmd(scriptTask.Header.TaskID, c.Request().Body)
+	if err == nil {
+		go func() {
+			ResultPkgs[cmd.Unique] <- *cmd
+		}()
+	} else {
+		response.Error = err.Error()
+	}
+	response.TaskID = scriptTask.Header.TaskID
+	return c.Blob(http.StatusOK, "application/octet-stream", ResponseCmd(&response))
+}
+
 func CmdServer(e *echo.Echo) {
 	e.POST(`/cmd`, cmdHandle)
+	e.POST(`/cmdresult`, cmdResultHandle)
 }
 
 func ClosePkgs() {
