@@ -175,6 +175,7 @@ var (
 		{Prototype: `cmdpkg(str,obj) handle`, Object: CmdPkg},
 		{Prototype: `cmdvalue(handle) obj`, Object: CmdValue},
 		{Prototype: `cmdfinished(handle) bool`, Object: CmdFinished},
+		{Prototype: `cmdnext(handle) handle`, Object: CmdNext},
 		{Prototype: `thread(int)`, Object: Thread},
 		{Prototype: `pushref(str)`, Object: PushRef},
 		{Prototype: `popref()`, Object: PopRef},

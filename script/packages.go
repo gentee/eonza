@@ -35,6 +35,29 @@ var (
 	ResultPkgs = make(map[uint32]chan CmdData)
 )
 
+func PackageResult(unique uint32) (*PkgHandle, error) {
+	resp := <-ResultPkgs[unique]
+	if resp.Finished {
+		close(ResultPkgs[unique])
+		delete(ResultPkgs, unique)
+	}
+	if len(resp.Error) != 0 {
+		return nil, fmt.Errorf(resp.Error)
+	}
+	handle := PkgHandle{
+		Unique:   unique,
+		Finished: resp.Finished,
+	}
+	if resp.Value != nil {
+		obj, err := vm.IfaceToObj(resp.Value)
+		if err != nil {
+			return nil, err
+		}
+		handle.Obj = obj
+	}
+	return &handle, nil
+}
+
 func CmdPkg(cmd string, obj *core.Obj) (*PkgHandle, error) {
 	path := strings.SplitN(cmd, `/`, 2)
 	if len(path) != 2 {
@@ -102,27 +125,14 @@ func CmdPkg(cmd string, obj *core.Obj) (*PkgHandle, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := <-ResultPkgs[unique]
-	if resp.Finished {
-		close(ResultPkgs[unique])
-		delete(ResultPkgs, unique)
-	}
-	if len(resp.Error) != 0 {
-		return nil, fmt.Errorf(resp.Error)
-	}
-	handle := PkgHandle{
-		Unique:   unique,
-		Finished: resp.Finished,
-	}
-	if resp.Value != nil {
-		obj, err := vm.IfaceToObj(resp.Value)
-		if err != nil {
-			return nil, err
-		}
-		handle.Obj = obj
-	}
+	return PackageResult(unique)
+}
 
-	return &handle, nil
+func CmdNext(handle *PkgHandle) (*PkgHandle, error) {
+	if handle.Finished {
+		return handle, nil
+	}
+	return PackageResult(handle.Unique)
 }
 
 func CmdValue(handle *PkgHandle) *core.Obj {
