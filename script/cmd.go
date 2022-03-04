@@ -62,8 +62,6 @@ func ProcessCmd(taskid uint32, r io.Reader) (ret *CmdData, err error) {
 	if err = dec.Decode(ret); err == nil {
 		if ret.TaskID != taskid {
 			err = fmt.Errorf(`wrong task %d != %d in ProcessCmd`, taskid, ret.TaskID)
-		} else if len(ret.Error) > 0 {
-			err = fmt.Errorf(ret.Error)
 		}
 	}
 	return
