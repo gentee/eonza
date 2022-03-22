@@ -26,21 +26,19 @@ languages:
   - ru.yaml
 
 packages: 
-  files:
-    version: 1.0
+  file-utilities:
+    version: "1.0.0"
     info:
-      title: '#_name#'
+      title: '#.fileutils#'
       desc: '#_desc#'
-      help: files
+      help: file-utilities
       helplang: ru
+      app: true
     langs:
       en:
-        _name: Files
         _desc: Scripts for working with files and directories
       ru:
-        _name: Файлы
         _desc: Скрипты для работы с файлами и директориями
-    
     
   tests:
     version: 1.0

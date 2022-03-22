@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"eonza/lib"
 	es "eonza/script"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -20,11 +22,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const PackagesURL = `https://www.eonza.org/downloads/packages`
+
 type PackageInfo struct {
 	Title    string `json:"title" yaml:"title"`
 	Desc     string `json:"desc,omitempty" yaml:"desc,omitempty"`
 	Help     string `json:"help,omitempty" yaml:"help,omitempty"`
 	HelpLang string `json:"helplang,omitempty" yaml:"helplang,omitempty"`
+	App      bool   `json:"app,omitempty" yaml:"app,omitempty"`
 	// Calculated fields
 	Installed bool `json:"installed"`
 }
@@ -53,6 +58,16 @@ type Package struct {
 	Params      []es.ScriptParam             `json:"params,omitempty" yaml:"params,omitempty"`
 
 	json string // json of package values
+}
+
+type PackageRelease struct {
+	File string `yaml:"file"`
+	MD5  string `yaml:"md5,omitempty"`
+}
+
+type PackageDownload struct {
+	Version  string                    `yaml:"version"`
+	Releases map[string]PackageRelease `yaml:"releases"`
 }
 
 func GetPackageJSON(name string) string {
@@ -266,17 +281,47 @@ func packageInstallHandle(c echo.Context) error {
 	if err := os.MkdirAll(path, 0777); err != nil {
 		return jsonError(c, err)
 	}
+	pkgError := func(err error) error {
+		os.RemoveAll(path)
+		return jsonError(c, err)
+	}
+	if pkg.App {
+		var data []byte
+		if data, err = lib.Download(PackagesURL + `/` + name + `/package.yaml`); err != nil {
+			return pkgError(err)
+		}
+		var release PackageDownload
+		if err = yaml.Unmarshal(data, &release); err != nil {
+			return pkgError(err)
+		}
+		if err = os.WriteFile(filepath.Join(path, `package.yaml`), data, 0777); err != nil {
+			return pkgError(err)
+		}
+
+		if r, ok := release.Releases[runtime.GOOS+`-`+runtime.GOARCH]; !ok {
+			return pkgError(fmt.Errorf(`cannot find package's release`))
+		} else {
+			if data, err = lib.Download(PackagesURL + `/` + name + `/` + r.File); err != nil {
+				return pkgError(err)
+			}
+			if data, err = lib.GzipDecompress(data); err != nil {
+				return pkgError(err)
+			}
+			buf := bytes.NewBuffer(data)
+			if err = lib.UnpackTar(buf, path); err != nil {
+				return pkgError(err)
+			}
+		}
+	}
 	for _, f := range PackagesFS.List {
 		if strings.HasPrefix(f.Name, name+`/files`) {
 			fullName := filepath.Join(cfg.PackagesDir, f.Name)
 			if f.Dir {
 				if err := os.MkdirAll(fullName, 0777); err != nil {
-					os.RemoveAll(path)
-					return jsonError(c, err)
+					return pkgError(err)
 				}
 			} else if err = os.WriteFile(fullName, f.Data, 0666); err != nil {
-				os.RemoveAll(path)
-				return jsonError(c, err)
+				return pkgError(err)
 			}
 		}
 	}
