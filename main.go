@@ -78,6 +78,9 @@ func main() {
 			settings := initTask()
 			setStatus(TaskActive)
 			_, err := scriptTask.Run(settings)
+			if script.IsTimeout {
+				time.Sleep(time.Until(script.Timeout))
+			}
 			if err == nil {
 				setStatus(TaskFinished)
 			} else if err.Error() == `code execution has been terminated` {

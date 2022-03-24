@@ -168,6 +168,8 @@ var (
 		`DEBUG`:   LOG_DEBUG,
 		`INHERIT`: LOG_INHERIT,
 	}
+	IsTimeout  bool
+	Timeout    time.Time
 	MainThread *vm.Runtime
 	formID     uint32
 	dataScript Data
@@ -183,6 +185,7 @@ var (
 		{Prototype: `init()`, Object: Init},
 		{Prototype: `initcmd(int,str) int`, Object: InitCmd},
 		{Prototype: `deinit()`, Object: Deinit},
+		{Prototype: `SetTimeout(int)`, Object: SetTimeout},
 		{Prototype: `Condition(map.obj) bool`, Object: MapCondition},
 		{Prototype: `Condition(str,str) bool`, Object: Condition},
 		{Prototype: `CopyClipboard(str)`, Object: CopyClipboard},
@@ -275,6 +278,11 @@ var (
 		{Prototype: `GetCSV(handle) obj`, Object: GetCSV},
 	}
 )
+
+func SetTimeout(msec int64) {
+	IsTimeout = true
+	Timeout = time.Now().Add(time.Millisecond * time.Duration(msec))
+}
 
 func Thread(rt *vm.Runtime, level int64) {
 	if MainThread == nil {

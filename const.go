@@ -28,7 +28,7 @@ const (
 	// Number of reserved ports
 	PortsPool   = 1000
 	TimeFormat  = `2006/01/02 15:04:05`
-	TimeoutOpen = 4000
+	TimeoutOpen = 2000
 	SourceCode  = `source-code`
 	Return      = `return.eonza`
 	DefLang     = 0
