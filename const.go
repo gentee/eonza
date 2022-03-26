@@ -26,12 +26,14 @@ const (
 	HistoryLimit = 7
 	RunLimit     = 20
 	// Number of reserved ports
-	PortsPool   = 1000
-	TimeFormat  = `2006/01/02 15:04:05`
-	TimeoutOpen = 2000
-	SourceCode  = `source-code`
-	Return      = `return.eonza`
-	DefLang     = 0
+	PortsPool    = 1000
+	TimeFormat   = `2006/01/02 15:04:05`
+	TimeoutOpen  = 2000
+	SourceCode   = `source-code`
+	Function     = `function`
+	CallFunction = `call-function`
+	Return       = `return.eonza`
+	DefLang      = 0
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
 	Localhost     = `localhost`
