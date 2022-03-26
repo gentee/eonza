@@ -124,14 +124,17 @@ func GetTrialMode() int {
 	return storage.Trial.Mode
 }
 
-func TaskCheck(taskID uint32, userID uint32) error {
+func TaskCheck(taskID uint32, userID uint32) (bool, error) {
+	var status int
+
 	if v, ok := tasks[taskID]; ok && v.UserID == userID {
+		status = v.Status
 		if v.Status == TaskActive || v.Status == TaskWaiting ||
 			(v.Status == TaskFinished && time.Now().Unix() <= v.FinishTime+1) {
-			return nil
+			return v.Status < TaskFinished, nil
 		}
 	}
-	return fmt.Errorf(`access denied task %d / user %d`, taskID, userID)
+	return status < TaskFinished, fmt.Errorf(`access denied task %d / user %d`, taskID, userID)
 }
 
 func ProInit(psw []byte, counter uint32) {
