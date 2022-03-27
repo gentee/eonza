@@ -6,7 +6,7 @@ package main
 
 const (
 	// Version of the application
-	Version = "1.25.1"
+	Version = "1.26.0"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
@@ -26,12 +26,14 @@ const (
 	HistoryLimit = 7
 	RunLimit     = 20
 	// Number of reserved ports
-	PortsPool   = 1000
-	TimeFormat  = `2006/01/02 15:04:05`
-	TimeoutOpen = 4000
-	SourceCode  = `source-code`
-	Return      = `return.eonza`
-	DefLang     = 0
+	PortsPool    = 1000
+	TimeFormat   = `2006/01/02 15:04:05`
+	TimeoutOpen  = 2000
+	SourceCode   = `source-code`
+	Function     = `function`
+	CallFunction = `call-function`
+	Return       = `return.eonza`
+	DefLang      = 0
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
 	Localhost     = `localhost`

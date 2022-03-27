@@ -36,6 +36,7 @@ var (
 func CreateReport(title, body string) {
 	//	reportMutex.Lock()
 	//	defer reportMutex.Unlock()
+	SetTimeout(500)
 	dataScript.chReport <- Report{
 		Title: title,
 		Body:  strings.TrimSpace(body),

@@ -10,6 +10,7 @@ import (
 	"eonza/users"
 	"fmt"
 	"net/http"
+	"time"
 
 	pro "github.com/gentee/eonza-pro"
 	"github.com/labstack/echo/v4"
@@ -123,10 +124,24 @@ func GetTrialMode() int {
 	return storage.Trial.Mode
 }
 
+func TaskCheck(taskID uint32, userID uint32) (bool, error) {
+	var status int
+
+	if v, ok := tasks[taskID]; ok && v.UserID == userID {
+		status = v.Status
+		if v.Status == TaskActive || v.Status == TaskWaiting ||
+			(v.Status == TaskFinished && time.Now().Unix() <= v.FinishTime+1) {
+			return v.Status < TaskFinished, nil
+		}
+	}
+	return status < TaskFinished, fmt.Errorf(`access denied task %d / user %d`, taskID, userID)
+}
+
 func ProInit(psw []byte, counter uint32) {
 	pro.CallbackPassCounter = StoragePassCounter
 	pro.CallbackTitle = GetTitle
 	pro.CallbackTrial = GetTrialMode
+	pro.CallbackTaskCheck = TaskCheck
 	pro.LoadPro(psw, counter, cfg.path, cfg.Users.Dir)
 }
 

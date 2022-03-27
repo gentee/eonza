@@ -340,7 +340,7 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	if predef, err = src.Predefined(script); err != nil {
 		return ``, err
 	}
-	if !src.Linked[idname] || script.Settings.Name == SourceCode || len(node.Children) > 0 {
+	if !src.Linked[idname] || script.Settings.Name == SourceCode || script.Settings.Name == Function || len(node.Children) > 0 {
 		tmp, err := src.Tree(node.Children)
 		if err != nil {
 			return ``, err
@@ -357,7 +357,16 @@ func (src *Source) Script(node scriptTree) (string, error) {
 				src.Funcs += code + "\r\n"
 				return ``, nil
 			}
+		} else if script.Settings.Name == Function {
+			code = strings.Replace(code, `%funcname%`, values[0].Value, 1)
+			src.Funcs += code + "\r\n"
+			return ``, nil
+		} else if script.Settings.Name == CallFunction {
+			code = strings.Replace(code, `%funcname%`, values[0].Value, 1)
+			code = strings.Replace(code, `%params%`, values[1].Value, 1)
+			return code + "\r\n", nil
 		}
+
 		if script.Settings.Name == SourceCode || len(node.Children) > 0 {
 			idname = fmt.Sprintf("%s%d", idname, src.Counter)
 			src.Counter++

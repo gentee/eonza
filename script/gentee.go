@@ -299,3 +299,25 @@ func TempFile(path, name, content string) (ret string, err error) {
 	ret = f.Name()
 	return ret, f.Close()
 }
+
+func ObjToIface(obj *core.Obj) (ret interface{}) {
+	switch v := obj.Data.(type) {
+	case int64, float64, string, bool:
+		ret = obj.Data
+	case *core.Array:
+		data := make([]interface{}, len(v.Data))
+		for i, item := range v.Data {
+			data[i] = ObjToIface(item.(*core.Obj))
+		}
+		ret = data
+	case *core.Map:
+		data := make(map[string]interface{})
+		for _, key := range v.Keys {
+			data[key] = ObjToIface(v.Data[key].(*core.Obj))
+		}
+		ret = data
+	case *core.Obj:
+		ret = ObjToIface(v)
+	}
+	return
+}

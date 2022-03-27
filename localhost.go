@@ -180,6 +180,7 @@ func RunLocalServer(port int) *echo.Echo {
 	if IsScript {
 		e.GET("/info", infoHandle)
 		e.GET("/sys", sysHandle)
+		es.CmdServer(e)
 	} else {
 		e.GET("/api/run", runHandle)
 		e.GET("/api/randid", randidHandle)
