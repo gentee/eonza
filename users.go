@@ -29,10 +29,11 @@ type History struct {
 
 // UserSettings stores the user's settings
 type UserSettings struct {
-	ID      uint32  `json:"id" yaml:"id"`
-	Lang    string  `json:"lang" yaml:"lang"`
-	History History `json:"history" yaml:"history"`
-	Favs    []Fav   `json:"favs" yaml:"favs"`
+	ID        uint32  `json:"id" yaml:"id"`
+	FormAlign uint32  `json:"formalign" yaml:"formalign"`
+	Lang      string  `json:"lang" yaml:"lang"`
+	History   History `json:"history" yaml:"history"`
+	Favs      []Fav   `json:"favs" yaml:"favs"`
 }
 
 // User stores user's parameters

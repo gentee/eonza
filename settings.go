@@ -65,6 +65,7 @@ func saveSettingsHandle(c echo.Context) error {
 	}
 	userSets := userSettings[user.ID]
 	userSets.Lang = options.User.Lang
+	userSets.FormAlign = options.User.FormAlign
 	userSettings[user.ID] = userSets
 	if err = SaveUser(user.ID); err != nil {
 		return jsonError(c, err)

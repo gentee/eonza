@@ -39,6 +39,7 @@ type Header struct {
 	IsPro        bool
 	IP           string
 	TaskID       uint32
+	FormAlign    uint32
 	ServerPort   int
 	URLPort      int
 	HTTP         *lib.HTTPConfig

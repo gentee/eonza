@@ -65,6 +65,7 @@ type RenderScript struct {
 	Stdout     template.HTML
 	Logout     template.HTML
 	Reports    []script.Report
+	FormAlign  uint32
 }
 
 var (
@@ -133,6 +134,7 @@ func RenderPage(c echo.Context, url string) (string, error) {
 			renderScript.Role = scriptTask.Header.Role.Name
 			renderScript.URLPort = scriptTask.Header.URLPort
 			renderScript.IsAutoFill = scriptTask.Header.IsAutoFill
+			renderScript.FormAlign = scriptTask.Header.FormAlign
 		} else {
 			renderScript.URLPort = cfg.HTTP.Port
 			renderScript.Task = *c.Get(`Task`).(*Task)

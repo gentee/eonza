@@ -44,13 +44,22 @@ func systemRun(rs *RunScript) error {
 	if err != nil {
 		return err
 	}
+	var (
+		formAlign uint32
+		userID    uint32
+	)
 	if rs.Role.ID >= users.ResRoleID {
 		utemp, _ := GetUser(users.XRootID)
 		langCode = GetLangCode(&utemp)
 		langid = GetLangId(&utemp)
+		userID = utemp.ID
 	} else {
 		langCode = GetLangCode(&rs.User)
 		langid = GetLangId(&rs.User)
+		userID = rs.User.ID
+	}
+	if u, ok := userSettings[userID]; ok {
+		formAlign = u.FormAlign
 	}
 	if item = getRunScript(rs.Name); item == nil {
 		return fmt.Errorf(Lang(langid, `erropen`, rs.Name))
@@ -93,6 +102,7 @@ func systemRun(rs *RunScript) error {
 		SecureConsts: SecureConstants(),
 		Lang:         langCode,
 		TaskID:       lib.RndNum(),
+		FormAlign:    formAlign,
 		ServerPort:   cfg.HTTP.LocalPort,
 		URLPort:      cfg.HTTP.Port,
 		HTTP: &lib.HTTPConfig{
