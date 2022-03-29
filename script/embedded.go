@@ -36,6 +36,7 @@ const (
 	PDynamic
 	PPassword
 	PCheckList
+	PButtonLink
 
 	EonzaDynamic = `eonza.dynamic.constant`
 )
@@ -708,6 +709,7 @@ func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 	pbutton := fmt.Sprint(PButton)
 	pdynamic := fmt.Sprint(PDynamic)
 	pchecklist := fmt.Sprint(PCheckList)
+	pbuttonlink := fmt.Sprint(PButtonLink)
 	if json.Unmarshal([]byte(data), &dataList) == nil {
 		for i, item := range dataList {
 			if opt, optok := item["options"]; optok {
@@ -752,7 +754,7 @@ func loadForm(data string, form *[]map[string]interface{}) (string, error) {
 				dataList[i]["value"] = val
 				val, _ = Macro(fmt.Sprint(item["text"]))
 				dataList[i]["text"] = val
-				if item["type"] == pbutton {
+				if item["type"] == pbutton || item["type"] == pbuttonlink {
 					SetVar(varname, ``)
 				}
 			}
