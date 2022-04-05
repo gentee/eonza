@@ -18,6 +18,15 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type SalesOptions struct {
+	Title string `json:"title"`
+	Page  string `json:"page"`
+}
+
+type SourceExtended struct {
+	SalesScript [][]string
+}
+
 type Source struct {
 	Linked      map[string]bool
 	Strings     []string
@@ -26,6 +35,7 @@ type Source struct {
 	Header      *es.Header
 	Counter     int
 	Funcs       string
+	Extended    SourceExtended
 }
 
 type Param struct {
@@ -424,6 +434,25 @@ func (src *Source) Script(node scriptTree) (string, error) {
 			initcmd += "\r\n" + predef
 		}
 		code = initcmd + code
+		if script.Settings.Name == `sales-script` {
+			var (
+				sales     []string
+				salesBody string
+				titles    []string
+			)
+			for _, salespage := range src.Extended.SalesScript {
+				sales = append(sales, fmt.Sprintf("case %s: sales_script_page(%s, titles: titles)",
+					salespage[0], strings.Join(salespage, `,`)))
+				titles = append(titles, fmt.Sprintf(`%s: %s,`, salespage[0], salespage[1]))
+			}
+			if len(sales) > 0 {
+				salesBody = "switch page\r\n" + strings.Join(sales, "\r\n")
+			}
+			code = strings.Replace(code, `%titles%`, fmt.Sprintf(`map titles = {
+	%s
+}`, strings.Join(titles, "\r\n")), 1)
+			code = strings.Replace(code, `%sales%`, salesBody, 1)
+		}
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"
 	}
@@ -437,19 +466,20 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		}
 	}
 	var out string
-	if len(advanced.Ref) > 0 {
-		out = fmt.Sprintf("   pushref(%q)\r\n", advanced.Ref)
-	}
-	out += fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
-	if len(advanced.Ref) > 0 {
-		out += "  popref()\r\n"
-	}
-	/*	if script.Settings.Name == Return {
-		out += "     deinit();return\r\n"
-	}*/
-	if len(ifcond) > 0 {
-		out = fmt.Sprintf(`   if %s {
+	if script.Settings.Name == `sales-script-page` {
+		src.Extended.SalesScript = append(src.Extended.SalesScript, params)
+	} else {
+		if len(advanced.Ref) > 0 {
+			out = fmt.Sprintf("   pushref(%q)\r\n", advanced.Ref)
+		}
+		out += fmt.Sprintf("   %s(%s)\r\n", idname, strings.Join(params, `,`))
+		if len(advanced.Ref) > 0 {
+			out += "  popref()\r\n"
+		}
+		if len(ifcond) > 0 {
+			out = fmt.Sprintf(`   if %s {
         %s   }`+"\r\n", ifcond, out)
+		}
 	}
 	return out, nil
 }
