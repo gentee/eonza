@@ -25,6 +25,7 @@ type SalesOptions struct {
 
 type SourceExtended struct {
 	SalesScript [][]string
+	Flowchart   [][]string
 }
 
 type Source struct {
@@ -47,6 +48,31 @@ type Param struct {
 type Advanced struct {
 	LogLevel int
 	Ref      string
+}
+
+func Flowchart(pref, code string, elements [][]string) string {
+	var (
+		sales     []string
+		salesBody string
+		titles    []string
+	)
+	flow := strings.HasPrefix(pref, `flow`)
+	for _, salespage := range elements {
+		if flow {
+			pref = salespage[len(salespage)-1]
+			salespage = salespage[:len(salespage)-1]
+		}
+		sales = append(sales, fmt.Sprintf("case %s: %s(%s, titles: titles)",
+			salespage[0], pref, strings.Join(salespage, `,`)))
+		titles = append(titles, fmt.Sprintf(`%s: %s,`, salespage[0], salespage[1]))
+	}
+	if len(sales) > 0 {
+		salesBody = "switch page\r\n" + strings.Join(sales, "\r\n")
+	}
+	code = strings.Replace(code, `%titles%`, fmt.Sprintf(`map titles = {
+%s
+}`, strings.Join(titles, "\r\n")), 1)
+	return strings.Replace(code, `%sales%`, salesBody, 1)
 }
 
 func (src *Source) Tree(tree []scriptTree) (string, error) {
@@ -435,24 +461,11 @@ func (src *Source) Script(node scriptTree) (string, error) {
 		}
 		code = initcmd + code
 		if script.Settings.Name == `sales-script` {
-			var (
-				sales     []string
-				salesBody string
-				titles    []string
-			)
-			for _, salespage := range src.Extended.SalesScript {
-				sales = append(sales, fmt.Sprintf("case %s: sales_script_page(%s, titles: titles)",
-					salespage[0], strings.Join(salespage, `,`)))
-				titles = append(titles, fmt.Sprintf(`%s: %s,`, salespage[0], salespage[1]))
-			}
-			if len(sales) > 0 {
-				salesBody = "switch page\r\n" + strings.Join(sales, "\r\n")
-			}
-			code = strings.Replace(code, `%titles%`, fmt.Sprintf(`map titles = {
-	%s
-}`, strings.Join(titles, "\r\n")), 1)
-			code = strings.Replace(code, `%sales%`, salesBody, 1)
+			code = Flowchart("sales_script_page", code, src.Extended.SalesScript)
+		} else if script.Settings.Name == `flowchart` {
+			code = Flowchart("flowchart_element", code, src.Extended.Flowchart)
 		}
+
 		src.Funcs += fmt.Sprintf("func %s(%s) {\r\n", idname, strings.Join(params, `,`)) +
 			prefix + code + suffix + "\r\n}\r\n"
 	}
@@ -468,6 +481,8 @@ func (src *Source) Script(node scriptTree) (string, error) {
 	var out string
 	if script.Settings.Name == `sales-script-page` {
 		src.Extended.SalesScript = append(src.Extended.SalesScript, params)
+	} else if script.Settings.Name == `flowchart-element` {
+		src.Extended.Flowchart = append(src.Extended.Flowchart, append(params, idname))
 	} else {
 		if len(advanced.Ref) > 0 {
 			out = fmt.Sprintf("   pushref(%q)\r\n", advanced.Ref)
