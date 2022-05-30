@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	"github.com/kataras/golog"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (

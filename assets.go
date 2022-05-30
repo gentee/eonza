@@ -13,7 +13,7 @@ import (
 	"eonza/internal/tarfs"
 
 	"github.com/kataras/golog"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed assets/assets.yaml

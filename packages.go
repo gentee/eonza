@@ -19,7 +19,7 @@ import (
 
 	"github.com/kataras/golog"
 	"github.com/labstack/echo/v4"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const PackagesURL = `https://www.eonza.org/downloads/packages`

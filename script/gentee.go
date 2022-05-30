@@ -19,7 +19,7 @@ import (
 	"github.com/gentee/gentee"
 	"github.com/gentee/gentee/core"
 	"github.com/gentee/gentee/vm"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type FileLines struct {
