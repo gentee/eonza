@@ -7,7 +7,6 @@ require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/boombuler/barcode v1.0.1 // indirect
-	github.com/gentee/eonza-pro v0.0.0-00010101000000-000000000000
 	github.com/gentee/gentee v1.22.0
 	github.com/gentee/systray v1.3.1
 	github.com/go-sql-driver/mysql v1.6.0
@@ -18,7 +17,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/lib/pq v1.10.6
-	github.com/pquerna/otp v1.3.0 // indirect
+	github.com/pquerna/otp v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/xhit/go-simple-mail/v2 v2.11.0
 	github.com/xuri/excelize/v2 v2.6.0
@@ -32,5 +31,3 @@ require (
 	gopkg.in/ini.v1 v1.66.5
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/gentee/eonza-pro => ../eonza-pro

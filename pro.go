@@ -2,8 +2,6 @@
 // Use of this source code is governed by a MIT license
 // that can be found in the LICENSE file.
 
-//go:build pro
-
 package main
 
 import (
@@ -12,62 +10,32 @@ import (
 	"net/http"
 	"time"
 
-	pro "github.com/gentee/eonza-pro"
 	"github.com/labstack/echo/v4"
 )
 
 type ProOptions struct {
-	Active   bool                `json:"active"`
-	License  users.LicenseInfo   `json:"license"`
-	Settings users.ProSettings   `json:"settings"`
-	Storage  pro.StorageResponse `json:"storage"`
-	Trial    Trial               `json:"trial"`
+	Active   bool              `json:"active"`
+	Settings users.ProSettings `json:"settings"`
+	Storage  StorageResponse   `json:"storage"`
 }
 
 const (
 	Pro = true
 )
 
-func Licensed() bool {
-	return pro.Licensed()
-}
-
 func IsProActive() bool {
-	return pro.Active
-}
-
-func SetActive() {
-	pro.SetActive()
-}
-
-func VerifyKey() {
-	pro.VerifyKey(false)
+	return true
 }
 
 func CheckAdmin(c echo.Context) error {
-	return pro.AdminAccess(c.(*Auth).User.ID)
-}
-
-func ScriptAccess(name, ipath string, roleid uint32) error {
-	if roleid >= users.ResRoleID {
-		return nil
-	}
-	return pro.ScriptAccess(name, ipath, roleid)
-}
-
-func GetRole(id uint32) (role users.Role, ok bool) {
-	return pro.GetRole(id)
-}
-
-func GetUser(id uint32) (user users.User, ok bool) {
-	return pro.GetUser(id)
+	return AdminAccess(c.(*Auth).User.ID)
 }
 
 func GetUserRole(id, idrole uint32) (uname string, rname string) {
 	if idrole >= users.ResRoleID {
 		uname, rname = GetSchedulerName(id, idrole)
 	} else {
-		uname, rname = pro.GetUserRole(id)
+		uname, rname = ProGetUserRole(id)
 	}
 	if len(uname) == 0 {
 		uname = fmt.Sprintf("%x", id)
@@ -76,38 +44,6 @@ func GetUserRole(id, idrole uint32) (uname string, rname string) {
 		rname = fmt.Sprintf("%x", idrole)
 	}
 	return
-}
-
-func GetUsers() []users.User {
-	return pro.GetUsers()
-}
-
-func SetUserPassword(id uint32, hash []byte) error {
-	return pro.SetUserPassword(id, hash)
-}
-
-func IncPassCounter(id uint32) error {
-	return pro.IncPassCounter(id)
-}
-
-func IsTwofa() bool {
-	return pro.IsTwofa()
-}
-
-func TwofaQR(id uint32) (string, error) {
-	return pro.TwofaQR(id)
-}
-
-func IsDecrypted() bool {
-	return pro.IsDecrypted()
-}
-
-func IsAutoFill() bool {
-	return pro.IsAutoFill()
-}
-
-func ValidateOTP(user users.User, otp string) error {
-	return pro.ValidateOTP(user, otp)
 }
 
 func GetTitle() string {
@@ -138,11 +74,11 @@ func TaskCheck(taskID uint32, userID uint32) (bool, error) {
 }
 
 func ProInit(psw []byte, counter uint32) {
-	pro.CallbackPassCounter = StoragePassCounter
-	pro.CallbackTitle = GetTitle
-	pro.CallbackTrial = GetTrialMode
-	pro.CallbackTaskCheck = TaskCheck
-	pro.LoadPro(psw, counter, cfg.path, cfg.Users.Dir)
+	CallbackPassCounter = StoragePassCounter
+	CallbackTitle = GetTitle
+	CallbackTrial = GetTrialMode
+	CallbackTaskCheck = TaskCheck
+	LoadPro(psw, counter, cfg.path, cfg.Users.Dir)
 }
 
 func proSettingsHandle(c echo.Context) error {
@@ -152,18 +88,8 @@ func proSettingsHandle(c echo.Context) error {
 		return jsonError(c, err)
 	}
 	response.Active = IsProActive()
-	response.License = pro.GetLicenseInfo()
-	response.Trial = storage.Trial
-	response.Settings = pro.Settings()
-	response.Storage = pro.PassStorage()
+	response.Settings = ProSettings()
+	response.Storage = PassStorage()
 
 	return c.JSON(http.StatusOK, &response)
-}
-
-func SecureConstants() map[string]string {
-	return pro.SecureConstants()
-}
-
-func ProApi(e *echo.Echo) {
-	pro.ProApi(e)
 }

@@ -22,10 +22,6 @@ const (
 	StorageExt = `eox`
 	TrialDays  = 30
 
-	TrialDisabled = -1
-	TrialOff      = 0
-	TrialOn       = 1
-
 	DefMaxTasks    = 100
 	DefRemoveAfter = 14
 )

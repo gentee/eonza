@@ -7,6 +7,7 @@ package lib
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/yuin/goldmark"
@@ -49,5 +50,6 @@ func Markdown(input string) (string, error) {
 	if err := markdown.Convert([]byte(input), &markDown, parser.WithContext(ctx)); err != nil {
 		return ``, err
 	}
-	return markDown.String(), nil
+	ret := strings.ReplaceAll(markDown.String(), `<code>`, ``)
+	return strings.ReplaceAll(ret, `</code>`, ``), nil
 }
