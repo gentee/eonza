@@ -129,6 +129,7 @@ func replaceTemplate(src, dest string, template int) error {
 		header.UncompressedSize64 = uint64(size)
 		header.UncompressedSize = uint32(size)
 		header.Name = f.Name
+		header.Method = zip.Deflate
 		item, err := zw.CreateHeader(header)
 		if err != nil {
 			return err
