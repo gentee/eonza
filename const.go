@@ -8,7 +8,7 @@ import "eonza/lib"
 
 const (
 	// Version of the application
-	Version = "1.28.0"
+	Version = "1.29.0"
 	// DefPort is the default web-server port
 	DefPort = 3234
 	// DefTheme is the default web-server theme
