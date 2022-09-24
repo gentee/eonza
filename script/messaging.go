@@ -49,7 +49,7 @@ func SendEmail(smtpserv *core.Obj, emailobj *core.Obj) error {
 	server := mail.NewSMTPClient()
 	server.Host = ObjStr(smtpserv, "host")
 	if len(server.Host) == 0 {
-		server.Host = `localhost`
+		server.Host = lib.Localhost
 	}
 	server.Port = int(ObjInt(smtpserv, "port"))
 	server.Username = ObjStr(smtpserv, "username")

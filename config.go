@@ -132,11 +132,11 @@ func LoadConfig() {
 	if len(cfg.HTTP.Theme) == 0 {
 		cfg.HTTP.Theme = DefTheme
 	}
-	if cfg.HTTP.Host != Localhost {
-		if cfg.HTTP.Cert == nil {
+	if !lib.IsPrivateHost(cfg.HTTP.Host) {
+		if cfg.HTTP.Cert == nil || fmt.Sprint(cfg.HTTP.Cert) == `` {
 			golog.Fatal(`Specify the path to the certificate pem file in config file`)
 		}
-		if cfg.HTTP.Priv == nil {
+		if cfg.HTTP.Priv == nil || fmt.Sprint(cfg.HTTP.Priv) == `` {
 			golog.Fatal(`Specify the path to the private key pem file in config file`)
 		}
 		if cfg.HTTP.Cert, err = os.ReadFile(fmt.Sprint(cfg.HTTP.Cert)); err != nil {

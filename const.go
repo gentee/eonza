@@ -4,6 +4,8 @@
 
 package main
 
+import "eonza/lib"
+
 const (
 	// Version of the application
 	Version = "1.28.0"
@@ -36,7 +38,7 @@ const (
 	DefLang      = 0
 	// ConsolePrefix is the prefix of eonza console version
 	ConsolePrefix = `ez`
-	Localhost     = `localhost`
+	Localhost     = lib.Localhost
 	// DefTaskLimit is the maximum running scripts in playground mode
 	DefTaskLimit = 2
 )

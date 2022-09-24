@@ -24,6 +24,8 @@ import (
 	"github.com/kataras/golog"
 )
 
+const Localhost = `localhost`
+
 // HTTPConfig stores web-server settings
 type HTTPConfig struct {
 	Host      string      `yaml:"host"`      // if empty, then localhost
@@ -203,34 +205,43 @@ func AddFileToZip(zipWriter *zip.Writer, filename string) error {
 }
 
 func IsLocalhost(host, ipaddr string) bool {
-	if host != `localhost` && host != `127.0.0.1` {
+	if host != Localhost && host != `127.0.0.1` {
 		return false
 	}
 	ip := net.ParseIP(ipaddr)
 	return ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast()
 }
 
-func IsPrivate(host, ipaddr string) bool {
-	var ip net.IP
-	isPrivate := func() bool {
+func IsPrivateHost(host string) bool {
+	if host == Localhost || host == `127.0.0.1` {
+		return true
+	}
+	ip := net.ParseIP(host)
+	if ip != nil {
 		for _, block := range privateIPBlocks {
 			if block.Contains(ip) {
 				return true
 			}
 		}
-		return false
 	}
-	if host != `localhost` {
-		ip = net.ParseIP(host)
-		if ip == nil || !isPrivate() {
-			return false
-		}
+	return false
+}
+
+func IsPrivate(host, ipaddr string) bool {
+	var ip net.IP
+	if !IsPrivateHost(host) {
+		return false
 	}
 	ip = net.ParseIP(ipaddr)
 	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
 		return true
 	}
-	return isPrivate()
+	for _, block := range privateIPBlocks {
+		if block.Contains(ip) {
+			return true
+		}
+	}
+	return false
 }
 
 func LocalGet(port int, url string) (body []byte, err error) {

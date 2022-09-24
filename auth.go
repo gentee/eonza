@@ -122,8 +122,12 @@ func AuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		} else {
 			isAccess = host == cfg.HTTP.Host
 		}
-		if isAccess && host == Localhost {
-			isAccess = lib.IsLocalhost(host, ip)
+		if isAccess {
+			if host == Localhost {
+				isAccess = lib.IsLocalhost(host, ip)
+			} else if lib.IsPrivateHost(host) {
+				isAccess = lib.IsPrivate(host, ip)
+			}
 		}
 		if !isAccess {
 			return AccessDenied(http.StatusForbidden)

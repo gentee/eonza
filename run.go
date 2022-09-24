@@ -79,7 +79,7 @@ func systemRun(rs *RunScript) error {
 		}
 	}
 	var cdn string
-	if cfg.HTTP.Host != Localhost {
+	if !lib.IsPrivateHost(cfg.HTTP.Host) {
 		cdn = fmt.Sprintf(`https://%s:%d`, cfg.HTTP.Host, cfg.HTTP.Port)
 	}
 	header := script.Header{

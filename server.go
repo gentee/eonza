@@ -244,7 +244,7 @@ func markdownHandle(c echo.Context) error {
 
 func allowOrigin(origin string) (bool, error) {
 	protocol := `https://`
-	if cfg.HTTP.Host == `localhost` {
+	if lib.IsPrivateHost(cfg.HTTP.Host) {
 		protocol = `http://`
 	}
 	return strings.HasPrefix(origin, protocol+cfg.HTTP.Host) ||
@@ -344,7 +344,7 @@ func RunServer(options lib.HTTPConfig) *echo.Echo {
 		if IsScript {
 			e.Logger.SetOutput(io.Discard)
 		}
-		if options.Host == Localhost {
+		if lib.IsPrivateHost(options.Host) {
 			if err := e.Start(fmt.Sprintf(":%d", options.Port)); err != nil && !isShutdown {
 				if IsScript {
 					setStatus(TaskFailed, err)
