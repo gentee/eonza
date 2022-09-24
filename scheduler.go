@@ -387,7 +387,7 @@ func eventHandle(c echo.Context) error {
 	if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
 		host = host[:offPort]
 	}
-	if !lib.IsLocalhost(host, ip) || len(eventData.Rand) > 0 {
+	if /*!lib.IsLocalhost(host, ip) &&*/ !lib.IsPrivate(host, ip) || len(eventData.Rand) > 0 {
 		if len(event.Token) == 0 {
 			return AccessDenied(http.StatusForbidden)
 		}

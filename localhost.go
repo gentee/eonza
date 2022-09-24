@@ -32,7 +32,7 @@ func LocalAuthHandle(next echo.HandlerFunc) echo.HandlerFunc {
 		if offPort := strings.LastIndex(c.Request().Host, `:`); offPort > 0 {
 			host = host[:offPort]
 		}
-		if !lib.IsLocalhost(host, ip) {
+		if /*!lib.IsLocalhost(host, ip) &&*/ !lib.IsPrivate(host, ip) {
 			return AccessDenied(http.StatusForbidden)
 		}
 		lang := LangDefCode
