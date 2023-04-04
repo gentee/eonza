@@ -40,6 +40,10 @@ func CheckConsole() bool {
 				}
 			}
 		}
+		args := os.Args[1:]
+		if len(args) > 1 {
+			os.Setenv("EZCMD", strings.Join(args, ` `))
+		}
 		answer, err := lib.LocalGet(port, fmt.Sprintf("api/run?name=%s&silent=true&console=true",
 			os.Args[1]))
 		if err != nil {
