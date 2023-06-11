@@ -10,6 +10,7 @@ import (
 	"eonza/script"
 	"eonza/users"
 	"fmt"
+	"html"
 	"html/template"
 	"os"
 	"strings"
@@ -114,12 +115,13 @@ func RenderPage(c echo.Context, url string) (string, error) {
 	out2html := func(input string, isLog bool) template.HTML {
 		var out string
 		if len(strings.TrimSpace(input)) != 0 {
-			out = strings.ReplaceAll(input, "\n", `<br>`)
+			out = strings.ReplaceAll(html.EscapeString(input), "\n", `<br>`)
 			if isLog {
 				for key, item := range map[string]string{`INFO`: `egreen`, `FORM`: `eblue`,
 					`WARN`: `eyellow`, `ERROR`: `ered`} {
-					out = strings.ReplaceAll(out, "["+key+"]", fmt.Sprintf(`<span class="%s">[%s]</span>`,
-						item, key))
+					out = strings.ReplaceAll(out,
+						"["+key+"]", fmt.Sprintf(`<span class="%s">[%s]</span>`,
+							item, key))
 				}
 			}
 		}

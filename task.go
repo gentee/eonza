@@ -11,6 +11,7 @@ import (
 	es "eonza/script"
 	"eonza/users"
 	"fmt"
+	"html"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -206,7 +207,7 @@ func sendLogout(client WsClient) (err error) {
 		err = client.Conn.WriteJSON(WsCmd{
 			TaskID:  task.ID,
 			Cmd:     WcLogout,
-			Message: out,
+			Message: html.EscapeString(out),
 		})
 	}
 	return
