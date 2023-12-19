@@ -25,9 +25,9 @@ require (
 	github.com/xuri/excelize/v2 v2.7.0
 	github.com/yuin/goldmark v1.5.4
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
-	golang.org/x/crypto v0.6.0
-	golang.org/x/sys v0.5.0
-	golang.org/x/text v0.7.0
+	golang.org/x/crypto v0.17.0
+	golang.org/x/sys v0.15.0
+	golang.org/x/text v0.14.0
 	golang.org/x/time v0.3.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0
