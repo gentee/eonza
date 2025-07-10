@@ -11,7 +11,7 @@ require (
 	github.com/gentee/gentee v1.22.0
 	github.com/gentee/systray v1.3.1
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/gorilla/websocket v1.5.3
 	github.com/kataras/golog v0.1.13
 	github.com/labstack/echo/v4 v4.13.4
