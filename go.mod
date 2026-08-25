@@ -1,8 +1,6 @@
 module eonza
 
-go 1.24
-
-toolchain go1.24.5
+go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
@@ -22,9 +20,9 @@ require (
 	github.com/xuri/excelize/v2 v2.9.1
 	github.com/yuin/goldmark v1.7.12
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
-	golang.org/x/crypto v0.39.0
-	golang.org/x/sys v0.34.0
-	golang.org/x/text v0.27.0
+	golang.org/x/crypto v0.55.0
+	golang.org/x/sys v0.47.0
+	golang.org/x/text v0.41.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -48,7 +46,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xuri/efp v0.0.1 // indirect
 	github.com/xuri/nfp v0.0.1 // indirect
-	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
